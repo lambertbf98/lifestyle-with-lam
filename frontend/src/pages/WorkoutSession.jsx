@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { workouts as workoutsApi } from '../api';
-import { ArrowLeft, Play, Pause, Check, X, Timer, ChevronDown, ChevronUp, Dumbbell, Clock, Target, Info } from 'lucide-react';
+import { ArrowLeft, Play, Check, X, Timer, ChevronDown, ChevronUp, Dumbbell, Clock, Target, Info, Plus, Minus } from 'lucide-react';
 
 export default function WorkoutSession() {
   const { dayId } = useParams();
@@ -17,7 +17,6 @@ export default function WorkoutSession() {
   const [isResting, setIsResting] = useState(false);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const [expandedExercise, setExpandedExercise] = useState(null);
-  const [showExerciseDetail, setShowExerciseDetail] = useState(null);
 
   useEffect(() => {
     loadWorkout();
@@ -57,11 +56,14 @@ export default function WorkoutSession() {
         const day = plan.days.find(d => d.id === parseInt(dayId));
         if (day) {
           setWorkout(day);
+          // Initialize exercise logs with sets tracking
           setExerciseLogs(day.exercises?.map(ex => ({
             exercise_id: ex.exercise_id,
-            sets_completed: 0,
-            reps_per_set: '',
-            weight_kg: null
+            exercise_name: ex.exercise?.name || '',
+            target_sets: ex.sets,
+            target_reps: ex.reps,
+            sets: [], // Array of { reps: number, weight_kg: number }
+            notes: ''
           })) || []);
         }
       }
@@ -77,22 +79,43 @@ export default function WorkoutSession() {
       const response = await workoutsApi.startWorkout(parseInt(dayId));
       setWorkoutLogId(response.data.log.id);
       setIsActive(true);
-      setExpandedExercise(0); // Expand first exercise
+      setExpandedExercise(0);
     } catch (error) {
       console.error('Error starting workout:', error);
     }
   };
 
+  const updateSetData = (exerciseIndex, field, value) => {
+    const newLogs = [...exerciseLogs];
+    if (!newLogs[exerciseIndex].currentSet) {
+      newLogs[exerciseIndex].currentSet = { reps: 10, weight_kg: 0 };
+    }
+    newLogs[exerciseIndex].currentSet[field] = value;
+    setExerciseLogs(newLogs);
+  };
+
   const completeSet = (exerciseIndex) => {
     const newLogs = [...exerciseLogs];
-    newLogs[exerciseIndex].sets_completed += 1;
+    const currentSet = newLogs[exerciseIndex].currentSet || { reps: 10, weight_kg: 0 };
+
+    // Add the completed set
+    newLogs[exerciseIndex].sets.push({
+      reps: currentSet.reps,
+      weight_kg: currentSet.weight_kg
+    });
+
+    // Prepare for next set (keep same weight)
+    newLogs[exerciseIndex].currentSet = {
+      reps: currentSet.reps,
+      weight_kg: currentSet.weight_kg
+    };
+
     setExerciseLogs(newLogs);
 
     const exercise = workout.exercises[exerciseIndex];
 
     // Check if exercise is complete
-    if (newLogs[exerciseIndex].sets_completed >= exercise.sets) {
-      // Move to next exercise
+    if (newLogs[exerciseIndex].sets.length >= exercise.sets) {
       if (exerciseIndex < workout.exercises.length - 1) {
         setExpandedExercise(exerciseIndex + 1);
         setCurrentExercise(exerciseIndex + 1);
@@ -111,10 +134,20 @@ export default function WorkoutSession() {
 
   const completeWorkout = async () => {
     try {
+      // Format exercise logs for API
+      const formattedLogs = exerciseLogs.map(log => ({
+        exercise_id: log.exercise_id,
+        sets_completed: log.sets.length,
+        reps_per_set: log.sets.map(s => s.reps).join(','),
+        weight_kg: log.sets.length > 0 ? Math.max(...log.sets.map(s => s.weight_kg)) : null,
+        sets_detail: JSON.stringify(log.sets),
+        notes: log.notes
+      }));
+
       await workoutsApi.completeWorkout({
         workout_log_id: workoutLogId,
         duration_minutes: Math.round(timer / 60),
-        exercises: exerciseLogs
+        exercises: formattedLogs
       });
       navigate('/workouts');
     } catch (error) {
@@ -130,7 +163,7 @@ export default function WorkoutSession() {
 
   const getTotalProgress = () => {
     const totalSets = workout.exercises?.reduce((acc, ex) => acc + ex.sets, 0) || 0;
-    const completedSets = exerciseLogs.reduce((acc, log) => acc + (log.sets_completed || 0), 0);
+    const completedSets = exerciseLogs.reduce((acc, log) => acc + log.sets.length, 0);
     return totalSets > 0 ? (completedSets / totalSets) * 100 : 0;
   };
 
@@ -175,10 +208,8 @@ export default function WorkoutSession() {
           </div>
         </div>
 
-        {/* Progress Bar and Timer */}
         {isActive && (
           <div className="mt-4 space-y-3">
-            {/* Progress */}
             <div>
               <div className="flex justify-between text-xs text-gray-400 mb-1">
                 <span>Progreso</span>
@@ -192,7 +223,6 @@ export default function WorkoutSession() {
               </div>
             </div>
 
-            {/* Timer */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Timer size={18} className="text-accent-primary" />
@@ -207,10 +237,7 @@ export default function WorkoutSession() {
                     <Clock size={16} className="text-accent-warning" />
                     <span className="text-accent-warning font-bold text-lg">{restTimer}s</span>
                   </div>
-                  <button
-                    onClick={skipRest}
-                    className="text-xs text-gray-400 hover:text-white"
-                  >
+                  <button onClick={skipRest} className="text-xs text-gray-400 hover:text-white">
                     Saltar
                   </button>
                 </div>
@@ -224,9 +251,11 @@ export default function WorkoutSession() {
       <div className="p-4 space-y-4 pb-32">
         {workout.exercises?.map((exercise, index) => {
           const log = exerciseLogs[index];
-          const isComplete = log?.sets_completed >= exercise.sets;
+          const completedSets = log?.sets?.length || 0;
+          const isComplete = completedSets >= exercise.sets;
           const isExpanded = expandedExercise === index;
           const isCurrent = currentExercise === index && isActive;
+          const currentSetData = log?.currentSet || { reps: 10, weight_kg: 0 };
 
           return (
             <div
@@ -244,13 +273,8 @@ export default function WorkoutSession() {
                 onClick={() => setExpandedExercise(isExpanded ? null : index)}
                 className="w-full p-4 flex items-center gap-4"
               >
-                {/* Exercise Number */}
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  isComplete
-                    ? 'bg-accent-success'
-                    : isCurrent
-                    ? 'bg-accent-primary'
-                    : 'bg-dark-700'
+                  isComplete ? 'bg-accent-success' : isCurrent ? 'bg-accent-primary' : 'bg-dark-700'
                 }`}>
                   {isComplete ? (
                     <Check size={20} className="text-dark-900" />
@@ -274,15 +298,13 @@ export default function WorkoutSession() {
                       </>
                     )}
                   </div>
-                  {/* Progress indicator */}
+                  {/* Sets progress */}
                   <div className="flex gap-1 mt-2">
                     {Array.from({ length: exercise.sets }).map((_, i) => (
                       <div
                         key={i}
                         className={`h-1.5 flex-1 rounded-full transition-all ${
-                          i < (log?.sets_completed || 0)
-                            ? 'bg-accent-primary'
-                            : 'bg-dark-600'
+                          i < completedSets ? 'bg-accent-primary' : 'bg-dark-600'
                         }`}
                       />
                     ))}
@@ -306,9 +328,7 @@ export default function WorkoutSession() {
                         src={exercise.exercise.gif_url}
                         alt={exercise.exercise.name}
                         className="w-full h-48 object-contain"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     </div>
                   )}
@@ -341,37 +361,106 @@ export default function WorkoutSession() {
                       </div>
                     )}
 
-                    {/* Notes */}
-                    {exercise.notes && (
-                      <div className="bg-accent-warning/10 rounded-xl p-3 border border-accent-warning/20">
-                        <p className="text-sm text-accent-warning">
-                          {exercise.notes}
-                        </p>
+                    {/* Completed Sets Log */}
+                    {log?.sets?.length > 0 && (
+                      <div className="bg-dark-700/30 rounded-xl p-3">
+                        <p className="text-xs text-gray-400 mb-2">Series completadas:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {log.sets.map((set, i) => (
+                            <div key={i} className="bg-accent-primary/20 px-3 py-1 rounded-full text-sm">
+                              <span className="text-accent-primary font-medium">
+                                {set.weight_kg}kg × {set.reps}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    {/* Complete Set Button */}
+                    {/* Weight and Reps Input */}
                     {isActive && !isComplete && (
-                      <button
-                        onClick={() => completeSet(index)}
-                        disabled={isResting}
-                        className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
-                          isResting
-                            ? 'bg-dark-600 text-gray-500 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-accent-primary to-neon-purple text-dark-900 hover:scale-[1.02] active:scale-[0.98]'
-                        }`}
-                      >
-                        {isResting
-                          ? `Descansando... (${restTimer}s)`
-                          : `Completar Serie ${(log?.sets_completed || 0) + 1} de ${exercise.sets}`
-                        }
-                      </button>
+                      <div className="bg-dark-700 rounded-xl p-4 space-y-4">
+                        <p className="text-sm font-medium text-center text-gray-300">
+                          Serie {completedSets + 1} de {exercise.sets}
+                        </p>
+
+                        {/* Weight Input */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-2 text-center">Peso (kg)</label>
+                          <div className="flex items-center justify-center gap-3">
+                            <button
+                              onClick={() => updateSetData(index, 'weight_kg', Math.max(0, currentSetData.weight_kg - 2.5))}
+                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                            >
+                              <Minus size={20} />
+                            </button>
+                            <input
+                              type="number"
+                              value={currentSetData.weight_kg}
+                              onChange={(e) => updateSetData(index, 'weight_kg', parseFloat(e.target.value) || 0)}
+                              className="w-24 h-12 bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                            />
+                            <button
+                              onClick={() => updateSetData(index, 'weight_kg', currentSetData.weight_kg + 2.5)}
+                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                            >
+                              <Plus size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Reps Input */}
+                        <div>
+                          <label className="text-xs text-gray-400 block mb-2 text-center">Repeticiones</label>
+                          <div className="flex items-center justify-center gap-3">
+                            <button
+                              onClick={() => updateSetData(index, 'reps', Math.max(1, currentSetData.reps - 1))}
+                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                            >
+                              <Minus size={20} />
+                            </button>
+                            <input
+                              type="number"
+                              value={currentSetData.reps}
+                              onChange={(e) => updateSetData(index, 'reps', parseInt(e.target.value) || 1)}
+                              className="w-24 h-12 bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                            />
+                            <button
+                              onClick={() => updateSetData(index, 'reps', currentSetData.reps + 1)}
+                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                            >
+                              <Plus size={20} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Complete Set Button */}
+                        <button
+                          onClick={() => completeSet(index)}
+                          disabled={isResting}
+                          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
+                            isResting
+                              ? 'bg-dark-600 text-gray-500 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-accent-primary to-neon-purple text-dark-900 hover:scale-[1.02] active:scale-[0.98]'
+                          }`}
+                        >
+                          {isResting
+                            ? `Descansando... (${restTimer}s)`
+                            : `Completar Serie ${completedSets + 1}`
+                          }
+                        </button>
+                      </div>
                     )}
 
                     {isComplete && (
                       <div className="bg-accent-success/10 rounded-xl p-4 text-center border border-accent-success/20">
                         <Check size={24} className="text-accent-success mx-auto mb-2" />
                         <p className="text-accent-success font-medium">Ejercicio completado</p>
+                        {log?.sets?.length > 0 && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Mejor serie: {Math.max(...log.sets.map(s => s.weight_kg))}kg
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -406,7 +495,7 @@ export default function WorkoutSession() {
               className="btn-primary flex-1 py-4 flex items-center justify-center gap-2"
             >
               <Check size={20} />
-              Finalizar Entreno
+              Finalizar
             </button>
           </div>
         )}

@@ -36,11 +36,30 @@ const initDatabase = async () => {
         preferred_proteins TEXT[],
         preferred_carbs TEXT[],
         preferred_fats TEXT[],
-        meals_per_day INTEGER DEFAULT 4,
+        meals_per_day INTEGER DEFAULT 5,
+        chest_cm DECIMAL(5,2),
+        waist_cm DECIMAL(5,2),
+        hips_cm DECIMAL(5,2),
+        bicep_cm DECIMAL(5,2),
+        thigh_cm DECIMAL(5,2),
+        calf_cm DECIMAL(5,2),
         onboarding_completed BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Add body measurement columns if they don't exist (for existing databases)
+    await client.query(`
+      DO $$ BEGIN
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS chest_cm DECIMAL(5,2);
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS waist_cm DECIMAL(5,2);
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS hips_cm DECIMAL(5,2);
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS bicep_cm DECIMAL(5,2);
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS thigh_cm DECIMAL(5,2);
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS calf_cm DECIMAL(5,2);
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END $$;
     `);
 
     // Weight history for tracking progress
@@ -49,6 +68,22 @@ const initDatabase = async () => {
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         weight_kg DECIMAL(5,2) NOT NULL,
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        notes TEXT
+      )
+    `);
+
+    // Body measurements history
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS body_measurements (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        chest_cm DECIMAL(5,2),
+        waist_cm DECIMAL(5,2),
+        hips_cm DECIMAL(5,2),
+        bicep_cm DECIMAL(5,2),
+        thigh_cm DECIMAL(5,2),
+        calf_cm DECIMAL(5,2),
         recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         notes TEXT
       )

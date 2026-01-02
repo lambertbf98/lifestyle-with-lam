@@ -272,6 +272,26 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
     );
     const profile = profileResult.rows[0] || {};
 
+    // Get previous exercise performance for progressive overload
+    const previousPerformanceResult = await pool.query(
+      `SELECT
+         e.name as exercise_name,
+         e.name_es as exercise_name_es,
+         MAX(el.weight_kg) as max_weight,
+         AVG(el.weight_kg) as avg_weight,
+         COUNT(el.id) as times_performed,
+         MAX(wl.completed_at) as last_performed
+       FROM exercise_logs el
+       JOIN exercises e ON el.exercise_id = e.id
+       JOIN workout_logs wl ON el.workout_log_id = wl.id
+       WHERE wl.user_id = $1 AND el.weight_kg > 0
+       GROUP BY e.id, e.name, e.name_es
+       ORDER BY MAX(wl.completed_at) DESC
+       LIMIT 50`,
+      [req.user.id]
+    );
+    const previousPerformance = previousPerformanceResult.rows;
+
     const exercisesResult = await pool.query(
       `SELECT id, name, name_es, muscle_group, equipment, difficulty, gif_url, instructions
        FROM exercises ORDER BY muscle_group, name`
@@ -303,6 +323,24 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
     const userGender = profile.gender || 'male';
     const isFemale = userGender === 'female' || userGender === 'mujer' || userGender === 'femenino';
 
+    // Build previous performance context for progressive overload
+    let progressionContext = '';
+    if (previousPerformance.length > 0) {
+      progressionContext = `
+HISTORIAL DE RENDIMIENTO DEL USUARIO (para progresión):
+${previousPerformance.slice(0, 20).map(p =>
+  `- ${p.exercise_name_es || p.exercise_name}: Peso máximo ${p.max_weight}kg, Promedio ${Math.round(p.avg_weight)}kg (realizado ${p.times_performed} veces)`
+).join('\n')}
+
+⚡ PROGRESIÓN OBLIGATORIA:
+- Para ejercicios donde el usuario ya tiene historial, sugiere peso +2.5kg a +5kg más que su máximo anterior
+- Si el usuario ha hecho el ejercicio más de 3 veces, puede aumentar más
+- Incluye en las notas el peso sugerido basado en su progreso`;
+    } else {
+      progressionContext = `
+NOTA: Este es un usuario nuevo sin historial de pesos. Sugiere pesos conservadores para empezar.`;
+    }
+
     // Different training approach based on gender
     let trainingFocus = '';
     if (isFemale) {
@@ -328,6 +366,7 @@ DATOS DEL USUARIO:
 - Días por semana: ${daysCount}
 - Objetivo: ${userGoal}
 - Equipamiento: ${equipment_available || 'gimnasio completo'}
+${progressionContext}
 
 ${trainingFocus}
 

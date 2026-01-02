@@ -45,6 +45,8 @@ export const user = {
   completeOnboarding: () => api.post('/user/complete-onboarding'),
   getWeightHistory: (limit = 30) => api.get(`/user/weight-history?limit=${limit}`),
   addWeight: (data) => api.post('/user/weight', data),
+  getMeasurementsHistory: (limit = 30) => api.get(`/user/measurements-history?limit=${limit}`),
+  addMeasurements: (data) => api.post('/user/measurements', data),
   getDashboard: () => api.get('/user/dashboard')
 };
 

@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi } from '../api';
-import { ArrowLeft, ArrowRight, Check, Target, Scale, Ruler, Calendar, Activity, Utensils } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Target, Scale, Ruler, Calendar, Activity, Utensils, User } from 'lucide-react';
 
 const steps = [
   { id: 'basics', title: 'Datos Básicos', icon: Ruler },
+  { id: 'measurements', title: 'Medidas Corporales', icon: User },
   { id: 'goals', title: 'Objetivos', icon: Target },
   { id: 'activity', title: 'Actividad', icon: Activity },
   { id: 'diet', title: 'Alimentación', icon: Utensils }
@@ -41,9 +42,16 @@ export default function Onboarding() {
     fitness_goal: '',
     activity_level: '',
     workout_days_per_week: 3,
-    meals_per_day: 4,
+    meals_per_day: 5,
     preferred_proteins: [],
-    preferred_carbs: []
+    preferred_carbs: [],
+    // Body measurements
+    chest_cm: '',
+    waist_cm: '',
+    hips_cm: '',
+    bicep_cm: '',
+    thigh_cm: '',
+    calf_cm: ''
   });
 
   const { updateUser } = useAuth();
@@ -143,6 +151,90 @@ export default function Onboarding() {
                   onChange={(e) => updateField('current_weight_kg', e.target.value)}
                   className="input"
                   placeholder="75"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'measurements':
+        return (
+          <div className="space-y-6 animate-fade-in">
+            <p className="text-gray-400 text-sm mb-4">
+              Estas medidas son opcionales pero ayudan a personalizar tu plan y seguir tu progreso.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Pecho (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.chest_cm}
+                  onChange={(e) => updateField('chest_cm', e.target.value)}
+                  className="input"
+                  placeholder="95"
+                />
+              </div>
+              <div>
+                <label className="label">Cintura (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.waist_cm}
+                  onChange={(e) => updateField('waist_cm', e.target.value)}
+                  className="input"
+                  placeholder="80"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Cadera (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.hips_cm}
+                  onChange={(e) => updateField('hips_cm', e.target.value)}
+                  className="input"
+                  placeholder="100"
+                />
+              </div>
+              <div>
+                <label className="label">Bícep (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.bicep_cm}
+                  onChange={(e) => updateField('bicep_cm', e.target.value)}
+                  className="input"
+                  placeholder="32"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">Muslo (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.thigh_cm}
+                  onChange={(e) => updateField('thigh_cm', e.target.value)}
+                  className="input"
+                  placeholder="55"
+                />
+              </div>
+              <div>
+                <label className="label">Gemelo (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.calf_cm}
+                  onChange={(e) => updateField('calf_cm', e.target.value)}
+                  className="input"
+                  placeholder="38"
                 />
               </div>
             </div>

@@ -13,7 +13,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
               up.birth_date, up.gender, up.activity_level, up.fitness_goal,
               up.workout_days_per_week, up.dietary_restrictions,
               up.preferred_proteins, up.preferred_carbs, up.preferred_fats,
-              up.meals_per_day, up.onboarding_completed
+              up.meals_per_day, up.onboarding_completed,
+              up.chest_cm, up.waist_cm, up.hips_cm, up.bicep_cm, up.thigh_cm, up.calf_cm
        FROM users u
        LEFT JOIN user_profiles up ON u.id = up.user_id
        WHERE u.id = $1`,
@@ -46,7 +47,13 @@ router.put('/profile', authenticateToken, async (req, res) => {
     preferred_proteins,
     preferred_carbs,
     preferred_fats,
-    meals_per_day
+    meals_per_day,
+    chest_cm,
+    waist_cm,
+    hips_cm,
+    bicep_cm,
+    thigh_cm,
+    calf_cm
   } = req.body;
 
   try {
@@ -65,8 +72,14 @@ router.put('/profile', authenticateToken, async (req, res) => {
         preferred_carbs = COALESCE($11, preferred_carbs),
         preferred_fats = COALESCE($12, preferred_fats),
         meals_per_day = COALESCE($13, meals_per_day),
+        chest_cm = COALESCE($14, chest_cm),
+        waist_cm = COALESCE($15, waist_cm),
+        hips_cm = COALESCE($16, hips_cm),
+        bicep_cm = COALESCE($17, bicep_cm),
+        thigh_cm = COALESCE($18, thigh_cm),
+        calf_cm = COALESCE($19, calf_cm),
         updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $14
+       WHERE user_id = $20
        RETURNING *`,
       [
         height_cm,
@@ -82,6 +95,12 @@ router.put('/profile', authenticateToken, async (req, res) => {
         preferred_carbs,
         preferred_fats,
         meals_per_day,
+        chest_cm,
+        waist_cm,
+        hips_cm,
+        bicep_cm,
+        thigh_cm,
+        calf_cm,
         req.user.id
       ]
     );
@@ -91,6 +110,15 @@ router.put('/profile', authenticateToken, async (req, res) => {
       await pool.query(
         'INSERT INTO weight_history (user_id, weight_kg) VALUES ($1, $2)',
         [req.user.id, current_weight_kg]
+      );
+    }
+
+    // If body measurements were updated, add to measurements history
+    if (chest_cm || waist_cm || hips_cm || bicep_cm || thigh_cm || calf_cm) {
+      await pool.query(
+        `INSERT INTO body_measurements (user_id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [req.user.id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm]
       );
     }
 
@@ -168,6 +196,67 @@ router.post('/weight', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Add weight error:', error);
     res.status(500).json({ error: 'Failed to log weight' });
+  }
+});
+
+// Get body measurements history
+router.get('/measurements-history', authenticateToken, async (req, res) => {
+  const { limit = 30 } = req.query;
+
+  try {
+    const result = await pool.query(
+      `SELECT id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, recorded_at, notes
+       FROM body_measurements
+       WHERE user_id = $1
+       ORDER BY recorded_at DESC
+       LIMIT $2`,
+      [req.user.id, limit]
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Get measurements history error:', error);
+    res.status(500).json({ error: 'Failed to get measurements history' });
+  }
+});
+
+// Add body measurements entry
+router.post('/measurements', authenticateToken, async (req, res) => {
+  const { chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes } = req.body;
+
+  if (!chest_cm && !waist_cm && !hips_cm && !bicep_cm && !thigh_cm && !calf_cm) {
+    return res.status(400).json({ error: 'At least one measurement is required' });
+  }
+
+  try {
+    // Add to history
+    const result = await pool.query(
+      `INSERT INTO body_measurements (user_id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [req.user.id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes]
+    );
+
+    // Update current measurements in profile
+    await pool.query(
+      `UPDATE user_profiles SET
+        chest_cm = COALESCE($1, chest_cm),
+        waist_cm = COALESCE($2, waist_cm),
+        hips_cm = COALESCE($3, hips_cm),
+        bicep_cm = COALESCE($4, bicep_cm),
+        thigh_cm = COALESCE($5, thigh_cm),
+        calf_cm = COALESCE($6, calf_cm),
+        updated_at = CURRENT_TIMESTAMP
+       WHERE user_id = $7`,
+      [chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, req.user.id]
+    );
+
+    res.status(201).json({
+      message: 'Measurements logged successfully',
+      entry: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Add measurements error:', error);
+    res.status(500).json({ error: 'Failed to log measurements' });
   }
 });
 
