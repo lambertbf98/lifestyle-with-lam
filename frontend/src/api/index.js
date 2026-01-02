@@ -45,6 +45,7 @@ export const user = {
   completeOnboarding: () => api.post('/user/complete-onboarding'),
   getWeightHistory: (limit = 30) => api.get(`/user/weight-history?limit=${limit}`),
   addWeight: (data) => api.post('/user/weight', data),
+  clearWeightHistory: () => api.delete('/user/weight-history'),
   getMeasurementsHistory: (limit = 30) => api.get(`/user/measurements-history?limit=${limit}`),
   addMeasurements: (data) => api.post('/user/measurements', data),
   deleteMeasurement: (id) => api.delete(`/user/measurements/${id}`),

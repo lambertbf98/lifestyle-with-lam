@@ -139,7 +139,6 @@ export default function Onboarding() {
                   value={formData.height_cm}
                   onChange={(e) => updateField('height_cm', e.target.value)}
                   className="input"
-                  placeholder="175"
                 />
               </div>
               <div>
@@ -150,7 +149,6 @@ export default function Onboarding() {
                   value={formData.current_weight_kg}
                   onChange={(e) => updateField('current_weight_kg', e.target.value)}
                   className="input"
-                  placeholder="75"
                 />
               </div>
             </div>
@@ -173,7 +171,6 @@ export default function Onboarding() {
                   value={formData.chest_cm}
                   onChange={(e) => updateField('chest_cm', e.target.value)}
                   className="input"
-                  placeholder="95"
                 />
               </div>
               <div>
@@ -184,7 +181,6 @@ export default function Onboarding() {
                   value={formData.waist_cm}
                   onChange={(e) => updateField('waist_cm', e.target.value)}
                   className="input"
-                  placeholder="80"
                 />
               </div>
             </div>
@@ -198,7 +194,6 @@ export default function Onboarding() {
                   value={formData.hips_cm}
                   onChange={(e) => updateField('hips_cm', e.target.value)}
                   className="input"
-                  placeholder="100"
                 />
               </div>
               <div>
@@ -209,7 +204,6 @@ export default function Onboarding() {
                   value={formData.bicep_cm}
                   onChange={(e) => updateField('bicep_cm', e.target.value)}
                   className="input"
-                  placeholder="32"
                 />
               </div>
             </div>
@@ -223,7 +217,6 @@ export default function Onboarding() {
                   value={formData.thigh_cm}
                   onChange={(e) => updateField('thigh_cm', e.target.value)}
                   className="input"
-                  placeholder="55"
                 />
               </div>
               <div>
@@ -234,7 +227,6 @@ export default function Onboarding() {
                   value={formData.calf_cm}
                   onChange={(e) => updateField('calf_cm', e.target.value)}
                   className="input"
-                  placeholder="38"
                 />
               </div>
             </div>
@@ -275,7 +267,6 @@ export default function Onboarding() {
                 value={formData.target_weight_kg}
                 onChange={(e) => updateField('target_weight_kg', e.target.value)}
                 className="input"
-                placeholder="70"
               />
             </div>
           </div>

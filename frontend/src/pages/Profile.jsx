@@ -359,7 +359,6 @@ export default function Profile() {
                 value={formData.chest_cm || ''}
                 onChange={(e) => setFormData({ ...formData, chest_cm: e.target.value })}
                 className="input"
-                placeholder="95"
               />
             </div>
             <div>
@@ -370,7 +369,6 @@ export default function Profile() {
                 value={formData.waist_cm || ''}
                 onChange={(e) => setFormData({ ...formData, waist_cm: e.target.value })}
                 className="input"
-                placeholder="80"
               />
             </div>
             <div>
@@ -381,7 +379,6 @@ export default function Profile() {
                 value={formData.hips_cm || ''}
                 onChange={(e) => setFormData({ ...formData, hips_cm: e.target.value })}
                 className="input"
-                placeholder="100"
               />
             </div>
             <div>
@@ -392,7 +389,6 @@ export default function Profile() {
                 value={formData.bicep_cm || ''}
                 onChange={(e) => setFormData({ ...formData, bicep_cm: e.target.value })}
                 className="input"
-                placeholder="32"
               />
             </div>
             <div>
@@ -403,7 +399,6 @@ export default function Profile() {
                 value={formData.thigh_cm || ''}
                 onChange={(e) => setFormData({ ...formData, thigh_cm: e.target.value })}
                 className="input"
-                placeholder="55"
               />
             </div>
             <div>
@@ -414,7 +409,6 @@ export default function Profile() {
                 value={formData.calf_cm || ''}
                 onChange={(e) => setFormData({ ...formData, calf_cm: e.target.value })}
                 className="input"
-                placeholder="38"
               />
             </div>
           </div>
@@ -479,7 +473,6 @@ export default function Profile() {
                 value={newDislikedFood}
                 onChange={(e) => setNewDislikedFood(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addDislikedFood()}
-                placeholder="Ej: Queso cottage, Brócoli..."
                 className="input flex-1"
               />
               <button

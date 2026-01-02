@@ -43,33 +43,23 @@ router.get('/', authenticateToken, async (req, res) => {
       [req.user.id]
     );
 
-    // Get targets
+    // Get targets and initial weight from profile
     const profileResult = await pool.query(
-      `SELECT up.current_weight_kg, up.target_weight_kg, dp.daily_calories
+      `SELECT up.current_weight_kg, up.target_weight_kg, up.initial_weight_kg, dp.daily_calories
        FROM user_profiles up
        LEFT JOIN diet_plans dp ON dp.user_id = up.user_id AND dp.is_active = TRUE
        WHERE up.user_id = $1`,
       [req.user.id]
     );
 
-    // Get initial weight (first ever recorded)
-    const initialWeightResult = await pool.query(
-      `SELECT weight_kg FROM weight_history
-       WHERE user_id = $1
-       ORDER BY recorded_at ASC
-       LIMIT 1`,
-      [req.user.id]
-    );
-
     const profile = profileResult.rows[0] || {};
-    const initialWeight = initialWeightResult.rows[0]?.weight_kg;
 
     res.json({
       weight: {
         history: weightResult.rows,
         current: profile.current_weight_kg,
         target: profile.target_weight_kg,
-        initial: initialWeight
+        initial: profile.initial_weight_kg
       },
       workouts: workoutResult.rows,
       calories: {

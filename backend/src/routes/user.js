@@ -59,6 +59,15 @@ router.put('/profile', authenticateToken, async (req, res) => {
   } = req.body;
 
   try {
+    // If setting weight and initial_weight is not set, set it now
+    if (current_weight_kg) {
+      await pool.query(
+        `UPDATE user_profiles SET initial_weight_kg = $1
+         WHERE user_id = $2 AND initial_weight_kg IS NULL`,
+        [current_weight_kg, req.user.id]
+      );
+    }
+
     const result = await pool.query(
       `UPDATE user_profiles SET
         height_cm = COALESCE($1, height_cm),
@@ -181,10 +190,10 @@ router.post('/weight', authenticateToken, async (req, res) => {
   }
 
   try {
-    // Check if already logged today
+    // Check if already logged today (using date comparison that works across timezones)
     const existing = await pool.query(
       `SELECT id FROM weight_history
-       WHERE user_id = $1 AND DATE(recorded_at) = CURRENT_DATE`,
+       WHERE user_id = $1 AND recorded_at::date = CURRENT_DATE`,
       [req.user.id]
     );
 
@@ -217,6 +226,20 @@ router.post('/weight', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Add weight error:', error);
     res.status(500).json({ error: 'Failed to log weight' });
+  }
+});
+
+// Clear weight history
+router.delete('/weight-history', authenticateToken, async (req, res) => {
+  try {
+    await pool.query(
+      'DELETE FROM weight_history WHERE user_id = $1',
+      [req.user.id]
+    );
+    res.json({ message: 'Weight history cleared successfully' });
+  } catch (error) {
+    console.error('Clear weight history error:', error);
+    res.status(500).json({ error: 'Failed to clear weight history' });
   }
 });
 

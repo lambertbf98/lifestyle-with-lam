@@ -59,6 +59,7 @@ const initDatabase = async () => {
         ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS thigh_cm DECIMAL(5,2);
         ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS calf_cm DECIMAL(5,2);
         ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS disliked_foods TEXT[];
+        ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS initial_weight_kg DECIMAL(5,2);
       EXCEPTION WHEN OTHERS THEN NULL;
       END $$;
     `);

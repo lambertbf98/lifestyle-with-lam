@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2 } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -95,6 +95,16 @@ export default function Progress() {
     }
   };
 
+  const clearWeightHistory = async () => {
+    if (!window.confirm('¿Eliminar todo el historial de peso? Esta acción no se puede deshacer.')) return;
+    try {
+      await userApi.clearWeightHistory();
+      await loadData();
+    } catch (error) {
+      console.error('Error clearing weight history:', error);
+    }
+  };
+
   const formatWeightData = () => {
     if (!progressData?.weight?.history) return [];
     return progressData.weight.history.map(entry => ({
@@ -151,12 +161,21 @@ export default function Progress() {
             <h2 className="text-lg font-semibold">Peso</h2>
             <p className="text-sm text-gray-400">Últimos {period} días</p>
           </div>
-          <button
-            onClick={() => setShowWeightModal(true)}
-            className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center hover:bg-accent-primary/30 transition-colors"
-          >
-            <Plus size={20} className="text-accent-primary" />
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={clearWeightHistory}
+              className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center hover:bg-red-500/30 transition-colors"
+              title="Reiniciar historial"
+            >
+              <RotateCcw size={18} className="text-red-400" />
+            </button>
+            <button
+              onClick={() => setShowWeightModal(true)}
+              className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center hover:bg-accent-primary/30 transition-colors"
+            >
+              <Plus size={20} className="text-accent-primary" />
+            </button>
+          </div>
         </div>
 
         {weightData.length > 0 ? (
@@ -239,7 +258,7 @@ export default function Progress() {
             }`}>
               {weightChange ? `${parseFloat(weightChange) > 0 ? '+' : ''}${weightChange}` : '--'}
             </p>
-            <p className="text-xs text-gray-400">vs Inicial</p>
+            <p className="text-xs text-gray-400">Diferencia</p>
           </div>
         </div>
       </div>
@@ -377,7 +396,6 @@ export default function Progress() {
                 value={newWeight}
                 onChange={(e) => setNewWeight(e.target.value)}
                 className="input text-2xl text-center"
-                placeholder="75.5"
                 autoFocus
               />
             </div>
@@ -414,7 +432,6 @@ export default function Progress() {
                   value={measurements.chest_cm}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, chest_cm: e.target.value }))}
                   className="input"
-                  placeholder="95"
                 />
               </div>
               <div>
@@ -425,7 +442,6 @@ export default function Progress() {
                   value={measurements.waist_cm}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, waist_cm: e.target.value }))}
                   className="input"
-                  placeholder="80"
                 />
               </div>
               <div>
@@ -436,7 +452,6 @@ export default function Progress() {
                   value={measurements.hips_cm}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, hips_cm: e.target.value }))}
                   className="input"
-                  placeholder="95"
                 />
               </div>
               <div>
@@ -447,7 +462,6 @@ export default function Progress() {
                   value={measurements.bicep_cm}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, bicep_cm: e.target.value }))}
                   className="input"
-                  placeholder="35"
                 />
               </div>
               <div>
@@ -458,7 +472,6 @@ export default function Progress() {
                   value={measurements.thigh_cm}
                   onChange={(e) => setMeasurements(prev => ({ ...prev, thigh_cm: e.target.value }))}
                   className="input"
-                  placeholder="55"
                 />
               </div>
             </div>
