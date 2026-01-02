@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw, Edit3 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -13,7 +13,9 @@ export default function Progress() {
   const [period, setPeriod] = useState(30);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showMeasurementsModal, setShowMeasurementsModal] = useState(false);
+  const [showInitialWeightModal, setShowInitialWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState('');
+  const [newInitialWeight, setNewInitialWeight] = useState('');
   const [measurements, setMeasurements] = useState({
     chest_cm: '',
     waist_cm: '',
@@ -105,6 +107,18 @@ export default function Progress() {
     }
   };
 
+  const setInitialWeight = async () => {
+    if (!newInitialWeight) return;
+    try {
+      await userApi.setInitialWeight({ initial_weight_kg: parseFloat(newInitialWeight) });
+      setNewInitialWeight('');
+      setShowInitialWeightModal(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error setting initial weight:', error);
+    }
+  };
+
   const formatWeightData = () => {
     if (!progressData?.weight?.history) return [];
     return progressData.weight.history.map(entry => ({
@@ -128,8 +142,10 @@ export default function Progress() {
   }
 
   const weightData = formatWeightData();
-  const weightChange = progressData?.weight?.current && progressData?.weight?.initial
-    ? (parseFloat(progressData.weight.current) - parseFloat(progressData.weight.initial)).toFixed(1)
+
+  // Diferencia = cuánto falta para llegar al objetivo (current - target)
+  const weightToGoal = progressData?.weight?.current && progressData?.weight?.target
+    ? (parseFloat(progressData.weight.current) - parseFloat(progressData.weight.target)).toFixed(1)
     : null;
 
   return (
@@ -178,8 +194,8 @@ export default function Progress() {
           </div>
         </div>
 
-        {weightData.length > 0 ? (
-          <div className="h-48">
+        <div className="h-48">
+          {weightData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weightData}>
                 <defs>
@@ -191,17 +207,20 @@ export default function Progress() {
                 <XAxis
                   dataKey="date"
                   stroke="#475569"
-                  fontSize={12}
+                  fontSize={10}
                   tickLine={false}
                   axisLine={false}
+                  interval="preserveStartEnd"
+                  tickCount={5}
                 />
                 <YAxis
                   stroke="#475569"
-                  fontSize={12}
+                  fontSize={11}
                   tickLine={false}
                   axisLine={false}
                   domain={['dataMin - 2', 'dataMax + 2']}
-                  tickFormatter={(val) => `${val}kg`}
+                  tickFormatter={(val) => `${val}`}
+                  width={35}
                 />
                 <Tooltip
                   contentStyle={{
@@ -222,28 +241,27 @@ export default function Progress() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className="h-48 flex items-center justify-center">
-            <div className="text-center">
-              <Scale size={32} className="text-gray-600 mx-auto mb-2" />
-              <p className="text-gray-500">Sin datos de peso</p>
-              <button
-                onClick={() => setShowWeightModal(true)}
-                className="text-accent-primary text-sm mt-2"
-              >
-                Registrar peso
-              </button>
+          ) : (
+            <div className="h-full flex items-center justify-center border border-dashed border-dark-600 rounded-xl">
+              <div className="text-center">
+                <Scale size={28} className="text-gray-600 mx-auto mb-2" />
+                <p className="text-gray-500 text-sm">Registra tu peso para ver el gráfico</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Weight Stats */}
         <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-dark-600">
-          <div className="text-center">
+          <button
+            onClick={() => setShowInitialWeightModal(true)}
+            className="text-center hover:bg-dark-700/50 rounded-lg p-1 transition-colors"
+          >
             <p className="text-xl font-bold">{progressData?.weight?.initial || '--'}</p>
-            <p className="text-xs text-gray-400">Inicial</p>
-          </div>
+            <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
+              Inicial <Edit3 size={10} />
+            </p>
+          </button>
           <div className="text-center">
             <p className="text-xl font-bold">{progressData?.weight?.current || '--'}</p>
             <p className="text-xs text-gray-400">Actual</p>
@@ -254,11 +272,11 @@ export default function Progress() {
           </div>
           <div className="text-center">
             <p className={`text-xl font-bold ${
-              weightChange && parseFloat(weightChange) < 0 ? 'text-accent-success' : 'text-accent-warning'
+              weightToGoal && parseFloat(weightToGoal) <= 0 ? 'text-accent-success' : 'text-accent-warning'
             }`}>
-              {weightChange ? `${parseFloat(weightChange) > 0 ? '+' : ''}${weightChange}` : '--'}
+              {weightToGoal ? `${Math.abs(parseFloat(weightToGoal)).toFixed(1)}` : '--'}
             </p>
-            <p className="text-xs text-gray-400">Diferencia</p>
+            <p className="text-xs text-gray-400">Faltan kg</p>
           </div>
         </div>
       </div>
@@ -409,6 +427,44 @@ export default function Progress() {
               <button
                 onClick={addWeight}
                 disabled={!newWeight}
+                className="btn-primary flex-1 disabled:opacity-50"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Initial Weight Modal */}
+      {showInitialWeightModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up">
+            <h3 className="text-xl font-bold mb-4">Peso Inicial</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Este es el peso con el que empezaste tu camino fitness.
+            </p>
+            <div className="mb-4">
+              <label className="label">Peso inicial (kg)</label>
+              <input
+                type="number"
+                step="0.1"
+                value={newInitialWeight}
+                onChange={(e) => setNewInitialWeight(e.target.value)}
+                className="input text-2xl text-center"
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowInitialWeightModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={setInitialWeight}
+                disabled={!newInitialWeight}
                 className="btn-primary flex-1 disabled:opacity-50"
               >
                 Guardar

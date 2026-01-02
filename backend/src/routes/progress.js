@@ -52,9 +52,20 @@ router.get('/', authenticateToken, async (req, res) => {
       [req.user.id]
     );
 
+    // Get first weight from history (as backup for initial weight)
+    const firstWeightResult = await pool.query(
+      `SELECT weight_kg FROM weight_history
+       WHERE user_id = $1
+       ORDER BY recorded_at ASC
+       LIMIT 1`,
+      [req.user.id]
+    );
+
     const profile = profileResult.rows[0] || {};
-    // Fallback: usar current_weight_kg si initial_weight_kg no existe
-    const initialWeight = profile.initial_weight_kg || profile.current_weight_kg;
+    const firstHistoryWeight = firstWeightResult.rows[0]?.weight_kg;
+
+    // Priority: initial_weight_kg from profile > first weight in history > current weight
+    const initialWeight = profile.initial_weight_kg || firstHistoryWeight || profile.current_weight_kg;
 
     res.json({
       weight: {

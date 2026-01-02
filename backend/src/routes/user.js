@@ -9,7 +9,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT u.id, u.email, u.name, u.created_at,
-              up.height_cm, up.current_weight_kg, up.target_weight_kg,
+              up.height_cm, up.current_weight_kg, up.target_weight_kg, up.initial_weight_kg,
               up.birth_date, up.gender, up.activity_level, up.fitness_goal,
               up.workout_days_per_week, up.dietary_restrictions,
               up.preferred_proteins, up.preferred_carbs, up.preferred_fats,
@@ -240,6 +240,26 @@ router.delete('/weight-history', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Clear weight history error:', error);
     res.status(500).json({ error: 'Failed to clear weight history' });
+  }
+});
+
+// Set initial weight explicitly
+router.put('/initial-weight', authenticateToken, async (req, res) => {
+  const { initial_weight_kg } = req.body;
+
+  if (!initial_weight_kg) {
+    return res.status(400).json({ error: 'Initial weight is required' });
+  }
+
+  try {
+    await pool.query(
+      'UPDATE user_profiles SET initial_weight_kg = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2',
+      [initial_weight_kg, req.user.id]
+    );
+    res.json({ message: 'Initial weight set successfully' });
+  } catch (error) {
+    console.error('Set initial weight error:', error);
+    res.status(500).json({ error: 'Failed to set initial weight' });
   }
 });
 
