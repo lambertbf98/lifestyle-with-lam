@@ -56,8 +56,12 @@ const calculateMacros = (tdee, goal, weight) => {
   switch (goal) {
     case 'lose_weight':
     case 'perder_peso':
-      calories = tdee - 500;
+      calories = tdee - 300; // Moderate deficit
       proteinPerKg = 2.0;
+      break;
+    case 'lose_weight_aggressive':
+      calories = tdee - 500; // Aggressive deficit for sprint
+      proteinPerKg = 2.2; // Higher protein to preserve muscle
       break;
     case 'gain_muscle':
     case 'ganar_musculo':
@@ -520,12 +524,41 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const tdee = calculateTDEE(bmr, profile.activity_level);
     const macros = calculateMacros(tdee, profile.fitness_goal, weight);
 
-    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas siguiendo el protocolo de 5 comidas cada 3 horas:
+    const mealsPerDay = profile.meals_per_day || 5;
+    const dislikedFoods = profile.disliked_foods?.join(', ') || '';
+
+    // Define meal structure based on number of meals
+    let mealStructure = '';
+    let mealDistribution = '';
+
+    if (mealsPerDay === 3) {
+      mealStructure = `breakfast, lunch, dinner`;
+      mealDistribution = `Desayuno: 30%, Almuerzo: 40%, Cena: 30%`;
+    } else if (mealsPerDay === 4) {
+      mealStructure = `breakfast, lunch, snack, dinner`;
+      mealDistribution = `Desayuno: 25%, Almuerzo: 35%, Merienda: 15%, Cena: 25%`;
+    } else if (mealsPerDay === 5) {
+      mealStructure = `breakfast, mid_morning, lunch, snack, dinner`;
+      mealDistribution = `Desayuno: 25%, Media mañana: 10%, Almuerzo: 30%, Merienda: 15%, Cena: 20%`;
+    } else {
+      mealStructure = `breakfast, mid_morning, lunch, snack, dinner, late_snack`;
+      mealDistribution = `Desayuno: 20%, Media mañana: 10%, Almuerzo: 30%, Merienda: 15%, Cena: 20%, Snack nocturno: 5%`;
+    }
+
+    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas:
+
+⚠️ IMPORTANTE - SUPERMERCADO MERCADONA (ESPAÑA):
+Usa ÚNICAMENTE productos que se encuentran en MERCADONA España. Ejemplos:
+- Proteínas: Pechuga Hacendado, Huevos Hacendado, Atún claro Hacendado, Salmón fresco, Ternera picada, Lomo de cerdo
+- Lácteos: Yogur griego Hacendado, Queso fresco batido 0%, Leche entera/desnatada Hacendado
+- Carbohidratos: Arroz SOS, Pasta Hacendado, Pan de molde integral Hacendado, Avena Hacendado, Patatas
+- Verduras: Brócoli, Espinacas baby, Judías verdes, Calabacín, Pimientos, Tomate
+- Grasas: Aceite de oliva virgen extra Hacendado, Aguacate, Frutos secos Hacendado, Mantequilla de cacahuete
 
 DATOS NUTRICIONALES CALCULADOS (Mifflin-St Jeor):
 - TMB: ${Math.round(bmr)} kcal
 - TDEE: ${Math.round(tdee)} kcal
-- Calorías objetivo: ${macros.calories} kcal/día
+- Calorías objetivo: ${macros.calories} kcal/día${profile.fitness_goal === 'lose_weight_aggressive' ? ' (DÉFICIT AGRESIVO -500kcal)' : ''}
 - Proteínas: ${macros.protein}g (${Math.round(macros.protein/weight*10)/10}g/kg)
 - Carbohidratos: ${macros.carbs}g
 - Grasas: ${macros.fat}g
@@ -534,25 +567,16 @@ DATOS DEL USUARIO:
 - Peso: ${weight}kg
 - Objetivo: ${profile.fitness_goal || 'mantener'}
 - Restricciones: ${profile.dietary_restrictions?.join(', ') || 'ninguna'}
-- Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos, carne'}
+- Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
+- Carbohidratos preferidos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
 
-PROTOCOLO NUTRICIONAL OBLIGATORIO:
-1. 5 COMIDAS al día (cada ~3 horas):
-   - 07:00 - Desayuno (breakfast)
-   - 10:00 - Media mañana (mid_morning)
-   - 13:00 - Almuerzo (lunch)
-   - 16:00 - Merienda (snack) - PRE-ENTRENO si entrena
-   - 20:00 - Cena (dinner) - POST-ENTRENO si entrena tarde
+🚫 ALIMENTOS PROHIBIDOS (el usuario los odia, NO incluir):
+${dislikedFoods || 'Ninguno especificado'}
 
-2. DISTRIBUCIÓN de calorías:
-   - Desayuno: 25% (~${Math.round(macros.calories*0.25)} kcal)
-   - Media mañana: 10% (~${Math.round(macros.calories*0.10)} kcal)
-   - Almuerzo: 30% (~${Math.round(macros.calories*0.30)} kcal)
-   - Merienda: 15% (~${Math.round(macros.calories*0.15)} kcal)
-   - Cena: 20% (~${Math.round(macros.calories*0.20)} kcal)
-
-3. PROTEÍNA distribuida: ${Math.round(macros.protein/5)}g por comida aprox
-
+PROTOCOLO NUTRICIONAL:
+1. ${mealsPerDay} COMIDAS al día: ${mealStructure}
+2. DISTRIBUCIÓN de calorías: ${mealDistribution}
+3. PROTEÍNA distribuida: ${Math.round(macros.protein/mealsPerDay)}g por comida aprox
 4. PRE-ENTRENO (merienda): Carbohidratos complejos + proteína ligera
 5. POST-ENTRENO (cena): Proteína alta + carbohidratos para recuperación
 
@@ -566,53 +590,24 @@ Responde SOLO con JSON válido:
   "meals": [
     {
       "meal_type": "breakfast",
-      "time": "07:00",
       "name": "Desayuno Energético",
-      "description": "Descripción completa del plato",
-      "calories": ${Math.round(macros.calories*0.25)},
-      "protein_grams": ${Math.round(macros.protein*0.25)},
-      "carbs_grams": ${Math.round(macros.carbs*0.25)},
-      "fat_grams": ${Math.round(macros.fat*0.25)},
+      "description": "Descripción del plato con productos Mercadona",
+      "calories": ${Math.round(macros.calories/mealsPerDay)},
+      "protein_grams": ${Math.round(macros.protein/mealsPerDay)},
+      "carbs_grams": ${Math.round(macros.carbs/mealsPerDay)},
+      "fat_grams": ${Math.round(macros.fat/mealsPerDay)},
       "ingredients": [
-        {"name": "Avena", "amount": "80g", "calories": 304, "protein": 10.7}
+        {"name": "Producto Mercadona", "amount": "cantidad en g", "calories": 100, "protein": 20}
       ],
-      "recipe": "Pasos de preparación",
-      "alternatives": [
-        {
-          "name": "Alternativa",
-          "description": "Descripción",
-          "calories": 400,
-          "protein_grams": 30
-        }
-      ]
-    },
-    {
-      "meal_type": "mid_morning",
-      "time": "10:00",
-      "name": "Snack Media Mañana",
-      ...
-    },
-    {
-      "meal_type": "lunch",
-      "time": "13:00",
-      ...
-    },
-    {
-      "meal_type": "snack",
-      "time": "16:00",
-      "name": "Pre-Entreno / Merienda",
-      ...
-    },
-    {
-      "meal_type": "dinner",
-      "time": "20:00",
-      "name": "Cena Post-Entreno",
-      ...
+      "recipe": "Preparación paso a paso"
     }
   ]
 }
 
-IMPORTANTE: Las 5 comidas deben sumar EXACTAMENTE ${macros.calories} kcal y ${macros.protein}g de proteína.`;
+IMPORTANTE:
+- Las ${mealsPerDay} comidas deben sumar EXACTAMENTE ${macros.calories} kcal y ${macros.protein}g proteína
+- NO incluir ningún alimento de la lista de prohibidos
+- Usar productos específicos de MERCADONA España`;
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
@@ -865,6 +860,108 @@ router.delete('/conversations/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Delete conversation error:', error);
     res.status(500).json({ error: 'Failed to delete conversation' });
+  }
+});
+
+// Regenerate a single meal with same macros
+router.post('/regenerate-meal', authenticateToken, async (req, res) => {
+  const { meal_id, calories, protein_grams, meal_type } = req.body;
+
+  try {
+    const profileResult = await pool.query(
+      `SELECT * FROM user_profiles WHERE user_id = $1`,
+      [req.user.id]
+    );
+    const profile = profileResult.rows[0] || {};
+    const dislikedFoods = profile.disliked_foods?.join(', ') || '';
+
+    const prompt = `Genera UNA comida alternativa con estos macros EXACTOS:
+- Calorías: ${calories} kcal
+- Proteína: ${protein_grams}g
+- Tipo de comida: ${meal_type}
+
+⚠️ MERCADONA (ESPAÑA) - Usa SOLO productos de Mercadona:
+Pechuga Hacendado, Huevos, Atún claro, Salmón, Arroz SOS, Pasta Hacendado, Yogur griego Hacendado, Queso fresco batido 0%, Avena, etc.
+
+🚫 ALIMENTOS PROHIBIDOS (NO incluir):
+${dislikedFoods || 'Ninguno'}
+
+Preferencias del usuario:
+- Proteínas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
+- Carbohidratos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+
+Responde SOLO con JSON:
+{
+  "name": "Nombre del plato",
+  "description": "Descripción",
+  "calories": ${calories},
+  "protein_grams": ${protein_grams},
+  "carbs_grams": XX,
+  "fat_grams": XX,
+  "ingredients": [{"name": "Ingrediente", "amount": "cantidad", "calories": XX, "protein": XX}],
+  "recipe": "Preparación"
+}`;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 1000,
+      system: 'Eres un nutricionista deportivo. Genera comidas con productos de MERCADONA España. Responde SOLO con JSON válido.',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const jsonResponse = response.content[0].text;
+    let newMeal;
+    try {
+      newMeal = JSON.parse(jsonResponse);
+    } catch (parseError) {
+      const jsonMatch = jsonResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        newMeal = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Invalid JSON response');
+      }
+    }
+
+    // Update the meal in database if meal_id provided
+    if (meal_id) {
+      await pool.query(
+        `UPDATE meals SET
+          name = $1,
+          description = $2,
+          calories = $3,
+          protein_grams = $4,
+          carbs_grams = $5,
+          fat_grams = $6,
+          ingredients = $7,
+          recipe = $8,
+          image_url = $9
+         WHERE id = $10`,
+        [
+          newMeal.name,
+          newMeal.description,
+          newMeal.calories,
+          newMeal.protein_grams,
+          newMeal.carbs_grams,
+          newMeal.fat_grams,
+          JSON.stringify({ main: newMeal.ingredients }),
+          newMeal.recipe,
+          getMealImageUrl(meal_type, newMeal.name),
+          meal_id
+        ]
+      );
+    }
+
+    res.json({
+      success: true,
+      meal: {
+        ...newMeal,
+        meal_type,
+        image_url: getMealImageUrl(meal_type, newMeal.name)
+      }
+    });
+  } catch (error) {
+    console.error('Regenerate meal error:', error);
+    res.status(500).json({ error: 'Failed to regenerate meal', details: error.message });
   }
 });
 

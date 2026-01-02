@@ -233,11 +233,23 @@ export default function WorkoutSession() {
 
               {isResting && (
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setRestTimer(t => Math.max(0, t - 15))}
+                    className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white"
+                  >
+                    <Minus size={16} />
+                  </button>
                   <div className="bg-accent-warning/20 px-4 py-2 rounded-full flex items-center gap-2">
                     <Clock size={16} className="text-accent-warning" />
                     <span className="text-accent-warning font-bold text-lg">{restTimer}s</span>
                   </div>
-                  <button onClick={skipRest} className="text-xs text-gray-400 hover:text-white">
+                  <button
+                    onClick={() => setRestTimer(t => t + 15)}
+                    className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white"
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button onClick={skipRest} className="text-xs text-gray-400 hover:text-white ml-1">
                     Saltar
                   </button>
                 </div>

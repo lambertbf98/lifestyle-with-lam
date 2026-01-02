@@ -1,12 +1,12 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { Home, Dumbbell, UtensilsCrossed, TrendingUp, MessageCircle } from 'lucide-react';
+import { Home, Dumbbell, UtensilsCrossed, TrendingUp, User } from 'lucide-react';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Inicio' },
   { path: '/workouts', icon: Dumbbell, label: 'Entreno' },
   { path: '/diet', icon: UtensilsCrossed, label: 'Dieta' },
   { path: '/progress', icon: TrendingUp, label: 'Progreso' },
-  { path: '/coach', icon: MessageCircle, label: 'Coach' }
+  { path: '/profile', icon: User, label: 'Perfil' }
 ];
 
 export default function Layout() {

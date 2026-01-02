@@ -304,4 +304,36 @@ router.get('/history', authenticateToken, async (req, res) => {
   }
 });
 
+// Clear workout history (for testing)
+router.delete('/clear-history', authenticateToken, async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Delete exercise logs first (due to foreign key)
+    await client.query(
+      `DELETE FROM exercise_logs WHERE workout_log_id IN
+       (SELECT id FROM workout_logs WHERE user_id = $1)`,
+      [req.user.id]
+    );
+
+    // Delete workout logs
+    await client.query(
+      'DELETE FROM workout_logs WHERE user_id = $1',
+      [req.user.id]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({ message: 'Workout history cleared successfully' });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Clear workout history error:', error);
+    res.status(500).json({ error: 'Failed to clear workout history' });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;

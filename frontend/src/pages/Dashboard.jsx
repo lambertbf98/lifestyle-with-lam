@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi, progress as progressApi, workouts as workoutsApi } from '../api';
-import { Dumbbell, Flame, TrendingDown, TrendingUp, Trophy, ChevronRight, Plus, Sparkles } from 'lucide-react';
+import { Dumbbell, Flame, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -178,38 +178,22 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-4">
-        <Link
-          to="/diet"
-          className="card bg-gradient-to-br from-accent-success/10 to-dark-800 border-accent-success/20 hover:border-accent-success/40 transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-accent-success/20 rounded-xl flex items-center justify-center">
-              <Plus size={20} className="text-accent-success" />
-            </div>
-            <div>
-              <p className="font-medium">Registrar Comida</p>
-              <p className="text-xs text-gray-400">Log tu nutrición</p>
-            </div>
+      {/* Quick Action */}
+      <Link
+        to="/progress"
+        className="card bg-gradient-to-br from-neon-purple/10 to-dark-800 border-neon-purple/20 hover:border-neon-purple/40 transition-all"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-neon-purple/20 rounded-xl flex items-center justify-center">
+            <TrendingUp size={24} className="text-neon-purple" />
           </div>
-        </Link>
-
-        <Link
-          to="/progress"
-          className="card bg-gradient-to-br from-neon-purple/10 to-dark-800 border-neon-purple/20 hover:border-neon-purple/40 transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center">
-              <TrendingUp size={20} className="text-neon-purple" />
-            </div>
-            <div>
-              <p className="font-medium">Ver Progreso</p>
-              <p className="text-xs text-gray-400">Gráficas y stats</p>
-            </div>
+          <div className="flex-1">
+            <p className="font-semibold text-lg">Ver Progreso</p>
+            <p className="text-sm text-gray-400">Gráficas, estadísticas y logros</p>
           </div>
-        </Link>
-      </div>
+          <ChevronRight size={20} className="text-gray-400" />
+        </div>
+      </Link>
     </div>
   );
 }

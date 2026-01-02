@@ -14,7 +14,8 @@ router.get('/profile', authenticateToken, async (req, res) => {
               up.workout_days_per_week, up.dietary_restrictions,
               up.preferred_proteins, up.preferred_carbs, up.preferred_fats,
               up.meals_per_day, up.onboarding_completed,
-              up.chest_cm, up.waist_cm, up.hips_cm, up.bicep_cm, up.thigh_cm, up.calf_cm
+              up.chest_cm, up.waist_cm, up.hips_cm, up.bicep_cm, up.thigh_cm, up.calf_cm,
+              up.disliked_foods
        FROM users u
        LEFT JOIN user_profiles up ON u.id = up.user_id
        WHERE u.id = $1`,
@@ -53,7 +54,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
     hips_cm,
     bicep_cm,
     thigh_cm,
-    calf_cm
+    calf_cm,
+    disliked_foods
   } = req.body;
 
   try {
@@ -78,8 +80,9 @@ router.put('/profile', authenticateToken, async (req, res) => {
         bicep_cm = COALESCE($17, bicep_cm),
         thigh_cm = COALESCE($18, thigh_cm),
         calf_cm = COALESCE($19, calf_cm),
+        disliked_foods = COALESCE($20, disliked_foods),
         updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $20
+       WHERE user_id = $21
        RETURNING *`,
       [
         height_cm,
@@ -101,6 +104,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
         bicep_cm,
         thigh_cm,
         calf_cm,
+        disliked_foods,
         req.user.id
       ]
     );

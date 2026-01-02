@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { diet as dietApi, coach as coachApi } from '../api';
-import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, X } from 'lucide-react';
+import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw } from 'lucide-react';
 
 const mealTypeLabels = {
   breakfast: 'Desayuno',
@@ -23,6 +23,7 @@ export default function Diet() {
   const [activePlan, setActivePlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [regeneratingMeal, setRegeneratingMeal] = useState(null);
   const [expandedMeal, setExpandedMeal] = useState(null);
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
   const [nutritionInfo, setNutritionInfo] = useState(null);
@@ -89,6 +90,35 @@ export default function Diet() {
       await loadData();
     } catch (error) {
       console.error('Error logging meal:', error);
+    }
+  };
+
+  const regenerateMeal = async (meal) => {
+    setRegeneratingMeal(meal.id);
+    try {
+      const response = await coachApi.regenerateMeal({
+        meal_id: meal.id,
+        calories: meal.calories,
+        protein_grams: meal.protein_grams,
+        meal_type: meal.meal_type
+      });
+
+      if (response.data.success) {
+        // Update the local state with the new meal
+        setTodayData(prev => ({
+          ...prev,
+          meals: prev.meals.map(m =>
+            m.id === meal.id
+              ? { ...m, ...response.data.meal, id: m.id }
+              : m
+          )
+        }));
+      }
+    } catch (error) {
+      console.error('Error regenerating meal:', error);
+      alert('Error al regenerar la comida. Intenta de nuevo.');
+    } finally {
+      setRegeneratingMeal(null);
     }
   };
 
@@ -329,18 +359,34 @@ export default function Diet() {
                         </div>
                       </div>
 
-                      {logged ? (
-                        <div className="w-10 h-10 bg-accent-success rounded-full flex items-center justify-center flex-shrink-0">
-                          <Check size={20} className="text-dark-900" />
-                        </div>
-                      ) : (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Regenerate button */}
                         <button
-                          onClick={() => logMeal(meal)}
-                          className="w-10 h-10 bg-accent-primary rounded-full flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform"
+                          onClick={() => regenerateMeal(meal)}
+                          disabled={regeneratingMeal === meal.id}
+                          className="w-10 h-10 bg-dark-600 rounded-full flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                          title="Cambiar por otra opción"
                         >
-                          <Plus size={20} className="text-dark-900" />
+                          {regeneratingMeal === meal.id ? (
+                            <Loader2 size={18} className="animate-spin text-accent-primary" />
+                          ) : (
+                            <RefreshCw size={18} className="text-gray-400" />
+                          )}
                         </button>
-                      )}
+
+                        {logged ? (
+                          <div className="w-10 h-10 bg-accent-success rounded-full flex items-center justify-center">
+                            <Check size={20} className="text-dark-900" />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => logMeal(meal)}
+                            className="w-10 h-10 bg-accent-primary rounded-full flex items-center justify-center hover:scale-105 transition-transform"
+                          >
+                            <Plus size={20} className="text-dark-900" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {meal.description && (

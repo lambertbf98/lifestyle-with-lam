@@ -86,6 +86,7 @@ export const coach = {
   chat: (message, context = 'general') => api.post('/coach/chat', { message, context }),
   generateWorkout: (data) => api.post('/coach/generate-workout', data),
   generateDiet: (data) => api.post('/coach/generate-diet', data),
+  regenerateMeal: (data) => api.post('/coach/regenerate-meal', data),
   getConversations: (context) => api.get('/coach/conversations', { params: { context } }),
   deleteConversation: (id) => api.delete(`/coach/conversations/${id}`),
   getNutritionInfo: () => api.get('/coach/nutrition-info')
