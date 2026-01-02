@@ -121,13 +121,38 @@ export default function Progress() {
 
   const formatWeightData = () => {
     const history = progressData?.weight?.history || [];
+    const initial = progressData?.weight?.initial;
 
-    // Usar datos reales del historial con fechas reales
-    return history.map(entry => ({
+    // Convertir historial a formato de gráfica
+    const historyData = history.map(entry => ({
       date: format(parseISO(entry.recorded_at), 'd MMM', { locale: es }),
       weight: parseFloat(entry.weight_kg),
       fullDate: format(parseISO(entry.recorded_at), 'dd MMM yyyy', { locale: es })
     }));
+
+    // Agregar peso inicial como primer punto si existe y es diferente al primer registro
+    if (initial) {
+      const initialWeight = parseFloat(initial);
+      const firstHistoryWeight = historyData.length > 0 ? historyData[0].weight : null;
+
+      // Solo agregar si no hay datos O si el inicial es diferente al primero
+      if (historyData.length === 0 || initialWeight !== firstHistoryWeight) {
+        // Calcular fecha de inicio basada en el período seleccionado
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - period);
+
+        return [
+          {
+            date: format(startDate, 'd MMM', { locale: es }),
+            weight: initialWeight,
+            fullDate: 'Peso inicial'
+          },
+          ...historyData
+        ];
+      }
+    }
+
+    return historyData;
   };
 
   if (loading) {
