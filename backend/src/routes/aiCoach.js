@@ -557,6 +557,19 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const tdee = calculateTDEE(bmr, profile.activity_level);
     const macros = calculateMacros(tdee, profile.fitness_goal, weight);
 
+    // Debug logging
+    console.log('=== DIET GENERATION DEBUG ===');
+    console.log('User ID:', req.user.id);
+    console.log('Fitness Goal from DB:', profile.fitness_goal);
+    console.log('Weight:', weight, 'kg');
+    console.log('Height:', height, 'cm');
+    console.log('Age:', age);
+    console.log('Activity Level:', profile.activity_level);
+    console.log('BMR:', Math.round(bmr));
+    console.log('TDEE:', Math.round(tdee));
+    console.log('Final Calories:', macros.calories);
+    console.log('=============================');
+
     const mealsPerDay = profile.meals_per_day || 5;
     // Expand categories like "verduras" to include all vegetables
     const expandedDisliked = expandFoodCategories(profile.disliked_foods);

@@ -129,55 +129,34 @@ export default function Dashboard() {
       {/* Today's Workout */}
       <div className="card-glow">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Entreno de Hoy</h2>
+          <h2 className="text-lg font-semibold">Tu Próximo Entreno</h2>
           <Link to="/workouts" className="text-accent-primary text-sm flex items-center gap-1">
             Ver todos <ChevronRight size={16} />
           </Link>
         </div>
 
         {activePlan && activePlan.days?.length > 0 ? (
-          (() => {
-            // Get today's day of week (1-7, where 1 = Monday)
-            const today = new Date().getDay();
-            const todayAdjusted = today === 0 ? 7 : today; // Convert Sunday from 0 to 7
-
-            // Find today's workout
-            const todayWorkout = activePlan.days.find(day => day.day_of_week === todayAdjusted);
-
-            if (todayWorkout) {
-              return (
-                <Link
-                  to={`/workout-session/${todayWorkout.id}`}
-                  className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{todayWorkout.name}</h3>
-                      <p className="text-sm text-gray-400">
-                        {todayWorkout.exercises?.length || 0} ejercicios
-                      </p>
-                    </div>
-                    <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
-                      <Dumbbell size={20} className="text-accent-primary" />
-                    </div>
+          <div className="space-y-3">
+            {activePlan.days.slice(0, 2).map((day, index) => (
+              <Link
+                key={day.id}
+                to={`/workout-session/${day.id}`}
+                className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">{day.name}</h3>
+                    <p className="text-sm text-gray-400">
+                      {day.exercises?.length || 0} ejercicios • {day.focus_area || 'General'}
+                    </p>
                   </div>
-                </Link>
-              );
-            } else {
-              // Rest day
-              return (
-                <div className="bg-dark-700/50 rounded-xl p-6 border border-dark-600 text-center">
-                  <div className="w-16 h-16 bg-neon-purple/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-3xl">😴</span>
+                  <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
+                    <Dumbbell size={20} className="text-accent-primary" />
                   </div>
-                  <h3 className="font-semibold text-lg mb-1">Día de Descanso</h3>
-                  <p className="text-sm text-gray-400">
-                    Hoy toca recuperar. Descansa bien para rendir mejor mañana.
-                  </p>
                 </div>
-              );
-            }
-          })()
+              </Link>
+            ))}
+          </div>
         ) : (
           <Link
             to="/workouts"

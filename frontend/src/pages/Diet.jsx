@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { diet as dietApi, coach as coachApi } from '../api';
-import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw } from 'lucide-react';
+import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw, X } from 'lucide-react';
 
 const mealTypeLabels = {
   breakfast: 'Desayuno',
@@ -91,6 +91,19 @@ export default function Diet() {
       await loadData();
     } catch (error) {
       console.error('Error logging meal:', error);
+    }
+  };
+
+  const unlogMeal = async (mealId) => {
+    try {
+      // Find the log entry for this meal
+      const logEntry = todayData.logged.find(log => log.meal_id === mealId);
+      if (logEntry) {
+        await dietApi.deleteMealLog(logEntry.id);
+        await loadData();
+      }
+    } catch (error) {
+      console.error('Error unlogging meal:', error);
     }
   };
 
@@ -414,9 +427,14 @@ export default function Diet() {
                         </button>
 
                         {logged ? (
-                          <div className="w-10 h-10 bg-accent-success rounded-full flex items-center justify-center">
-                            <Check size={20} className="text-dark-900" />
-                          </div>
+                          <button
+                            onClick={() => unlogMeal(meal.id)}
+                            className="w-10 h-10 bg-accent-success rounded-full flex items-center justify-center hover:bg-red-500 transition-colors group"
+                            title="Quitar comida registrada"
+                          >
+                            <Check size={20} className="text-dark-900 group-hover:hidden" />
+                            <X size={20} className="text-white hidden group-hover:block" />
+                          </button>
                         ) : (
                           <button
                             onClick={() => logMeal(meal)}
