@@ -11,7 +11,7 @@ const anthropic = new Anthropic({
 
 // Helper function to calculate age from birth_date
 const calculateAge = (birthDate) => {
-  if (!birthDate) return 30; // Default if not provided
+  if (!birthDate) return 30;
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
@@ -22,27 +22,27 @@ const calculateAge = (birthDate) => {
   return age;
 };
 
-// Calculate BMR using Mifflin-St Jeor equation (more accurate than Harris-Benedict)
+// Calculate BMR using Mifflin-St Jeor equation
 const calculateBMR = (weight, height, age, gender) => {
-  if (gender === 'male' || gender === 'hombre') {
+  if (gender === 'male' || gender === 'hombre' || gender === 'masculino') {
     return (10 * weight) + (6.25 * height) - (5 * age) + 5;
   } else {
     return (10 * weight) + (6.25 * height) - (5 * age) - 161;
   }
 };
 
-// Calculate TDEE (Total Daily Energy Expenditure)
+// Calculate TDEE
 const calculateTDEE = (bmr, activityLevel) => {
   const multipliers = {
-    'sedentary': 1.2,        // Little or no exercise
+    'sedentary': 1.2,
     'sedentario': 1.2,
-    'light': 1.375,          // Light exercise 1-3 days/week
+    'light': 1.375,
     'ligero': 1.375,
-    'moderate': 1.55,        // Moderate exercise 3-5 days/week
+    'moderate': 1.55,
     'moderado': 1.55,
-    'active': 1.725,         // Hard exercise 6-7 days/week
+    'active': 1.725,
     'activo': 1.725,
-    'very_active': 1.9,      // Very hard exercise, physical job
+    'very_active': 1.9,
     'muy_activo': 1.9
   };
   return bmr * (multipliers[activityLevel] || 1.55);
@@ -51,18 +51,18 @@ const calculateTDEE = (bmr, activityLevel) => {
 // Calculate macros based on goal
 const calculateMacros = (tdee, goal, weight) => {
   let calories = tdee;
-  let proteinPerKg = 1.6; // Default protein
+  let proteinPerKg = 1.6;
 
   switch (goal) {
     case 'lose_weight':
     case 'perder_peso':
-      calories = tdee - 500; // 500 cal deficit for ~0.5kg/week loss
-      proteinPerKg = 2.0; // Higher protein to preserve muscle
+      calories = tdee - 500;
+      proteinPerKg = 2.0;
       break;
     case 'gain_muscle':
     case 'ganar_musculo':
-      calories = tdee + 300; // Slight surplus for muscle gain
-      proteinPerKg = 2.2; // Higher protein for muscle synthesis
+      calories = tdee + 300;
+      proteinPerKg = 2.2;
       break;
     case 'maintain':
     case 'mantener':
@@ -72,8 +72,8 @@ const calculateMacros = (tdee, goal, weight) => {
   }
 
   const protein = Math.round(weight * proteinPerKg);
-  const fat = Math.round((calories * 0.25) / 9); // 25% of calories from fat
-  const carbs = Math.round((calories - (protein * 4) - (fat * 9)) / 4); // Rest from carbs
+  const fat = Math.round((calories * 0.25) / 9);
+  const carbs = Math.round((calories - (protein * 4) - (fat * 9)) / 4);
 
   return {
     calories: Math.round(calories),
@@ -83,40 +83,81 @@ const calculateMacros = (tdee, goal, weight) => {
   };
 };
 
-// System prompt for the AI coach
-const getCoachSystemPrompt = (profile, nutritionInfo) => `Eres un entrenador personal profesional y nutricionista certificado llamado "Coach Lam". Tu objetivo es ayudar a tu cliente a alcanzar sus metas de fitness y nutrición.
+// Get user's current plans for coach context
+const getUserPlansContext = async (userId) => {
+  try {
+    const workoutPlan = await pool.query(
+      `SELECT wp.name, wp.description,
+              (SELECT COUNT(*) FROM workout_days WHERE plan_id = wp.id) as days_count
+       FROM workout_plans wp WHERE user_id = $1 AND is_active = TRUE LIMIT 1`,
+      [userId]
+    );
+
+    const dietPlan = await pool.query(
+      `SELECT name, daily_calories, protein_grams, carbs_grams, fat_grams
+       FROM diet_plans WHERE user_id = $1 AND is_active = TRUE LIMIT 1`,
+      [userId]
+    );
+
+    const recentWorkouts = await pool.query(
+      `SELECT COUNT(*) as count FROM workout_logs
+       WHERE user_id = $1 AND completed_at > NOW() - INTERVAL '7 days'`,
+      [userId]
+    );
+
+    return {
+      hasWorkoutPlan: workoutPlan.rows.length > 0,
+      workoutPlan: workoutPlan.rows[0] || null,
+      hasDietPlan: dietPlan.rows.length > 0,
+      dietPlan: dietPlan.rows[0] || null,
+      workoutsThisWeek: parseInt(recentWorkouts.rows[0]?.count || 0)
+    };
+  } catch (error) {
+    return { hasWorkoutPlan: false, hasDietPlan: false, workoutsThisWeek: 0 };
+  }
+};
+
+// System prompt for the AI coach - ONLY for questions and motivation
+const getCoachSystemPrompt = (profile, nutritionInfo, plansContext) => `Eres "Coach Lam", un entrenador personal y nutricionista deportivo certificado con 10 años de experiencia. Tu rol es ÚNICAMENTE responder preguntas, motivar y dar consejos personalizados.
+
+⚠️ IMPORTANTE: NO generes planes de entrenamiento ni dietas completas. Si el usuario pide un plan, dile que use los botones "Generar con IA" en las secciones de Entreno o Dieta de la app.
 
 INFORMACIÓN DEL CLIENTE:
 - Nombre: ${profile.name || 'Usuario'}
+- Género: ${profile.gender || 'No especificado'}
 - Peso actual: ${profile.current_weight_kg || 'No especificado'} kg
 - Peso objetivo: ${profile.target_weight_kg || 'No especificado'} kg
 - Altura: ${profile.height_cm || 'No especificada'} cm
 - Edad: ${calculateAge(profile.birth_date)} años
-- Género: ${profile.gender || 'No especificado'}
 - Objetivo: ${profile.fitness_goal || 'No especificado'}
 - Nivel de actividad: ${profile.activity_level || 'No especificado'}
-- Días de entrenamiento por semana: ${profile.workout_days_per_week || 3}
-- Restricciones dietéticas: ${profile.dietary_restrictions?.join(', ') || 'Ninguna'}
-- Comidas por día preferidas: ${profile.meals_per_day || 4}
+- Días de entrenamiento: ${profile.workout_days_per_week || 3}/semana
 
 DATOS NUTRICIONALES CALCULADOS:
-- TMB (Tasa Metabólica Basal): ${nutritionInfo.bmr} kcal
-- TDEE (Gasto Energético Total): ${nutritionInfo.tdee} kcal
-- Calorías objetivo diarias: ${nutritionInfo.calories} kcal
-- Proteínas objetivo: ${nutritionInfo.protein}g
-- Carbohidratos objetivo: ${nutritionInfo.carbs}g
-- Grasas objetivo: ${nutritionInfo.fat}g
+- TMB: ${nutritionInfo.bmr} kcal/día
+- TDEE: ${nutritionInfo.tdee} kcal/día
+- Objetivo calórico: ${nutritionInfo.calories} kcal/día
+- Macros: ${nutritionInfo.protein}g proteína | ${nutritionInfo.carbs}g carbos | ${nutritionInfo.fat}g grasas
 
-INSTRUCCIONES:
-1. Sé motivador pero realista
-2. Da consejos basados en evidencia científica
-3. Personaliza tus respuestas según el perfil del cliente
-4. Responde en español
-5. Sé conciso pero informativo
-6. USA LOS DATOS NUTRICIONALES CALCULADOS - son precisos basados en la ecuación Mifflin-St Jeor
-7. Si te piden un plan de entrenamiento, sugiere usar el botón "Generar Plan" en la app
-8. Si te piden un plan de dieta, sugiere usar el botón "Generar Dieta" en la app
-9. Celebra los logros y motiva cuando hay dificultades`;
+PLANES ACTUALES DEL USUARIO:
+- Plan de entrenamiento: ${plansContext.hasWorkoutPlan ? `"${plansContext.workoutPlan.name}" (${plansContext.workoutPlan.days_count} días)` : 'Sin plan activo - sugiérele generar uno'}
+- Plan de dieta: ${plansContext.hasDietPlan ? `"${plansContext.dietPlan.name}" (${plansContext.dietPlan.daily_calories} kcal)` : 'Sin plan activo - sugiérele generar uno'}
+- Entrenos esta semana: ${plansContext.workoutsThisWeek}
+
+TU ROL:
+1. Responder dudas sobre ejercicios (técnica, variaciones, sustituciones)
+2. Explicar conceptos de nutrición
+3. Motivar y celebrar logros
+4. Dar tips para mejorar rendimiento
+5. Resolver dudas sobre los planes que ya tiene
+6. Sugerir ajustes menores (más peso, más series, etc.)
+
+NO DEBES:
+- Generar planes completos de entrenamiento
+- Generar dietas completas
+- Solo di: "Para generar un plan personalizado, usa el botón 'Generar con IA' en la sección correspondiente"
+
+Responde siempre en español, de forma motivadora pero profesional. Sé conciso.`;
 
 // Chat with AI coach
 router.post('/chat', authenticateToken, async (req, res) => {
@@ -127,7 +168,6 @@ router.post('/chat', authenticateToken, async (req, res) => {
   }
 
   try {
-    // Get user profile
     const profileResult = await pool.query(
       `SELECT up.*, u.name FROM user_profiles up
        JOIN users u ON up.user_id = u.id
@@ -136,8 +176,8 @@ router.post('/chat', authenticateToken, async (req, res) => {
     );
 
     const profile = profileResult.rows[0] || {};
+    const plansContext = await getUserPlansContext(req.user.id);
 
-    // Calculate nutrition info
     const age = calculateAge(profile.birth_date);
     const bmr = calculateBMR(
       profile.current_weight_kg || 70,
@@ -154,7 +194,6 @@ router.post('/chat', authenticateToken, async (req, res) => {
       ...macros
     };
 
-    // Get or create conversation
     let conversationResult = await pool.query(
       `SELECT id, messages FROM coach_conversations
        WHERE user_id = $1 AND context = $2
@@ -177,10 +216,8 @@ router.post('/chat', authenticateToken, async (req, res) => {
       conversationId = newConversation.rows[0].id;
     }
 
-    // Keep only last 10 messages for context
     const recentMessages = previousMessages.slice(-10);
 
-    // Build messages for Claude
     const messages = [
       ...recentMessages.map(m => ({
         role: m.role,
@@ -189,22 +226,20 @@ router.post('/chat', authenticateToken, async (req, res) => {
       { role: 'user', content: message }
     ];
 
-    // Call Claude Haiku
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 1024,
-      system: getCoachSystemPrompt(profile, nutritionInfo),
+      system: getCoachSystemPrompt(profile, nutritionInfo, plansContext),
       messages
     });
 
     const assistantMessage = response.content[0].text;
 
-    // Save conversation
     const updatedMessages = [
       ...previousMessages,
       { role: 'user', content: message, timestamp: new Date().toISOString() },
       { role: 'assistant', content: assistantMessage, timestamp: new Date().toISOString() }
-    ].slice(-20); // Keep last 20 messages
+    ].slice(-20);
 
     await pool.query(
       `UPDATE coach_conversations
@@ -231,21 +266,18 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
   const client = await pool.connect();
 
   try {
-    // Get user profile
     const profileResult = await pool.query(
       `SELECT * FROM user_profiles WHERE user_id = $1`,
       [req.user.id]
     );
     const profile = profileResult.rows[0] || {};
 
-    // Get ALL available exercises from database
     const exercisesResult = await pool.query(
       `SELECT id, name, name_es, muscle_group, equipment, difficulty, gif_url, instructions
        FROM exercises ORDER BY muscle_group, name`
     );
     const availableExercises = exercisesResult.rows;
 
-    // Create a map for quick lookup
     const exerciseMap = {};
     availableExercises.forEach(ex => {
       exerciseMap[ex.name.toLowerCase()] = ex;
@@ -254,7 +286,6 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
       }
     });
 
-    // Create exercise list grouped by muscle
     const exercisesByMuscle = {};
     availableExercises.forEach(ex => {
       if (!exercisesByMuscle[ex.muscle_group]) {
@@ -269,55 +300,75 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
 
     const daysCount = days_per_week || profile.workout_days_per_week || 3;
     const userGoal = focus || profile.fitness_goal || 'general';
+    const userGender = profile.gender || 'male';
+    const isFemale = userGender === 'female' || userGender === 'mujer' || userGender === 'femenino';
 
-    const prompt = `Genera un plan de entrenamiento semanal profesional con las siguientes características:
+    // Different training approach based on gender
+    let trainingFocus = '';
+    if (isFemale) {
+      trainingFocus = `
+ENFOQUE ESPECIAL PARA MUJER:
+- Prioridad absoluta en GLÚTEOS e ISQUIOTIBIALES
+- Si son 3 días: 2 días de pierna/glúteo + 1 día de torso
+- Si son 4 días: 2 días pierna/glúteo + 1 torso + 1 full body
+- Incluir SIEMPRE: Hip Thrust, Sentadilla, Peso Muerto Rumano, Zancadas
+- Cada día de pierna debe tener mínimo 3 ejercicios de glúteo`;
+    } else {
+      trainingFocus = `
+ENFOQUE PARA HOMBRE:
+- Distribución equilibrada: empuje/tirón/pierna o por grupos musculares
+- Incluir ejercicios compuestos pesados: Press Banca, Peso Muerto, Sentadilla
+- Priorizar fuerza y volumen muscular`;
+    }
+
+    const prompt = `Genera un plan de entrenamiento PROFESIONAL de ~45 minutos por sesión:
+
+DATOS DEL USUARIO:
+- Género: ${userGender} ${isFemale ? '(MUJER - énfasis en glúteos)' : '(HOMBRE)'}
 - Días por semana: ${daysCount}
 - Objetivo: ${userGoal}
-- Equipamiento disponible: ${equipment_available || 'gimnasio completo'}
-- Nivel: ${profile.activity_level || 'intermedio'}
+- Equipamiento: ${equipment_available || 'gimnasio completo'}
 
-IMPORTANTE: SOLO puedes usar ejercicios de esta lista (usa los nombres EXACTOS):
+${trainingFocus}
+
+EJERCICIOS DISPONIBLES (usa nombres EXACTOS):
 ${exerciseListText}
 
-Responde SOLO con un JSON válido con esta estructura exacta:
+REGLAS OBLIGATORIAS:
+1. MÍNIMO 6-7 ejercicios por día (para ~45 min de entreno)
+2. Ejercicios compuestos primero, aislamiento después
+3. Series: 3-4 por ejercicio
+4. Repeticiones según objetivo:
+   - Fuerza: 4-6 reps, descanso 120-180s
+   - Hipertrofia: 8-12 reps, descanso 60-90s
+   - Resistencia: 15-20 reps, descanso 30-45s
+5. ${isFemale ? 'MÍNIMO 2 días enfocados en pierna/glúteo' : 'Distribución equilibrada'}
+
+Responde SOLO con JSON válido:
 {
-  "name": "Nombre del plan (ej: Plan de Hipertrofia 3 Días)",
-  "description": "Descripción breve del objetivo del plan",
+  "name": "Plan ${isFemale ? 'Glúteos y Piernas' : 'Hipertrofia'} ${daysCount} Días",
+  "description": "Plan de ${daysCount} días enfocado en ${isFemale ? 'desarrollo de glúteos y piernas' : userGoal}",
   "days": [
     {
       "day_of_week": 1,
-      "name": "Día 1 - Pecho y Tríceps",
-      "focus_area": "Pecho",
+      "name": "Día 1 - ${isFemale ? 'Glúteos y Piernas' : 'Pecho y Tríceps'}",
+      "focus_area": "${isFemale ? 'Glúteos' : 'Pecho'}",
       "exercises": [
-        {
-          "name": "Press de Banca",
-          "sets": 4,
-          "reps": "8-10",
-          "rest_seconds": 90,
-          "notes": "Controla la bajada 2-3 segundos"
-        }
+        {"name": "Nombre exacto del ejercicio", "sets": 4, "reps": "10-12", "rest_seconds": 90, "notes": "Técnica o tips"}
       ]
     }
   ]
-}
-
-REGLAS:
-1. Incluye 4-6 ejercicios por día
-2. Alterna grupos musculares en días consecutivos
-3. Incluye ejercicios compuestos primero, aislamiento después
-4. Ajusta series y repeticiones al objetivo (fuerza: 4-6 reps, hipertrofia: 8-12 reps, resistencia: 15-20 reps)
-5. Los días deben numerarse del 1 al ${daysCount}`;
+}`;
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 3000,
-      system: 'Eres un entrenador personal certificado NSCA. Responde ÚNICAMENTE con JSON válido, sin texto adicional. Usa SOLO los ejercicios de la lista proporcionada.',
+      max_tokens: 4000,
+      system: 'Eres un entrenador personal certificado NSCA con especialización en entrenamiento femenino y masculino. Responde ÚNICAMENTE con JSON válido. Genera entrenamientos COMPLETOS de 45 minutos con 6-7 ejercicios por día.',
       messages: [{ role: 'user', content: prompt }]
     });
 
     const jsonResponse = response.content[0].text;
 
-    // Parse the JSON
     let workoutPlan;
     try {
       workoutPlan = JSON.parse(jsonResponse);
@@ -330,16 +381,13 @@ REGLAS:
       }
     }
 
-    // NOW SAVE THE PLAN TO DATABASE
     await client.query('BEGIN');
 
-    // Deactivate other workout plans
     await client.query(
       'UPDATE workout_plans SET is_active = FALSE WHERE user_id = $1',
       [req.user.id]
     );
 
-    // Create the workout plan
     const planResult = await client.query(
       `INSERT INTO workout_plans (user_id, name, description, ai_generated, is_active)
        VALUES ($1, $2, $3, TRUE, TRUE) RETURNING *`,
@@ -347,7 +395,6 @@ REGLAS:
     );
     const savedPlan = planResult.rows[0];
 
-    // Create days and exercises
     for (const day of workoutPlan.days) {
       const dayResult = await client.query(
         `INSERT INTO workout_days (plan_id, day_of_week, name, focus_area)
@@ -356,11 +403,8 @@ REGLAS:
       );
       const dayId = dayResult.rows[0].id;
 
-      // Add exercises
       for (let i = 0; i < day.exercises.length; i++) {
         const exercise = day.exercises[i];
-
-        // Find the exercise ID from our database
         const exerciseData = exerciseMap[exercise.name.toLowerCase()];
 
         if (exerciseData) {
@@ -371,9 +415,9 @@ REGLAS:
             [
               dayId,
               exerciseData.id,
-              exercise.sets || 3,
+              exercise.sets || 4,
               exercise.reps || '10-12',
-              exercise.rest_seconds || 60,
+              exercise.rest_seconds || 90,
               exercise.notes || '',
               i
             ]
@@ -384,7 +428,6 @@ REGLAS:
 
     await client.query('COMMIT');
 
-    // Return the full saved plan with exercises
     const fullPlanResult = await pool.query(
       `SELECT wp.*,
               json_agg(
@@ -417,21 +460,19 @@ REGLAS:
   }
 });
 
-// Generate AND SAVE diet plan with AI
+// Generate AND SAVE diet plan with AI - 5 meals + pre/post workout
 router.post('/generate-diet', authenticateToken, async (req, res) => {
-  const { meals_per_day, dietary_preferences } = req.body;
+  const { dietary_preferences, is_training_day } = req.body;
 
   const client = await pool.connect();
 
   try {
-    // Get user profile
     const profileResult = await pool.query(
       `SELECT * FROM user_profiles WHERE user_id = $1`,
       [req.user.id]
     );
     const profile = profileResult.rows[0] || {};
 
-    // Calculate precise nutrition requirements
     const age = calculateAge(profile.birth_date);
     const weight = profile.current_weight_kg || 70;
     const height = profile.height_cm || 170;
@@ -440,24 +481,43 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const tdee = calculateTDEE(bmr, profile.activity_level);
     const macros = calculateMacros(tdee, profile.fitness_goal, weight);
 
-    const mealsCount = meals_per_day || profile.meals_per_day || 4;
+    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas siguiendo el protocolo de 5 comidas cada 3 horas:
 
-    const prompt = `Genera un plan de dieta diario COMPLETO y PROFESIONAL con las siguientes características:
+DATOS NUTRICIONALES CALCULADOS (Mifflin-St Jeor):
+- TMB: ${Math.round(bmr)} kcal
+- TDEE: ${Math.round(tdee)} kcal
+- Calorías objetivo: ${macros.calories} kcal/día
+- Proteínas: ${macros.protein}g (${Math.round(macros.protein/weight*10)/10}g/kg)
+- Carbohidratos: ${macros.carbs}g
+- Grasas: ${macros.fat}g
 
-REQUERIMIENTOS NUTRICIONALES (calculados científicamente):
-- Calorías diarias: ${macros.calories} kcal
-- Proteínas: ${macros.protein}g (${Math.round(macros.protein * 4)} kcal)
-- Carbohidratos: ${macros.carbs}g (${Math.round(macros.carbs * 4)} kcal)
-- Grasas: ${macros.fat}g (${Math.round(macros.fat * 9)} kcal)
-
-PREFERENCIAS:
-- Comidas por día: ${mealsCount}
+DATOS DEL USUARIO:
+- Peso: ${weight}kg
+- Objetivo: ${profile.fitness_goal || 'mantener'}
 - Restricciones: ${profile.dietary_restrictions?.join(', ') || 'ninguna'}
 - Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos, carne'}
-- Carbohidratos preferidos: ${profile.preferred_carbs?.join(', ') || 'arroz, avena, pan integral, pasta'}
-- Preferencias adicionales: ${dietary_preferences || 'ninguna'}
 
-Responde SOLO con un JSON válido con esta estructura EXACTA:
+PROTOCOLO NUTRICIONAL OBLIGATORIO:
+1. 5 COMIDAS al día (cada ~3 horas):
+   - 07:00 - Desayuno (breakfast)
+   - 10:00 - Media mañana (mid_morning)
+   - 13:00 - Almuerzo (lunch)
+   - 16:00 - Merienda (snack) - PRE-ENTRENO si entrena
+   - 20:00 - Cena (dinner) - POST-ENTRENO si entrena tarde
+
+2. DISTRIBUCIÓN de calorías:
+   - Desayuno: 25% (~${Math.round(macros.calories*0.25)} kcal)
+   - Media mañana: 10% (~${Math.round(macros.calories*0.10)} kcal)
+   - Almuerzo: 30% (~${Math.round(macros.calories*0.30)} kcal)
+   - Merienda: 15% (~${Math.round(macros.calories*0.15)} kcal)
+   - Cena: 20% (~${Math.round(macros.calories*0.20)} kcal)
+
+3. PROTEÍNA distribuida: ${Math.round(macros.protein/5)}g por comida aprox
+
+4. PRE-ENTRENO (merienda): Carbohidratos complejos + proteína ligera
+5. POST-ENTRENO (cena): Proteína alta + carbohidratos para recuperación
+
+Responde SOLO con JSON válido:
 {
   "name": "Plan Nutricional ${macros.calories} kcal",
   "daily_calories": ${macros.calories},
@@ -467,51 +527,63 @@ Responde SOLO con un JSON válido con esta estructura EXACTA:
   "meals": [
     {
       "meal_type": "breakfast",
+      "time": "07:00",
       "name": "Desayuno Energético",
-      "description": "Descripción del plato completo",
-      "calories": 500,
-      "protein_grams": 35,
-      "carbs_grams": 50,
-      "fat_grams": 15,
+      "description": "Descripción completa del plato",
+      "calories": ${Math.round(macros.calories*0.25)},
+      "protein_grams": ${Math.round(macros.protein*0.25)},
+      "carbs_grams": ${Math.round(macros.carbs*0.25)},
+      "fat_grams": ${Math.round(macros.fat*0.25)},
       "ingredients": [
-        {"name": "Avena", "amount": "80g", "calories": 304, "protein": 10.7},
-        {"name": "Claras de huevo", "amount": "200ml (6 claras)", "calories": 104, "protein": 22},
-        {"name": "Plátano", "amount": "1 mediano (120g)", "calories": 107, "protein": 1.3},
-        {"name": "Miel", "amount": "1 cucharada (15g)", "calories": 46, "protein": 0}
+        {"name": "Avena", "amount": "80g", "calories": 304, "protein": 10.7}
       ],
-      "recipe": "1. Cocina la avena con agua o leche desnatada\\n2. Prepara las claras revueltas\\n3. Añade el plátano en rodajas\\n4. Endulza con miel",
+      "recipe": "Pasos de preparación",
       "alternatives": [
         {
-          "name": "Tostadas con Huevo",
-          "description": "2 tostadas integrales con huevos revueltos y aguacate",
-          "calories": 480,
-          "protein_grams": 28,
-          "carbs_grams": 45,
-          "fat_grams": 22
+          "name": "Alternativa",
+          "description": "Descripción",
+          "calories": 400,
+          "protein_grams": 30
         }
       ]
+    },
+    {
+      "meal_type": "mid_morning",
+      "time": "10:00",
+      "name": "Snack Media Mañana",
+      ...
+    },
+    {
+      "meal_type": "lunch",
+      "time": "13:00",
+      ...
+    },
+    {
+      "meal_type": "snack",
+      "time": "16:00",
+      "name": "Pre-Entreno / Merienda",
+      ...
+    },
+    {
+      "meal_type": "dinner",
+      "time": "20:00",
+      "name": "Cena Post-Entreno",
+      ...
     }
   ]
 }
 
-REGLAS IMPORTANTES:
-1. Los meal_type DEBEN ser: breakfast, lunch, snack, dinner (en ese orden)
-2. CADA comida debe tener 1-2 alternativas
-3. Los ingredientes DEBEN incluir cantidades EXACTAS en gramos
-4. Las calorías de cada comida deben sumar aproximadamente ${macros.calories} kcal en total
-5. Las proteínas deben distribuirse equitativamente
-6. Incluye preparaciones realistas y fáciles`;
+IMPORTANTE: Las 5 comidas deben sumar EXACTAMENTE ${macros.calories} kcal y ${macros.protein}g de proteína.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 4000,
-      system: 'Eres un nutricionista deportivo certificado. Responde ÚNICAMENTE con JSON válido, sin texto adicional. Los planes deben ser realistas, balanceados y con cantidades precisas.',
+      system: 'Eres un nutricionista deportivo certificado ISSN especializado en nutrición para rendimiento. Creas planes con 5 comidas cada 3 horas, timing de nutrientes pre/post entreno, y cantidades EXACTAS en gramos. Responde ÚNICAMENTE con JSON válido.',
       messages: [{ role: 'user', content: prompt }]
     });
 
     const jsonResponse = response.content[0].text;
 
-    // Parse the JSON
     let dietPlan;
     try {
       dietPlan = JSON.parse(jsonResponse);
@@ -524,16 +596,13 @@ REGLAS IMPORTANTES:
       }
     }
 
-    // SAVE TO DATABASE
     await client.query('BEGIN');
 
-    // Deactivate other diet plans
     await client.query(
       'UPDATE diet_plans SET is_active = FALSE WHERE user_id = $1',
       [req.user.id]
     );
 
-    // Create the diet plan
     const planResult = await client.query(
       `INSERT INTO diet_plans
        (user_id, name, daily_calories, protein_grams, carbs_grams, fat_grams, ai_generated, is_active)
@@ -549,7 +618,7 @@ REGLAS IMPORTANTES:
     );
     const savedPlan = planResult.rows[0];
 
-    // Save meals for all 7 days (same meals, different days)
+    // Save meals for all 7 days
     for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
       for (const meal of dietPlan.meals) {
         await client.query(
@@ -569,7 +638,8 @@ REGLAS IMPORTANTES:
             meal.fat_grams,
             JSON.stringify({
               main: meal.ingredients,
-              alternatives: meal.alternatives || []
+              alternatives: meal.alternatives || [],
+              time: meal.time
             }),
             meal.recipe,
             getMealImageUrl(meal.meal_type, meal.name)
@@ -580,7 +650,6 @@ REGLAS IMPORTANTES:
 
     await client.query('COMMIT');
 
-    // Return the full saved plan
     const fullPlanResult = await pool.query(
       `SELECT dp.*,
               json_agg(
@@ -600,9 +669,10 @@ REGLAS IMPORTANTES:
                 ) ORDER BY m.day_of_week,
                   CASE m.meal_type
                     WHEN 'breakfast' THEN 1
-                    WHEN 'lunch' THEN 2
-                    WHEN 'snack' THEN 3
-                    WHEN 'dinner' THEN 4
+                    WHEN 'mid_morning' THEN 2
+                    WHEN 'lunch' THEN 3
+                    WHEN 'snack' THEN 4
+                    WHEN 'dinner' THEN 5
                   END
               ) as meals
        FROM diet_plans dp
@@ -633,24 +703,23 @@ REGLAS IMPORTANTES:
   }
 });
 
-// Helper function to get meal image URL based on meal type
+// Helper function for meal images
 const getMealImageUrl = (mealType, mealName) => {
-  // Default food images by type
   const defaultImages = {
     breakfast: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=400',
+    mid_morning: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400',
     lunch: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     snack: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400',
     dinner: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400'
   };
 
-  // Check for specific foods in name
-  const nameLower = mealName.toLowerCase();
+  const nameLower = (mealName || '').toLowerCase();
 
   if (nameLower.includes('avena') || nameLower.includes('oatmeal')) {
     return 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=400';
   }
   if (nameLower.includes('huevo') || nameLower.includes('egg')) {
-    return 'https://images.unsplash.com/photo-1482049016gy-2f7yj7?w=400';
+    return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400';
   }
   if (nameLower.includes('pollo') || nameLower.includes('chicken')) {
     return 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=400';
@@ -664,14 +733,20 @@ const getMealImageUrl = (mealType, mealName) => {
   if (nameLower.includes('arroz') || nameLower.includes('rice')) {
     return 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=400';
   }
-  if (nameLower.includes('proteina') || nameLower.includes('batido') || nameLower.includes('shake')) {
+  if (nameLower.includes('batido') || nameLower.includes('shake') || nameLower.includes('proteina')) {
     return 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400';
   }
   if (nameLower.includes('yogur') || nameLower.includes('yogurt')) {
     return 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400';
   }
-  if (nameLower.includes('tostada') || nameLower.includes('toast')) {
+  if (nameLower.includes('tostada') || nameLower.includes('toast') || nameLower.includes('pan')) {
     return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400';
+  }
+  if (nameLower.includes('fruta') || nameLower.includes('fruit') || nameLower.includes('manzana') || nameLower.includes('platano')) {
+    return 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400';
+  }
+  if (nameLower.includes('pasta')) {
+    return 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=400';
   }
 
   return defaultImages[mealType] || defaultImages.lunch;
@@ -706,9 +781,9 @@ router.get('/nutrition-info', authenticateToken, async (req, res) => {
       tdee: Math.round(tdee),
       ...macros,
       explanation: {
-        bmr: 'Tasa Metabólica Basal - Calorías que quemas en reposo',
-        tdee: 'Gasto Energético Total - Calorías totales diarias según tu actividad',
-        calories: `Calorías objetivo ajustadas a tu meta (${profile.fitness_goal})`
+        bmr: 'Tasa Metabólica Basal - Calorías en reposo total',
+        tdee: 'Gasto Energético Total - Incluye tu actividad diaria',
+        calories: `Calorías ajustadas para ${profile.fitness_goal || 'tu objetivo'}`
       }
     });
   } catch (error) {

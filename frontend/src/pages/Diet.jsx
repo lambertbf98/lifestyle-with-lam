@@ -4,15 +4,17 @@ import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Che
 
 const mealTypeLabels = {
   breakfast: 'Desayuno',
+  mid_morning: 'Media Mañana',
   lunch: 'Almuerzo',
-  snack: 'Snack',
-  dinner: 'Cena'
+  snack: 'Merienda / Pre-Entreno',
+  dinner: 'Cena / Post-Entreno'
 };
 
 const mealTypeIcons = {
   breakfast: '🌅',
+  mid_morning: '🥤',
   lunch: '☀️',
-  snack: '🍎',
+  snack: '💪',
   dinner: '🌙'
 };
 
