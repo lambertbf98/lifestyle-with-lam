@@ -259,6 +259,22 @@ const initDatabase = async () => {
     await client.query('COMMIT');
     console.log('Database tables initialized successfully');
 
+    // Ensure body_measurements table exists (for existing databases)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS body_measurements (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        chest_cm DECIMAL(5,2),
+        waist_cm DECIMAL(5,2),
+        hips_cm DECIMAL(5,2),
+        bicep_cm DECIMAL(5,2),
+        thigh_cm DECIMAL(5,2),
+        calf_cm DECIMAL(5,2),
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        notes TEXT
+      )
+    `);
+
     // Seed exercises if table is empty
     await seedExercises();
   } catch (error) {

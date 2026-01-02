@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -85,6 +85,16 @@ export default function Progress() {
     }
   };
 
+  const deleteMeasurement = async (id) => {
+    if (!window.confirm('¿Eliminar esta medida?')) return;
+    try {
+      await userApi.deleteMeasurement(id);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting measurement:', error);
+    }
+  };
+
   const formatWeightData = () => {
     if (!progressData?.weight?.history) return [];
     return progressData.weight.history.map(entry => ({
@@ -108,8 +118,8 @@ export default function Progress() {
   }
 
   const weightData = formatWeightData();
-  const weightChange = progressData?.weight?.current && progressData?.weight?.target
-    ? (parseFloat(progressData.weight.current) - parseFloat(progressData.weight.target)).toFixed(1)
+  const weightChange = progressData?.weight?.current && progressData?.weight?.initial
+    ? (parseFloat(progressData.weight.current) - parseFloat(progressData.weight.initial)).toFixed(1)
     : null;
 
   return (
@@ -210,22 +220,26 @@ export default function Progress() {
         )}
 
         {/* Weight Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-dark-600">
+        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-dark-600">
           <div className="text-center">
-            <p className="text-2xl font-bold">{progressData?.weight?.current || '--'}</p>
-            <p className="text-xs text-gray-400">Actual (kg)</p>
+            <p className="text-xl font-bold">{progressData?.weight?.initial || '--'}</p>
+            <p className="text-xs text-gray-400">Inicial</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold">{progressData?.weight?.target || '--'}</p>
-            <p className="text-xs text-gray-400">Objetivo (kg)</p>
+            <p className="text-xl font-bold">{progressData?.weight?.current || '--'}</p>
+            <p className="text-xs text-gray-400">Actual</p>
           </div>
           <div className="text-center">
-            <p className={`text-2xl font-bold ${
+            <p className="text-xl font-bold">{progressData?.weight?.target || '--'}</p>
+            <p className="text-xs text-gray-400">Objetivo</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-xl font-bold ${
               weightChange && parseFloat(weightChange) < 0 ? 'text-accent-success' : 'text-accent-warning'
             }`}>
               {weightChange ? `${parseFloat(weightChange) > 0 ? '+' : ''}${weightChange}` : '--'}
             </p>
-            <p className="text-xs text-gray-400">Diferencia</p>
+            <p className="text-xs text-gray-400">vs Inicial</p>
           </div>
         </div>
       </div>
@@ -273,9 +287,17 @@ export default function Progress() {
               })}
             </div>
             {measurementsHistory[0]?.recorded_at && (
-              <p className="text-xs text-gray-500 text-center">
-                Último registro: {format(parseISO(measurementsHistory[0].recorded_at), 'dd MMM yyyy', { locale: es })}
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-xs text-gray-500">
+                  Último registro: {format(parseISO(measurementsHistory[0].recorded_at), 'dd MMM yyyy', { locale: es })}
+                </p>
+                <button
+                  onClick={() => deleteMeasurement(measurementsHistory[0].id)}
+                  className="text-red-400 hover:text-red-300 p-1"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             )}
           </div>
         ) : (

@@ -47,6 +47,7 @@ export const user = {
   addWeight: (data) => api.post('/user/weight', data),
   getMeasurementsHistory: (limit = 30) => api.get(`/user/measurements-history?limit=${limit}`),
   addMeasurements: (data) => api.post('/user/measurements', data),
+  deleteMeasurement: (id) => api.delete(`/user/measurements/${id}`),
   getDashboard: () => api.get('/user/dashboard')
 };
 

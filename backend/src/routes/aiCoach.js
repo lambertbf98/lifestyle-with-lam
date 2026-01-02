@@ -1097,7 +1097,22 @@ router.post('/regenerate-ingredient', authenticateToken, async (req, res) => {
     }
 
     const meal = mealResult.rows[0];
-    const currentIngredients = meal.ingredients?.main || [];
+
+    // Parse ingredients if it's a string
+    let ingredientsObj = meal.ingredients;
+    if (typeof ingredientsObj === 'string') {
+      try {
+        ingredientsObj = JSON.parse(ingredientsObj);
+      } catch (e) {
+        ingredientsObj = { main: [] };
+      }
+    }
+    ingredientsObj = ingredientsObj || { main: [] };
+    const currentIngredients = ingredientsObj.main || [];
+
+    if (currentIngredients.length === 0) {
+      return res.status(400).json({ error: 'No hay ingredientes en esta comida' });
+    }
 
     const prompt = `Necesito reemplazar UN ingrediente de una receta:
 
@@ -1146,14 +1161,20 @@ Responde SOLO con JSON:
       }
     }
 
-    // Update the meal ingredients in database
+    // Update the meal ingredients in database (preserve other properties)
     const updatedIngredients = currentIngredients.map(ing =>
-      ing.name === ingredient_name ? newIngredient : ing
+      ing.name === ingredient_name ? { ...ing, ...newIngredient } : ing
     );
+
+    // Preserve any other properties in ingredientsObj (like extras)
+    const updatedIngredientsObj = {
+      ...ingredientsObj,
+      main: updatedIngredients
+    };
 
     await pool.query(
       `UPDATE meals SET ingredients = $1 WHERE id = $2`,
-      [JSON.stringify({ main: updatedIngredients }), meal_id]
+      [JSON.stringify(updatedIngredientsObj), meal_id]
     );
 
     res.json({

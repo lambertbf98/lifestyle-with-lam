@@ -172,7 +172,7 @@ router.get('/weight-history', authenticateToken, async (req, res) => {
   }
 });
 
-// Add weight entry
+// Add weight entry (limit 1 per day - updates if exists)
 router.post('/weight', authenticateToken, async (req, res) => {
   const { weight_kg, notes } = req.body;
 
@@ -181,11 +181,28 @@ router.post('/weight', authenticateToken, async (req, res) => {
   }
 
   try {
-    // Add to history
-    const result = await pool.query(
-      'INSERT INTO weight_history (user_id, weight_kg, notes) VALUES ($1, $2, $3) RETURNING *',
-      [req.user.id, weight_kg, notes]
+    // Check if already logged today
+    const existing = await pool.query(
+      `SELECT id FROM weight_history
+       WHERE user_id = $1 AND DATE(recorded_at) = CURRENT_DATE`,
+      [req.user.id]
     );
+
+    let result;
+    if (existing.rows.length > 0) {
+      // Update today's entry
+      result = await pool.query(
+        `UPDATE weight_history SET weight_kg = $1, notes = $2
+         WHERE id = $3 RETURNING *`,
+        [weight_kg, notes, existing.rows[0].id]
+      );
+    } else {
+      // Insert new entry
+      result = await pool.query(
+        'INSERT INTO weight_history (user_id, weight_kg, notes) VALUES ($1, $2, $3) RETURNING *',
+        [req.user.id, weight_kg, notes]
+      );
+    }
 
     // Update current weight in profile
     await pool.query(
@@ -194,12 +211,33 @@ router.post('/weight', authenticateToken, async (req, res) => {
     );
 
     res.status(201).json({
-      message: 'Weight logged successfully',
+      message: existing.rows.length > 0 ? 'Weight updated for today' : 'Weight logged successfully',
       entry: result.rows[0]
     });
   } catch (error) {
     console.error('Add weight error:', error);
     res.status(500).json({ error: 'Failed to log weight' });
+  }
+});
+
+// Delete measurement entry
+router.delete('/measurements/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM body_measurements WHERE id = $1 AND user_id = $2 RETURNING id',
+      [id, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Measurement not found' });
+    }
+
+    res.json({ message: 'Measurement deleted successfully' });
+  } catch (error) {
+    console.error('Delete measurement error:', error);
+    res.status(500).json({ error: 'Failed to delete measurement' });
   }
 });
 

@@ -52,13 +52,24 @@ router.get('/', authenticateToken, async (req, res) => {
       [req.user.id]
     );
 
+    // Get initial weight (first ever recorded)
+    const initialWeightResult = await pool.query(
+      `SELECT weight_kg FROM weight_history
+       WHERE user_id = $1
+       ORDER BY recorded_at ASC
+       LIMIT 1`,
+      [req.user.id]
+    );
+
     const profile = profileResult.rows[0] || {};
+    const initialWeight = initialWeightResult.rows[0]?.weight_kg;
 
     res.json({
       weight: {
         history: weightResult.rows,
         current: profile.current_weight_kg,
-        target: profile.target_weight_kg
+        target: profile.target_weight_kg,
+        initial: initialWeight
       },
       workouts: workoutResult.rows,
       calories: {
