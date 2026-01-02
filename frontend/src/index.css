@@ -110,7 +110,7 @@
   /* Exercise card */
   .exercise-card {
     @apply bg-dark-700/50 rounded-xl p-3 flex items-center gap-3 border border-dark-600
-           transition-all duration-200 hover:bg-dark-700 active:scale-98;
+           transition-all duration-200 hover:bg-dark-700 active:scale-95;
   }
 
   /* Meal card */
@@ -137,10 +137,6 @@
 
   .text-glow {
     text-shadow: 0 0 20px currentColor;
-  }
-
-  .active\:scale-98:active {
-    transform: scale(0.98);
   }
 
   /* Gradient backgrounds */
