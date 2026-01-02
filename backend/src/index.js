@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -18,6 +19,11 @@ const { initDatabase } = require('./db/init');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Frontend dist path
+const frontendPath = path.resolve(__dirname, '../../frontend/dist');
+console.log('Frontend path:', frontendPath);
+console.log('Frontend exists:', fs.existsSync(frontendPath));
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -26,10 +32,7 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use(limiter);
 
@@ -48,11 +51,24 @@ app.get('/api/health', (req, res) => {
 
 // Serve static files from frontend build in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  if (fs.existsSync(frontendPath)) {
+    console.log('Serving static files from:', frontendPath);
+    app.use(express.static(frontendPath));
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
-  });
+    app.get('*', (req, res) => {
+      const indexPath = path.join(frontendPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).json({ error: 'Frontend not found', path: indexPath });
+      }
+    });
+  } else {
+    console.error('Frontend dist folder not found at:', frontendPath);
+    app.get('*', (req, res) => {
+      res.status(503).json({ error: 'Frontend not built', expectedPath: frontendPath });
+    });
+  }
 }
 
 // Error handling middleware
