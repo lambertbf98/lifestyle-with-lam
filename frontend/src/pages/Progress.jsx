@@ -120,50 +120,14 @@ export default function Progress() {
   };
 
   const formatWeightData = () => {
-    const initial = progressData?.weight?.initial;
-    const current = progressData?.weight?.current;
     const history = progressData?.weight?.history || [];
 
-    // Convertir historial a formato de gráfica
-    const historyData = history.map(entry => ({
-      date: format(parseISO(entry.recorded_at), 'dd/MM', { locale: es }),
+    // Usar datos reales del historial con fechas reales
+    return history.map(entry => ({
+      date: format(parseISO(entry.recorded_at), 'd MMM', { locale: es }),
       weight: parseFloat(entry.weight_kg),
       fullDate: format(parseISO(entry.recorded_at), 'dd MMM yyyy', { locale: es })
     }));
-
-    // Si hay datos en el historial y más de 1 punto, usar historial normal
-    if (historyData.length > 1) {
-      return historyData;
-    }
-
-    // Si no hay suficientes puntos pero tenemos inicial y actual, crear línea
-    if (initial && current) {
-      const initialWeight = parseFloat(initial);
-      const currentWeight = parseFloat(current);
-
-      // Si son diferentes, mostrar línea de progreso
-      if (initialWeight !== currentWeight) {
-        return [
-          { date: 'Inicio', weight: initialWeight, fullDate: 'Peso inicial' },
-          { date: 'Hoy', weight: currentWeight, fullDate: 'Peso actual' }
-        ];
-      }
-      // Si son iguales, mostrar solo un punto
-      return [{ date: 'Actual', weight: currentWeight, fullDate: 'Peso actual' }];
-    }
-
-    // Si solo hay historial con 1 punto
-    if (historyData.length === 1) {
-      if (initial && parseFloat(initial) !== historyData[0].weight) {
-        return [
-          { date: 'Inicio', weight: parseFloat(initial), fullDate: 'Peso inicial' },
-          ...historyData
-        ];
-      }
-      return historyData;
-    }
-
-    return [];
   };
 
   if (loading) {
@@ -235,7 +199,7 @@ export default function Progress() {
         <div className="h-48">
           {weightData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weightData}>
+              <AreaChart data={weightData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
@@ -248,8 +212,7 @@ export default function Progress() {
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
-                  interval="preserveStartEnd"
-                  tickCount={5}
+                  interval={weightData.length > 10 ? Math.floor(weightData.length / 5) : 0}
                 />
                 <YAxis
                   stroke="#475569"
@@ -276,6 +239,8 @@ export default function Progress() {
                   stroke="#22d3ee"
                   strokeWidth={2}
                   fill="url(#weightGradient)"
+                  dot={{ fill: '#22d3ee', strokeWidth: 0, r: 4 }}
+                  activeDot={{ r: 6, fill: '#22d3ee' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
