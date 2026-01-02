@@ -256,7 +256,7 @@ export default function Diet() {
         <div className="bg-gradient-to-r from-accent-primary/10 to-neon-purple/10 rounded-xl p-3 border border-accent-primary/20">
           <div className="flex items-center gap-2 mb-2">
             <Scale size={16} className="text-accent-primary" />
-            <span className="text-xs text-gray-400">Tu metabolismo (Mifflin-St Jeor)</span>
+            <span className="text-xs text-gray-400">Tu metabolismo</span>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs">
             <div>
@@ -427,14 +427,18 @@ export default function Diet() {
                         </button>
 
                         {logged ? (
-                          <button
-                            onClick={() => unlogMeal(meal.id)}
-                            className="w-10 h-10 bg-accent-success rounded-full flex items-center justify-center hover:bg-red-500 transition-colors group"
-                            title="Quitar comida registrada"
-                          >
-                            <Check size={20} className="text-dark-900 group-hover:hidden" />
-                            <X size={20} className="text-white hidden group-hover:block" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <div className="w-8 h-8 bg-accent-success rounded-full flex items-center justify-center">
+                              <Check size={16} className="text-dark-900" />
+                            </div>
+                            <button
+                              onClick={() => unlogMeal(meal.id)}
+                              className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors"
+                              title="Quitar comida registrada"
+                            >
+                              <X size={16} className="text-red-400 hover:text-white" />
+                            </button>
+                          </div>
                         ) : (
                           <button
                             onClick={() => logMeal(meal)}
