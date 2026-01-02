@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi, progress as progressApi, workouts as workoutsApi } from '../api';
-import { Dumbbell, Flame, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles, CheckCircle } from 'lucide-react';
+import { Dumbbell, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles, CheckCircle } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -110,29 +110,26 @@ export default function Dashboard() {
           <p className="text-2xl font-bold">{dashboard?.workoutsThisWeek || 0}</p>
           <p className="text-sm text-gray-500">esta semana</p>
         </div>
+      </div>
 
-        {/* Monthly Workouts */}
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-accent-warning/20 rounded-lg flex items-center justify-center">
-              <Flame size={18} className="text-accent-warning" />
-            </div>
-            <span className="text-sm text-gray-400">Este Mes</span>
+      {/* Objetivo - Full Width */}
+      <div className="bg-gradient-to-r from-accent-success/10 to-dark-800 rounded-2xl p-4 border border-accent-success/30">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-accent-success/20 rounded-2xl flex items-center justify-center">
+            <Trophy size={28} className="text-accent-success" />
           </div>
-          <p className="text-2xl font-bold">{dashboard?.workoutsThisMonth || 0}</p>
-          <p className="text-sm text-gray-500">entrenos</p>
-        </div>
-
-        {/* Goal Progress */}
-        <div className="stat-card">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-accent-success/20 rounded-lg flex items-center justify-center">
-              <Trophy size={18} className="text-accent-success" />
-            </div>
-            <span className="text-sm text-gray-400">Objetivo</span>
+          <div className="flex-1">
+            <p className="text-sm text-gray-400">Objetivo de peso</p>
+            <p className="font-bold text-2xl text-white">{dashboard?.targetWeight || '--'} kg</p>
           </div>
-          <p className="text-2xl font-bold">{dashboard?.targetWeight || '--'} kg</p>
-          <p className="text-sm text-gray-500">meta de peso</p>
+          {dashboard?.currentWeight && dashboard?.targetWeight && (
+            <div className="text-right">
+              <p className="text-sm text-gray-400">Faltan</p>
+              <p className="font-bold text-xl text-accent-success">
+                {Math.abs(parseFloat(dashboard.currentWeight) - parseFloat(dashboard.targetWeight)).toFixed(1)} kg
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -42,9 +42,10 @@ router.get('/plans/active', authenticateToken, async (req, res) => {
       `SELECT * FROM meals WHERE diet_plan_id = $1 ORDER BY day_of_week,
        CASE meal_type
          WHEN 'breakfast' THEN 1
-         WHEN 'lunch' THEN 2
-         WHEN 'snack' THEN 3
-         WHEN 'dinner' THEN 4
+         WHEN 'mid_morning' THEN 2
+         WHEN 'lunch' THEN 3
+         WHEN 'snack' THEN 4
+         WHEN 'dinner' THEN 5
        END`,
       [plan.id]
     );
@@ -77,9 +78,10 @@ router.get('/today', authenticateToken, async (req, res) => {
       `SELECT * FROM meals WHERE diet_plan_id = $1 AND day_of_week = $2
        ORDER BY CASE meal_type
          WHEN 'breakfast' THEN 1
-         WHEN 'lunch' THEN 2
-         WHEN 'snack' THEN 3
-         WHEN 'dinner' THEN 4
+         WHEN 'mid_morning' THEN 2
+         WHEN 'lunch' THEN 3
+         WHEN 'snack' THEN 4
+         WHEN 'dinner' THEN 5
        END`,
       [planResult.rows[0].id, dayOfWeek]
     );
