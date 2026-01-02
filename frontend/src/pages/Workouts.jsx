@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { workouts as workoutsApi, coach as coachApi } from '../api';
-import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy } from 'lucide-react';
+import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 
 export default function Workouts() {
   const [activePlan, setActivePlan] = useState(null);
@@ -9,6 +9,8 @@ export default function Workouts() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [history, setHistory] = useState([]);
+  const [expandedDay, setExpandedDay] = useState(null);
+  const [regeneratingExercise, setRegeneratingExercise] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -55,6 +57,43 @@ export default function Workouts() {
       await loadData();
     } catch (error) {
       console.error('Error activating plan:', error);
+    }
+  };
+
+  const regenerateExercise = async (exercise, dayIndex) => {
+    setRegeneratingExercise(exercise.id);
+    try {
+      const response = await coachApi.regenerateExercise({
+        workout_exercise_id: exercise.id,
+        current_exercise_name: exercise.exercise?.name_es || exercise.exercise?.name,
+        muscle_group: exercise.exercise?.muscle_group,
+        sets: exercise.sets,
+        reps: exercise.reps
+      });
+
+      if (response.data.success) {
+        // Update local state with new exercise
+        setActivePlan(prev => ({
+          ...prev,
+          days: prev.days.map((day, idx) =>
+            idx === dayIndex
+              ? {
+                  ...day,
+                  exercises: day.exercises.map(ex =>
+                    ex.id === exercise.id
+                      ? { ...ex, exercise: response.data.exercise.exercise }
+                      : ex
+                  )
+                }
+              : day
+          )
+        }));
+      }
+    } catch (error) {
+      console.error('Error regenerating exercise:', error);
+      alert('Error al cambiar el ejercicio. Intenta de nuevo.');
+    } finally {
+      setRegeneratingExercise(null);
     }
   };
 
@@ -134,36 +173,86 @@ export default function Workouts() {
 
           {/* Workout Days */}
           <div className="space-y-3">
-            {activePlan.days?.map((day, index) => {
+            {activePlan.days?.map((day, dayIndex) => {
               const exerciseCount = day.exercises?.length || 0;
-              const hasExercises = exerciseCount > 0;
+              const isExpanded = expandedDay === day.id;
 
               return (
-                <Link
-                  key={day.id}
-                  to={`/workout-session/${day.id}`}
-                  className="exercise-card group"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-accent-primary/30 to-neon-purple/20 rounded-xl flex items-center justify-center">
-                    <span className="text-accent-primary font-bold text-lg">{index + 1}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate">{day.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Dumbbell size={14} />
-                        {exerciseCount} ejercicios
-                      </span>
-                      {day.focus_area && (
-                        <>
-                          <span>•</span>
-                          <span>{day.focus_area}</span>
-                        </>
-                      )}
+                <div key={day.id} className="rounded-xl border border-dark-600 bg-dark-800 overflow-hidden">
+                  {/* Day Header */}
+                  <button
+                    onClick={() => setExpandedDay(isExpanded ? null : day.id)}
+                    className="w-full p-4 flex items-center gap-4"
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-accent-primary/30 to-neon-purple/20 rounded-xl flex items-center justify-center">
+                      <span className="text-accent-primary font-bold text-lg">{dayIndex + 1}</span>
                     </div>
-                  </div>
-                  <ChevronRight size={20} className="text-gray-500 group-hover:text-accent-primary transition-colors" />
-                </Link>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className="font-semibold truncate">{day.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Dumbbell size={14} />
+                          {exerciseCount} ejercicios
+                        </span>
+                        {day.focus_area && (
+                          <>
+                            <span>•</span>
+                            <span>{day.focus_area}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp size={20} className="text-gray-400" />
+                    ) : (
+                      <ChevronDown size={20} className="text-gray-400" />
+                    )}
+                  </button>
+
+                  {/* Exercises List (Expandable) */}
+                  {isExpanded && (
+                    <div className="border-t border-dark-600 p-3 space-y-2 animate-fade-in">
+                      {day.exercises?.map((exercise) => (
+                        <div
+                          key={exercise.id}
+                          className="flex items-center gap-3 p-3 bg-dark-700/50 rounded-xl"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {exercise.exercise?.name_es || exercise.exercise?.name || 'Ejercicio'}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {exercise.sets} series × {exercise.reps} • {exercise.rest_seconds}s descanso
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              regenerateExercise(exercise, dayIndex);
+                            }}
+                            disabled={regeneratingExercise === exercise.id}
+                            className="w-9 h-9 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                            title="Cambiar ejercicio"
+                          >
+                            {regeneratingExercise === exercise.id ? (
+                              <Loader2 size={16} className="animate-spin text-accent-primary" />
+                            ) : (
+                              <RefreshCw size={16} className="text-gray-400" />
+                            )}
+                          </button>
+                        </div>
+                      ))}
+
+                      {/* Start Workout Button */}
+                      <Link
+                        to={`/workout-session/${day.id}`}
+                        className="block w-full py-3 mt-2 bg-gradient-to-r from-accent-primary to-neon-purple rounded-xl text-center font-semibold text-dark-900"
+                      >
+                        Comenzar Entreno
+                      </Link>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

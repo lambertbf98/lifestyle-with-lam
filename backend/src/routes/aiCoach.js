@@ -548,12 +548,12 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const prompt = `Genera un plan de dieta PROFESIONAL para deportistas:
 
 ⚠️ IMPORTANTE - SUPERMERCADO MERCADONA (ESPAÑA):
-Usa ÚNICAMENTE productos que se encuentran en MERCADONA España. Ejemplos:
-- Proteínas: Pechuga Hacendado, Huevos Hacendado, Atún claro Hacendado, Salmón fresco, Ternera picada, Lomo de cerdo
-- Lácteos: Yogur griego Hacendado, Queso fresco batido 0%, Leche entera/desnatada Hacendado
-- Carbohidratos: Arroz SOS, Pasta Hacendado, Pan de molde integral Hacendado, Avena Hacendado, Patatas
-- Verduras: Brócoli, Espinacas baby, Judías verdes, Calabacín, Pimientos, Tomate
-- Grasas: Aceite de oliva virgen extra Hacendado, Aguacate, Frutos secos Hacendado, Mantequilla de cacahuete
+Usa productos disponibles en MERCADONA España. NO pongas la marca "Hacendado" en los nombres, solo el producto:
+- Proteínas: Pechuga de pollo, Huevos, Atún claro, Salmón fresco, Ternera picada, Lomo de cerdo, Pavo
+- Lácteos: Yogur griego, Queso fresco batido 0%, Leche, Requesón
+- Carbohidratos: Arroz, Pasta, Pan integral, Avena, Patatas, Boniato
+- Verduras: Brócoli, Espinacas, Judías verdes, Calabacín, Pimientos, Tomate, Champiñones
+- Grasas: Aceite de oliva virgen extra, Aguacate, Frutos secos, Mantequilla de cacahuete
 
 DATOS NUTRICIONALES CALCULADOS (Mifflin-St Jeor):
 - TMB: ${Math.round(bmr)} kcal
@@ -863,6 +863,50 @@ router.delete('/conversations/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Regenerate a single exercise in workout plan
+router.post('/regenerate-exercise', authenticateToken, async (req, res) => {
+  const { workout_exercise_id, current_exercise_name, muscle_group, sets, reps } = req.body;
+
+  try {
+    // Get available exercises for the same muscle group
+    const exercisesResult = await pool.query(
+      `SELECT id, name, name_es, muscle_group, equipment, gif_url, instructions
+       FROM exercises
+       WHERE muscle_group = $1 AND name_es != $2
+       ORDER BY RANDOM()
+       LIMIT 5`,
+      [muscle_group, current_exercise_name]
+    );
+
+    if (exercisesResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No hay ejercicios alternativos disponibles' });
+    }
+
+    // Pick the first random exercise
+    const newExercise = exercisesResult.rows[0];
+
+    // Update the workout_exercises table
+    await pool.query(
+      `UPDATE workout_exercises SET exercise_id = $1 WHERE id = $2`,
+      [newExercise.id, workout_exercise_id]
+    );
+
+    res.json({
+      success: true,
+      exercise: {
+        id: workout_exercise_id,
+        exercise_id: newExercise.id,
+        exercise: newExercise,
+        sets,
+        reps
+      }
+    });
+  } catch (error) {
+    console.error('Regenerate exercise error:', error);
+    res.status(500).json({ error: 'Failed to regenerate exercise', details: error.message });
+  }
+});
+
 // Regenerate a single meal with same macros
 router.post('/regenerate-meal', authenticateToken, async (req, res) => {
   const { meal_id, calories, protein_grams, meal_type } = req.body;
@@ -880,8 +924,8 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
 - Proteína: ${protein_grams}g
 - Tipo de comida: ${meal_type}
 
-⚠️ MERCADONA (ESPAÑA) - Usa SOLO productos de Mercadona:
-Pechuga Hacendado, Huevos, Atún claro, Salmón, Arroz SOS, Pasta Hacendado, Yogur griego Hacendado, Queso fresco batido 0%, Avena, etc.
+⚠️ MERCADONA (ESPAÑA) - Usa productos de Mercadona. NO pongas marca "Hacendado", solo el nombre del producto:
+Pechuga de pollo, Huevos, Atún claro, Salmón, Arroz, Pasta, Yogur griego, Queso fresco batido 0%, Avena, etc.
 
 🚫 ALIMENTOS PROHIBIDOS (NO incluir):
 ${dislikedFoods || 'Ninguno'}

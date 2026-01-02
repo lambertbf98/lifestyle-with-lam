@@ -59,7 +59,8 @@ export const workouts = {
   createPlan: (data) => api.post('/workouts/plans', data),
   startWorkout: (workoutDayId) => api.post('/workouts/start', { workout_day_id: workoutDayId }),
   completeWorkout: (data) => api.post('/workouts/complete', data),
-  getHistory: (limit = 20, offset = 0) => api.get(`/workouts/history?limit=${limit}&offset=${offset}`)
+  getHistory: (limit = 20, offset = 0) => api.get(`/workouts/history?limit=${limit}&offset=${offset}`),
+  clearHistory: () => api.delete('/workouts/clear-history')
 };
 
 // Diet
@@ -87,6 +88,7 @@ export const coach = {
   generateWorkout: (data) => api.post('/coach/generate-workout', data),
   generateDiet: (data) => api.post('/coach/generate-diet', data),
   regenerateMeal: (data) => api.post('/coach/regenerate-meal', data),
+  regenerateExercise: (data) => api.post('/coach/regenerate-exercise', data),
   getConversations: (context) => api.get('/coach/conversations', { params: { context } }),
   deleteConversation: (id) => api.delete(`/coach/conversations/${id}`),
   getNutritionInfo: () => api.get('/coach/nutrition-info')

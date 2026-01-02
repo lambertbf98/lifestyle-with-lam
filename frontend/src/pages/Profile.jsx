@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi, workouts as workoutsApi } from '../api';
-import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check } from 'lucide-react';
+import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check, Plus } from 'lucide-react';
 
 const activityLabels = {
   sedentary: 'Sedentario',
@@ -35,10 +35,6 @@ const goalOptions = [
   { value: 'maintain', label: 'Mantener', desc: 'Mantenimiento de peso' }
 ];
 
-const commonDislikedFoods = [
-  'Queso cottage', 'Brócoli', 'Espinacas', 'Coliflor', 'Hígado', 'Atún en lata',
-  'Tofu', 'Avena', 'Claras de huevo', 'Requesón', 'Acelgas', 'Coles de Bruselas'
-];
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -46,9 +42,10 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editMode, setEditMode] = useState(null); // 'settings', 'measurements', 'preferences'
+  const [editMode, setEditMode] = useState(null);
   const [workoutHistory, setWorkoutHistory] = useState([]);
   const [formData, setFormData] = useState({});
+  const [newDislikedFood, setNewDislikedFood] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -99,27 +96,27 @@ export default function Profile() {
       return;
     }
     try {
-      // Call API to clear history (we'll add this endpoint)
-      await fetch('/api/workouts/clear-history', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await workoutsApi.clearHistory();
       setWorkoutHistory([]);
       alert('Historial borrado correctamente');
     } catch (error) {
       console.error('Error clearing history:', error);
+      alert('Error al borrar el historial');
     }
   };
 
-  const toggleDislikedFood = (food) => {
+  const addDislikedFood = () => {
+    if (!newDislikedFood.trim()) return;
     const current = formData.disliked_foods || [];
-    if (current.includes(food)) {
-      setFormData({ ...formData, disliked_foods: current.filter(f => f !== food) });
-    } else {
-      setFormData({ ...formData, disliked_foods: [...current, food] });
+    if (!current.includes(newDislikedFood.trim())) {
+      setFormData({ ...formData, disliked_foods: [...current, newDislikedFood.trim()] });
     }
+    setNewDislikedFood('');
+  };
+
+  const removeDislikedFood = (food) => {
+    const current = formData.disliked_foods || [];
+    setFormData({ ...formData, disliked_foods: current.filter(f => f !== food) });
   };
 
   const calculateAge = (birthDate) => {
@@ -471,22 +468,41 @@ export default function Profile() {
 
         {editMode === 'disliked' ? (
           <div>
-            <p className="text-sm text-gray-400 mb-3">Selecciona los alimentos que NO quieres que aparezcan en tu dieta:</p>
-            <div className="flex flex-wrap gap-2">
-              {commonDislikedFoods.map(food => (
-                <button
-                  key={food}
-                  onClick={() => toggleDislikedFood(food)}
-                  className={`px-4 py-2 rounded-full border text-sm transition-all ${
-                    (formData.disliked_foods || []).includes(food)
-                      ? 'bg-accent-danger/20 border-accent-danger text-accent-danger'
-                      : 'bg-dark-700 border-dark-600 text-gray-300'
-                  }`}
-                >
-                  {food}
-                </button>
-              ))}
+            <p className="text-sm text-gray-400 mb-3">Escribe los alimentos que NO quieres en tu dieta:</p>
+
+            {/* Input para añadir */}
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={newDislikedFood}
+                onChange={(e) => setNewDislikedFood(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && addDislikedFood()}
+                placeholder="Ej: Queso cottage, Brócoli..."
+                className="input flex-1"
+              />
+              <button
+                onClick={addDislikedFood}
+                className="px-4 py-2 bg-accent-danger rounded-xl text-white font-medium"
+              >
+                <Plus size={20} />
+              </button>
             </div>
+
+            {/* Lista actual */}
+            {(formData.disliked_foods?.length > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {formData.disliked_foods.map((food, i) => (
+                  <button
+                    key={i}
+                    onClick={() => removeDislikedFood(food)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-accent-danger/20 border border-accent-danger/30 rounded-full text-accent-danger text-sm hover:bg-accent-danger/30"
+                  >
+                    {food}
+                    <X size={14} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div>
@@ -539,23 +555,26 @@ export default function Profile() {
       )}
 
       {/* Historial de entrenos - Borrar */}
-      {workoutHistory.length > 0 && (
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">Historial de Entrenos</h3>
-              <p className="text-sm text-gray-400">{workoutHistory.length} entrenos registrados</p>
-            </div>
-            <button
-              onClick={clearWorkoutHistory}
-              className="flex items-center gap-2 px-4 py-2 bg-accent-danger/10 border border-accent-danger/30 rounded-xl text-accent-danger text-sm hover:bg-accent-danger/20 transition-colors"
-            >
-              <Trash2 size={16} />
-              Borrar
-            </button>
+      <div className="card">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold">Historial de Entrenos</h3>
+            <p className="text-sm text-gray-400">
+              {workoutHistory.length > 0
+                ? `${workoutHistory.length} entrenos registrados`
+                : 'Sin entrenos registrados'}
+            </p>
           </div>
+          <button
+            onClick={clearWorkoutHistory}
+            disabled={workoutHistory.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-accent-danger/10 border border-accent-danger/30 rounded-xl text-accent-danger text-sm hover:bg-accent-danger/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 size={16} />
+            Borrar Todo
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Logout */}
       <button

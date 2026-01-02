@@ -181,17 +181,19 @@ export default function Dashboard() {
       {/* Quick Action */}
       <Link
         to="/progress"
-        className="card bg-gradient-to-br from-neon-purple/10 to-dark-800 border-neon-purple/20 hover:border-neon-purple/40 transition-all"
+        className="block bg-gradient-to-br from-neon-purple/10 to-dark-800 rounded-2xl p-4 border border-neon-purple/30 hover:border-neon-purple/50 transition-all shadow-lg"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-neon-purple/20 rounded-xl flex items-center justify-center">
-            <TrendingUp size={24} className="text-neon-purple" />
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-neon-purple/20 rounded-2xl flex items-center justify-center">
+            <TrendingUp size={28} className="text-neon-purple" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-lg">Ver Progreso</p>
+            <p className="font-bold text-xl text-white">Ver Progreso</p>
             <p className="text-sm text-gray-400">Gráficas, estadísticas y logros</p>
           </div>
-          <ChevronRight size={20} className="text-gray-400" />
+          <div className="w-10 h-10 bg-neon-purple/20 rounded-full flex items-center justify-center">
+            <ChevronRight size={22} className="text-neon-purple" />
+          </div>
         </div>
       </Link>
     </div>
