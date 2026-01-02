@@ -136,30 +136,51 @@ export default function Dashboard() {
         </div>
 
         {activePlan && activePlan.days?.length > 0 ? (
-          <div className="space-y-3">
-            {activePlan.days.slice(0, 2).map((day) => (
-              <Link
-                key={day.id}
-                to={`/workout-session/${day.id}`}
-                className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{day.name}</h3>
-                    <p className="text-sm text-gray-400">
-                      {day.exercises?.length || 0} ejercicios
-                    </p>
+          (() => {
+            // Get today's day of week (1-7, where 1 = Monday)
+            const today = new Date().getDay();
+            const todayAdjusted = today === 0 ? 7 : today; // Convert Sunday from 0 to 7
+
+            // Find today's workout
+            const todayWorkout = activePlan.days.find(day => day.day_of_week === todayAdjusted);
+
+            if (todayWorkout) {
+              return (
+                <Link
+                  to={`/workout-session/${todayWorkout.id}`}
+                  className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{todayWorkout.name}</h3>
+                      <p className="text-sm text-gray-400">
+                        {todayWorkout.exercises?.length || 0} ejercicios
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
+                      <Dumbbell size={20} className="text-accent-primary" />
+                    </div>
                   </div>
-                  <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
-                    <Dumbbell size={20} className="text-accent-primary" />
+                </Link>
+              );
+            } else {
+              // Rest day
+              return (
+                <div className="bg-dark-700/50 rounded-xl p-6 border border-dark-600 text-center">
+                  <div className="w-16 h-16 bg-neon-purple/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl">😴</span>
                   </div>
+                  <h3 className="font-semibold text-lg mb-1">Día de Descanso</h3>
+                  <p className="text-sm text-gray-400">
+                    Hoy toca recuperar. Descansa bien para rendir mejor mañana.
+                  </p>
                 </div>
-              </Link>
-            ))}
-          </div>
+              );
+            }
+          })()
         ) : (
           <Link
-            to="/coach"
+            to="/workouts"
             className="block bg-gradient-to-r from-accent-primary/10 to-neon-purple/10 rounded-xl p-4 border border-accent-primary/20 hover:border-accent-primary/40 transition-all"
           >
             <div className="flex items-center gap-4">

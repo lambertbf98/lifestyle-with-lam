@@ -89,6 +89,7 @@ export const coach = {
   generateDiet: (data) => api.post('/coach/generate-diet', data),
   regenerateMeal: (data) => api.post('/coach/regenerate-meal', data),
   regenerateExercise: (data) => api.post('/coach/regenerate-exercise', data),
+  regenerateIngredient: (data) => api.post('/coach/regenerate-ingredient', data),
   getConversations: (context) => api.get('/coach/conversations', { params: { context } }),
   deleteConversation: (id) => api.delete(`/coach/conversations/${id}`),
   getNutritionInfo: () => api.get('/coach/nutrition-info')

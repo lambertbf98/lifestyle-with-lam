@@ -24,6 +24,7 @@ export default function Diet() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [regeneratingMeal, setRegeneratingMeal] = useState(null);
+  const [regeneratingIngredient, setRegeneratingIngredient] = useState(null);
   const [expandedMeal, setExpandedMeal] = useState(null);
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
   const [nutritionInfo, setNutritionInfo] = useState(null);
@@ -119,6 +120,44 @@ export default function Diet() {
       alert('Error al regenerar la comida. Intenta de nuevo.');
     } finally {
       setRegeneratingMeal(null);
+    }
+  };
+
+  const regenerateIngredient = async (mealId, ingredient) => {
+    const key = `${mealId}-${ingredient.name}`;
+    setRegeneratingIngredient(key);
+    try {
+      const response = await coachApi.regenerateIngredient({
+        meal_id: mealId,
+        ingredient_name: ingredient.name,
+        ingredient_calories: ingredient.calories,
+        ingredient_protein: ingredient.protein
+      });
+
+      if (response.data.success) {
+        // Update the local state with the new ingredient
+        setTodayData(prev => ({
+          ...prev,
+          meals: prev.meals.map(m => {
+            if (m.id === mealId) {
+              const currentIngredients = m.ingredients?.main || [];
+              const updatedIngredients = currentIngredients.map(ing =>
+                ing.name === ingredient.name ? response.data.new_ingredient : ing
+              );
+              return {
+                ...m,
+                ingredients: { ...m.ingredients, main: updatedIngredients }
+              };
+            }
+            return m;
+          })
+        }));
+      }
+    } catch (error) {
+      console.error('Error regenerating ingredient:', error);
+      alert('Error al cambiar el ingrediente. Intenta de nuevo.');
+    } finally {
+      setRegeneratingIngredient(null);
     }
   };
 
@@ -418,12 +457,27 @@ export default function Diet() {
                           <div>
                             <h4 className="text-sm font-semibold text-gray-300 mb-2">Ingredientes:</h4>
                             <div className="bg-dark-700/50 rounded-xl p-3 space-y-2">
-                              {ingredients.main.map((ing, i) => (
-                                <div key={i} className="flex items-center justify-between text-sm">
-                                  <span className="text-white">{ing.name}</span>
-                                  <span className="text-accent-primary font-medium">{ing.amount}</span>
-                                </div>
-                              ))}
+                              {ingredients.main.map((ing, i) => {
+                                const isRegenerating = regeneratingIngredient === `${meal.id}-${ing.name}`;
+                                return (
+                                  <div key={i} className="flex items-center justify-between text-sm">
+                                    <span className="text-white flex-1">{ing.name}</span>
+                                    <span className="text-accent-primary font-medium mr-2">{ing.amount}</span>
+                                    <button
+                                      onClick={() => regenerateIngredient(meal.id, ing)}
+                                      disabled={isRegenerating}
+                                      className="w-7 h-7 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                                      title="Cambiar ingrediente"
+                                    >
+                                      {isRegenerating ? (
+                                        <Loader2 size={14} className="animate-spin text-accent-primary" />
+                                      ) : (
+                                        <RefreshCw size={14} className="text-gray-400" />
+                                      )}
+                                    </button>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         )}

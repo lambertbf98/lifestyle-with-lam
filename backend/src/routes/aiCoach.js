@@ -48,6 +48,39 @@ const calculateTDEE = (bmr, activityLevel) => {
   return bmr * (multipliers[activityLevel] || 1.55);
 };
 
+// Expand food categories to individual items
+const expandFoodCategories = (dislikedFoods) => {
+  const categoryMap = {
+    'verduras': ['espinacas', 'brócoli', 'brócoli', 'calabacín', 'judías verdes', 'acelgas', 'col', 'repollo', 'coliflor', 'berenjenas', 'pimientos', 'tomate', 'lechuga', 'espárragos', 'alcachofas', 'champiñones', 'setas'],
+    'pescado': ['salmón', 'atún', 'merluza', 'bacalao', 'lubina', 'dorada', 'sardinas', 'anchoas', 'trucha', 'caballa', 'boquerones'],
+    'mariscos': ['gambas', 'langostinos', 'mejillones', 'almejas', 'calamares', 'pulpo', 'sepia'],
+    'lácteos': ['leche', 'queso', 'yogur', 'yogur griego', 'queso cottage', 'requesón', 'nata', 'mantequilla'],
+    'frutos secos': ['nueces', 'almendras', 'cacahuetes', 'avellanas', 'pistachos', 'anacardos'],
+    'legumbres': ['lentejas', 'garbanzos', 'alubias', 'judías', 'habas', 'guisantes'],
+    'cerdo': ['lomo de cerdo', 'chuletas de cerdo', 'bacon', 'jamón', 'chorizo', 'salchichón'],
+    'ternera': ['ternera', 'carne picada de ternera', 'filete de ternera', 'entrecot'],
+    'pollo': ['pechuga de pollo', 'muslos de pollo', 'pollo entero'],
+    'huevos': ['huevos', 'huevos revueltos', 'tortilla', 'huevo cocido', 'claras de huevo'],
+    'avena': ['avena', 'copos de avena', 'porridge', 'overnight oats']
+  };
+
+  const expanded = new Set();
+
+  for (const food of (dislikedFoods || [])) {
+    const lower = food.toLowerCase().trim();
+    expanded.add(lower);
+
+    // Check if it's a category
+    for (const [category, items] of Object.entries(categoryMap)) {
+      if (lower.includes(category) || category.includes(lower)) {
+        items.forEach(item => expanded.add(item));
+      }
+    }
+  }
+
+  return Array.from(expanded);
+};
+
 // Calculate macros based on goal
 const calculateMacros = (tdee, goal, weight) => {
   let calories = tdee;
@@ -525,7 +558,9 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const macros = calculateMacros(tdee, profile.fitness_goal, weight);
 
     const mealsPerDay = profile.meals_per_day || 5;
-    const dislikedFoods = profile.disliked_foods?.join(', ') || '';
+    // Expand categories like "verduras" to include all vegetables
+    const expandedDisliked = expandFoodCategories(profile.disliked_foods);
+    const dislikedFoods = expandedDisliked.join(', ') || '';
 
     // Define meal structure based on number of meals
     let mealStructure = '';
@@ -917,7 +952,9 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
       [req.user.id]
     );
     const profile = profileResult.rows[0] || {};
-    const dislikedFoods = profile.disliked_foods?.join(', ') || '';
+    // Expand categories like "verduras" to include all vegetables
+    const expandedDisliked = expandFoodCategories(profile.disliked_foods);
+    const dislikedFoods = expandedDisliked.join(', ') || '';
 
     const prompt = `Genera UNA comida alternativa con estos macros EXACTOS:
 - Calorías: ${calories} kcal
@@ -1006,6 +1043,101 @@ Responde SOLO con JSON:
   } catch (error) {
     console.error('Regenerate meal error:', error);
     res.status(500).json({ error: 'Failed to regenerate meal', details: error.message });
+  }
+});
+
+// Regenerate a single ingredient in a meal
+router.post('/regenerate-ingredient', authenticateToken, async (req, res) => {
+  const { meal_id, ingredient_name, ingredient_calories, ingredient_protein } = req.body;
+
+  try {
+    const profileResult = await pool.query(
+      `SELECT * FROM user_profiles WHERE user_id = $1`,
+      [req.user.id]
+    );
+    const profile = profileResult.rows[0] || {};
+    const expandedDisliked = expandFoodCategories(profile.disliked_foods);
+    const dislikedFoods = expandedDisliked.join(', ') || '';
+
+    // Get current meal to access ingredients
+    const mealResult = await pool.query(
+      `SELECT * FROM meals WHERE id = $1`,
+      [meal_id]
+    );
+
+    if (mealResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Comida no encontrada' });
+    }
+
+    const meal = mealResult.rows[0];
+    const currentIngredients = meal.ingredients?.main || [];
+
+    const prompt = `Necesito reemplazar UN ingrediente de una receta:
+
+INGREDIENTE A REEMPLAZAR: ${ingredient_name}
+- Calorías aprox: ${ingredient_calories || 'desconocidas'}
+- Proteína aprox: ${ingredient_protein || 'desconocida'}g
+
+OTROS INGREDIENTES DE LA RECETA (no cambiar):
+${currentIngredients.filter(i => i.name !== ingredient_name).map(i => `- ${i.name}: ${i.amount}`).join('\n')}
+
+⚠️ MERCADONA ESPAÑA - Usa productos de Mercadona. NO usar marca "Hacendado".
+
+🚫 ALIMENTOS PROHIBIDOS (NO usar):
+${dislikedFoods || 'Ninguno'}
+${ingredient_name} (el ingrediente a reemplazar)
+
+Preferencias del usuario:
+- Proteínas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
+- Carbohidratos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+
+Responde SOLO con JSON:
+{
+  "name": "Nombre del nuevo ingrediente",
+  "amount": "cantidad (ej: 100g, 2 unidades)",
+  "calories": ${ingredient_calories || 100},
+  "protein": ${ingredient_protein || 10}
+}`;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 500,
+      system: 'Eres un nutricionista deportivo. Sugiere ingredientes alternativos de MERCADONA España con macros similares. Responde SOLO con JSON válido.',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const jsonResponse = response.content[0].text;
+    let newIngredient;
+    try {
+      newIngredient = JSON.parse(jsonResponse);
+    } catch (parseError) {
+      const jsonMatch = jsonResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        newIngredient = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('Invalid JSON response');
+      }
+    }
+
+    // Update the meal ingredients in database
+    const updatedIngredients = currentIngredients.map(ing =>
+      ing.name === ingredient_name ? newIngredient : ing
+    );
+
+    await pool.query(
+      `UPDATE meals SET ingredients = $1 WHERE id = $2`,
+      [JSON.stringify({ main: updatedIngredients }), meal_id]
+    );
+
+    res.json({
+      success: true,
+      old_ingredient: ingredient_name,
+      new_ingredient: newIngredient,
+      updated_ingredients: updatedIngredients
+    });
+  } catch (error) {
+    console.error('Regenerate ingredient error:', error);
+    res.status(500).json({ error: 'Failed to regenerate ingredient', details: error.message });
   }
 });
 

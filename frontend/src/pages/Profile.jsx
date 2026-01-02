@@ -22,16 +22,16 @@ const activityOptions = [
 
 const goalLabels = {
   lose_weight: 'Perder Peso',
-  lose_weight_aggressive: 'Pérdida Agresiva (-500kcal)',
+  lose_weight_aggressive: 'Pérdida Agresiva',
   gain_muscle: 'Ganar Músculo',
   maintain: 'Mantener',
   improve_health: 'Mejorar Salud'
 };
 
 const goalOptions = [
-  { value: 'lose_weight', label: 'Perder Peso', desc: 'Déficit moderado (-300kcal)' },
-  { value: 'lose_weight_aggressive', label: 'Pérdida Agresiva', desc: 'Déficit fuerte (-500kcal) - Sprint' },
-  { value: 'gain_muscle', label: 'Ganar Músculo', desc: 'Superávit calórico (+300kcal)' },
+  { value: 'lose_weight', label: 'Perder Peso', desc: 'Déficit moderado' },
+  { value: 'lose_weight_aggressive', label: 'Pérdida Agresiva', desc: 'Máxima quema de grasa' },
+  { value: 'gain_muscle', label: 'Ganar Músculo', desc: 'Superávit calórico' },
   { value: 'maintain', label: 'Mantener', desc: 'Mantenimiento de peso' }
 ];
 

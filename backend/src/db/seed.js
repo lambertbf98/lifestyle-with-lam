@@ -400,6 +400,244 @@ const exercises = [
     difficulty: 'Intermedio',
     instructions: 'En posición de plancha alta, alterna llevando las rodillas al pecho rápidamente.',
     gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Mountain-Climber.gif'
+  },
+
+  // EJERCICIOS ADICIONALES - Variaciones comunes
+
+  // Variaciones de Sentadilla
+  {
+    name: 'Sentadilla',
+    name_es: 'Sentadilla',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos', 'Isquiotibiales'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Pies al ancho de hombros, baja flexionando rodillas manteniendo espalda recta.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif'
+  },
+  {
+    name: 'Sentadilla Goblet',
+    name_es: 'Sentadilla Goblet',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos', 'Core'],
+    equipment: 'Mancuerna',
+    difficulty: 'Principiante',
+    instructions: 'Sostén una mancuerna contra el pecho y realiza una sentadilla profunda.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Goblet-Squat.gif'
+  },
+  {
+    name: 'Sentadilla Sumo',
+    name_es: 'Sentadilla Sumo',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos', 'Aductores'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Piernas muy separadas, puntas hacia afuera, baja manteniendo rodillas alineadas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Sumo-Squat.gif'
+  },
+  {
+    name: 'Sentadilla Hack',
+    name_es: 'Sentadilla Hack',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Máquina',
+    difficulty: 'Intermedio',
+    instructions: 'En máquina hack, baja controladamente y empuja con los talones.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hack-Squat.gif'
+  },
+
+  // Variaciones de Prensa
+  {
+    name: 'Prensa',
+    name_es: 'Prensa',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos', 'Isquiotibiales'],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Pies al ancho de hombros en la plataforma, baja y empuja.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif'
+  },
+  {
+    name: 'Prensa Inclinada',
+    name_es: 'Prensa Inclinada',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'En prensa a 45°, empuja la plataforma controlando el descenso.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif'
+  },
+
+  // Más ejercicios de Glúteos
+  {
+    name: 'Puente de Glúteos',
+    name_es: 'Puente de Glúteos',
+    muscle_group: 'Glúteos',
+    secondary_muscles: ['Isquiotibiales'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Acostado, pies apoyados, eleva las caderas apretando glúteos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Glute-Bridge.gif'
+  },
+  {
+    name: 'Peso Muerto Sumo',
+    name_es: 'Peso Muerto Sumo',
+    muscle_group: 'Glúteos',
+    secondary_muscles: ['Isquiotibiales', 'Espalda'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Piernas muy separadas, agarre estrecho, levanta manteniendo espalda recta.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Sumo-Deadlift.gif'
+  },
+  {
+    name: 'Abducción de Cadera',
+    name_es: 'Abducción de Cadera',
+    muscle_group: 'Glúteos',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Sentado en la máquina, separa las piernas contra la resistencia.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hip-Abduction-Machine.gif'
+  },
+  {
+    name: 'Aducción de Cadera',
+    name_es: 'Aducción de Cadera',
+    muscle_group: 'Aductores',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Sentado en la máquina, junta las piernas contra la resistencia.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hip-Adduction-Machine.gif'
+  },
+
+  // Más ejercicios de Espalda
+  {
+    name: 'Remo en Máquina',
+    name_es: 'Remo en Máquina',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps'],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Siéntate en la máquina, tira de las asas hacia el abdomen.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Row-Machine.gif'
+  },
+  {
+    name: 'Remo en Polea Baja',
+    name_es: 'Remo en Polea Baja',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps'],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'Sentado, tira del agarre hacia el abdomen manteniendo espalda recta.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Cable-Row.gif'
+  },
+  {
+    name: 'Pull Over',
+    name_es: 'Pull Over',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Pecho', 'Tríceps'],
+    equipment: 'Mancuerna',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, baja la mancuerna detrás de la cabeza y sube.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Pullover.gif'
+  },
+
+  // Más ejercicios de Pecho
+  {
+    name: 'Press de Pecho en Máquina',
+    name_es: 'Press de Pecho en Máquina',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps', 'Hombros'],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Sentado en la máquina, empuja las asas hacia adelante.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Chest-Press-Machine.gif'
+  },
+  {
+    name: 'Cruces en Polea',
+    name_es: 'Cruces en Polea',
+    muscle_group: 'Pecho',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'De pie entre las poleas, junta las manos frente al pecho.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Crossover.gif'
+  },
+
+  // Más ejercicios de Hombros
+  {
+    name: 'Press con Mancuernas',
+    name_es: 'Press con Mancuernas',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Tríceps'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Sentado o de pie, presiona las mancuernas sobre la cabeza.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif'
+  },
+  {
+    name: 'Press Arnold',
+    name_es: 'Press Arnold',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Tríceps'],
+    equipment: 'Mancuernas',
+    difficulty: 'Avanzado',
+    instructions: 'Inicia con mancuernas frente a ti, gira mientras presionas hacia arriba.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Arnold-Press.gif'
+  },
+  {
+    name: 'Face Pull',
+    name_es: 'Face Pull',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Espalda'],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'Tira de la cuerda hacia la cara separando las manos al final.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif'
+  },
+  {
+    name: 'Encogimientos de Hombros',
+    name_es: 'Encogimientos de Hombros',
+    muscle_group: 'Trapecios',
+    secondary_muscles: [],
+    equipment: 'Mancuernas',
+    difficulty: 'Principiante',
+    instructions: 'De pie con mancuernas, eleva los hombros hacia las orejas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shrug.gif'
+  },
+
+  // Curl de pierna sentado
+  {
+    name: 'Curl de Pierna Sentado',
+    name_es: 'Curl de Pierna Sentado',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Sentado en la máquina, flexiona las rodillas llevando talones hacia atrás.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Leg-Curl.gif'
+  },
+
+  // Más abdominales
+  {
+    name: 'Crunch en Polea',
+    name_es: 'Crunch en Polea',
+    muscle_group: 'Abdominales',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'De rodillas, flexiona el torso hacia abajo contra la resistencia.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Crunch.gif'
+  },
+  {
+    name: 'Plancha Lateral',
+    name_es: 'Plancha Lateral',
+    muscle_group: 'Oblicuos',
+    secondary_muscles: ['Core'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Intermedio',
+    instructions: 'Apoyado en un antebrazo, mantén el cuerpo recto de lado.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Side-Plank.gif'
   }
 ];
 
@@ -412,7 +650,9 @@ const seedExercises = async () => {
     const count = parseInt(existingCount.rows[0].count);
 
     if (count > 0) {
-      console.log(`Exercises table already has ${count} exercises, skipping seed`);
+      console.log(`Exercises table already has ${count} exercises, updating GIFs...`);
+      // Update existing exercises with GIFs
+      await updateExerciseGifs(client);
       return;
     }
 
@@ -444,6 +684,22 @@ const seedExercises = async () => {
     throw error;
   } finally {
     client.release();
+  }
+};
+
+// Update existing exercises with GIF URLs
+const updateExerciseGifs = async (client) => {
+  try {
+    for (const exercise of exercises) {
+      // Update by name_es (Spanish name)
+      await client.query(
+        `UPDATE exercises SET gif_url = $1 WHERE name_es = $2 OR name = $3`,
+        [exercise.gif_url, exercise.name_es, exercise.name]
+      );
+    }
+    console.log('Exercise GIFs updated successfully');
+  } catch (error) {
+    console.error('Error updating exercise GIFs:', error);
   }
 };
 
