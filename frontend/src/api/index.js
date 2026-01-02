@@ -85,7 +85,8 @@ export const coach = {
   generateWorkout: (data) => api.post('/coach/generate-workout', data),
   generateDiet: (data) => api.post('/coach/generate-diet', data),
   getConversations: (context) => api.get('/coach/conversations', { params: { context } }),
-  deleteConversation: (id) => api.delete(`/coach/conversations/${id}`)
+  deleteConversation: (id) => api.delete(`/coach/conversations/${id}`),
+  getNutritionInfo: () => api.get('/coach/nutrition-info')
 };
 
 export default api;

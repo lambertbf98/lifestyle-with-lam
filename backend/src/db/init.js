@@ -1,4 +1,5 @@
 const pool = require('./pool');
+const { seedExercises } = require('./seed');
 
 const initDatabase = async () => {
   const client = await pool.connect();
@@ -221,6 +222,9 @@ const initDatabase = async () => {
 
     await client.query('COMMIT');
     console.log('Database tables initialized successfully');
+
+    // Seed exercises if table is empty
+    await seedExercises();
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;

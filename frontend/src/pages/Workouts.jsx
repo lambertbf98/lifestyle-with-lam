@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { workouts as workoutsApi, coach as coachApi } from '../api';
-import { Dumbbell, Plus, ChevronRight, Sparkles, Clock, Target, Loader2 } from 'lucide-react';
+import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy } from 'lucide-react';
 
 export default function Workouts() {
   const [activePlan, setActivePlan] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -15,12 +16,14 @@ export default function Workouts() {
 
   const loadData = async () => {
     try {
-      const [activeRes, plansRes] = await Promise.all([
+      const [activeRes, plansRes, historyRes] = await Promise.all([
         workoutsApi.getActivePlan(),
-        workoutsApi.getPlans()
+        workoutsApi.getPlans(),
+        workoutsApi.getHistory()
       ]);
       setActivePlan(activeRes.data);
       setPlans(plansRes.data);
+      setHistory(historyRes.data || []);
     } catch (error) {
       console.error('Error loading workouts:', error);
     } finally {
@@ -31,34 +34,46 @@ export default function Workouts() {
   const generatePlan = async () => {
     setGenerating(true);
     try {
+      // El endpoint generate-workout ahora guarda el plan directamente
       const response = await coachApi.generateWorkout({});
-      const aiPlan = response.data.plan;
 
-      // Create the plan in database
-      await workoutsApi.createPlan({
-        name: aiPlan.name,
-        description: aiPlan.description,
-        days: aiPlan.days.map(day => ({
-          day_of_week: day.day_of_week,
-          name: day.name,
-          focus_area: day.focus_area,
-          exercises: day.exercises.map(ex => ({
-            exercise_id: null, // Will need to match with database
-            sets: ex.sets,
-            reps: ex.reps,
-            rest_seconds: ex.rest_seconds,
-            notes: ex.notes,
-            name: ex.name
-          }))
-        }))
-      });
-
-      await loadData();
+      if (response.data.success) {
+        // Recargar datos para mostrar el nuevo plan
+        await loadData();
+      }
     } catch (error) {
       console.error('Error generating plan:', error);
+      alert('Error al generar el plan. Por favor intenta de nuevo.');
     } finally {
       setGenerating(false);
     }
+  };
+
+  const activatePlan = async (planId) => {
+    try {
+      // TODO: Implementar endpoint para activar plan
+      await loadData();
+    } catch (error) {
+      console.error('Error activating plan:', error);
+    }
+  };
+
+  // Calculate weekly stats
+  const weekStats = {
+    totalHours: history
+      .filter(h => {
+        const date = new Date(h.completed_at);
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return date >= weekAgo;
+      })
+      .reduce((acc, h) => acc + (h.duration_minutes || 0), 0) / 60,
+    completedWorkouts: history.filter(h => {
+      const date = new Date(h.completed_at);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return date >= weekAgo;
+    }).length
   };
 
   if (loading) {
@@ -72,7 +87,7 @@ export default function Workouts() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 safe-bottom">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Entrenamientos</h1>
@@ -86,7 +101,7 @@ export default function Workouts() {
           ) : (
             <Sparkles size={18} />
           )}
-          Generar con IA
+          {generating ? 'Generando...' : 'Generar con IA'}
         </button>
       </div>
 
@@ -95,7 +110,16 @@ export default function Workouts() {
         <div className="card-glow">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-sm text-accent-primary font-medium">Plan Activo</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs bg-accent-primary/20 text-accent-primary px-2 py-1 rounded-full font-medium">
+                  Plan Activo
+                </span>
+                {activePlan.ai_generated && (
+                  <span className="text-xs bg-neon-purple/20 text-neon-purple px-2 py-1 rounded-full">
+                    IA
+                  </span>
+                )}
+              </div>
               <h2 className="text-xl font-bold">{activePlan.name}</h2>
             </div>
             <div className="text-right">
@@ -110,34 +134,48 @@ export default function Workouts() {
 
           {/* Workout Days */}
           <div className="space-y-3">
-            {activePlan.days?.map((day, index) => (
-              <Link
-                key={day.id}
-                to={`/workout-session/${day.id}`}
-                className="exercise-card"
-              >
-                <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center text-accent-primary font-bold">
-                  {index + 1}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">{day.name}</h3>
-                  <p className="text-sm text-gray-400">
-                    {day.exercises?.length || 0} ejercicios • {day.focus_area || 'General'}
-                  </p>
-                </div>
-                <ChevronRight size={20} className="text-gray-500" />
-              </Link>
-            ))}
+            {activePlan.days?.map((day, index) => {
+              const exerciseCount = day.exercises?.length || 0;
+              const hasExercises = exerciseCount > 0;
+
+              return (
+                <Link
+                  key={day.id}
+                  to={`/workout-session/${day.id}`}
+                  className="exercise-card group"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-accent-primary/30 to-neon-purple/20 rounded-xl flex items-center justify-center">
+                    <span className="text-accent-primary font-bold text-lg">{index + 1}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold truncate">{day.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Dumbbell size={14} />
+                        {exerciseCount} ejercicios
+                      </span>
+                      {day.focus_area && (
+                        <>
+                          <span>•</span>
+                          <span>{day.focus_area}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight size={20} className="text-gray-500 group-hover:text-accent-primary transition-colors" />
+                </Link>
+              );
+            })}
           </div>
         </div>
       ) : (
-        <div className="card text-center py-8">
-          <div className="w-16 h-16 bg-dark-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Dumbbell size={32} className="text-gray-500" />
+        <div className="card text-center py-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-dark-700 to-dark-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Dumbbell size={40} className="text-gray-500" />
           </div>
-          <h3 className="font-semibold mb-2">Sin plan activo</h3>
-          <p className="text-sm text-gray-400 mb-4">
-            Genera un plan personalizado con IA o crea uno manualmente
+          <h3 className="text-lg font-semibold mb-2">Sin plan activo</h3>
+          <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
+            Genera un plan de entrenamiento personalizado basado en tus objetivos y nivel de experiencia
           </p>
           <button
             onClick={generatePlan}
@@ -145,34 +183,17 @@ export default function Workouts() {
             className="btn-primary inline-flex items-center gap-2 disabled:opacity-50"
           >
             {generating ? (
-              <Loader2 size={18} className="animate-spin" />
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Generando plan...
+              </>
             ) : (
-              <Sparkles size={18} />
+              <>
+                <Sparkles size={18} />
+                Generar Plan con IA
+              </>
             )}
-            Generar Plan con IA
           </button>
-        </div>
-      )}
-
-      {/* Previous Plans */}
-      {plans.length > 1 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-3">Planes Anteriores</h2>
-          <div className="space-y-3">
-            {plans.filter(p => !p.is_active).map(plan => (
-              <div key={plan.id} className="card flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">{plan.name}</h3>
-                  <p className="text-sm text-gray-400">
-                    {plan.days_count} días • Semana {plan.week_number}
-                  </p>
-                </div>
-                <button className="text-accent-primary text-sm">
-                  Activar
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
@@ -183,16 +204,48 @@ export default function Workouts() {
             <Clock size={18} className="text-accent-primary" />
             <span className="text-sm text-gray-400">Esta Semana</span>
           </div>
-          <p className="text-xl font-bold">0 horas</p>
+          <p className="text-2xl font-bold">
+            {weekStats.totalHours.toFixed(1)} <span className="text-base font-normal text-gray-400">hrs</span>
+          </p>
         </div>
         <div className="stat-card">
           <div className="flex items-center gap-2 mb-2">
-            <Target size={18} className="text-neon-purple" />
+            <Trophy size={18} className="text-neon-purple" />
             <span className="text-sm text-gray-400">Completados</span>
           </div>
-          <p className="text-xl font-bold">0 entrenos</p>
+          <p className="text-2xl font-bold">
+            {weekStats.completedWorkouts} <span className="text-base font-normal text-gray-400">entrenos</span>
+          </p>
         </div>
       </div>
+
+      {/* Previous Plans */}
+      {plans.filter(p => !p.is_active).length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Calendar size={20} className="text-gray-400" />
+            Planes Anteriores
+          </h2>
+          <div className="space-y-3">
+            {plans.filter(p => !p.is_active).map(plan => (
+              <div key={plan.id} className="card flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{plan.name}</h3>
+                  <p className="text-sm text-gray-400">
+                    {plan.days_count} días • Semana {plan.week_number}
+                  </p>
+                </div>
+                <button
+                  onClick={() => activatePlan(plan.id)}
+                  className="text-accent-primary text-sm font-medium hover:underline"
+                >
+                  Activar
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
