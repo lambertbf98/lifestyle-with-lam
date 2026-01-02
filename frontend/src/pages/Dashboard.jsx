@@ -129,34 +129,55 @@ export default function Dashboard() {
       {/* Today's Workout */}
       <div className="card-glow">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Tu Próximo Entreno</h2>
+          <h2 className="text-lg font-semibold">Entreno de Hoy</h2>
           <Link to="/workouts" className="text-accent-primary text-sm flex items-center gap-1">
             Ver todos <ChevronRight size={16} />
           </Link>
         </div>
 
         {activePlan && activePlan.days?.length > 0 ? (
-          <div className="space-y-3">
-            {activePlan.days.slice(0, 2).map((day, index) => (
-              <Link
-                key={day.id}
-                to={`/workout-session/${day.id}`}
-                className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{day.name}</h3>
-                    <p className="text-sm text-gray-400">
-                      {day.exercises?.length || 0} ejercicios • {day.focus_area || 'General'}
-                    </p>
+          (() => {
+            // Map weekdays to workout days: Monday=1, Wednesday=3, Friday=5
+            const today = new Date().getDay(); // 0=Sunday, 1=Monday, etc.
+            const workoutDayMap = { 1: 0, 3: 1, 5: 2 }; // Mon->Day1, Wed->Day2, Fri->Day3
+            const todayWorkoutIndex = workoutDayMap[today];
+
+            if (todayWorkoutIndex !== undefined && activePlan.days[todayWorkoutIndex]) {
+              const todayWorkout = activePlan.days[todayWorkoutIndex];
+              return (
+                <Link
+                  to={`/workout-session/${todayWorkout.id}`}
+                  className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{todayWorkout.name}</h3>
+                      <p className="text-sm text-gray-400">
+                        {todayWorkout.exercises?.length || 0} ejercicios • {todayWorkout.focus_area || 'General'}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
+                      <Dumbbell size={20} className="text-accent-primary" />
+                    </div>
                   </div>
-                  <div className="w-10 h-10 bg-accent-primary/20 rounded-xl flex items-center justify-center">
-                    <Dumbbell size={20} className="text-accent-primary" />
+                </Link>
+              );
+            } else {
+              // Rest day (Tuesday, Thursday, Saturday, Sunday)
+              const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+              return (
+                <div className="bg-dark-700/50 rounded-xl p-6 border border-dark-600 text-center">
+                  <div className="w-16 h-16 bg-neon-purple/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl">😴</span>
                   </div>
+                  <h3 className="font-semibold text-lg mb-1">Día de Descanso</h3>
+                  <p className="text-sm text-gray-400">
+                    Hoy es {dayNames[today]}. Próximo entreno: {today < 5 ? 'Viernes' : 'Lunes'}
+                  </p>
                 </div>
-              </Link>
-            ))}
-          </div>
+              );
+            }
+          })()
         ) : (
           <Link
             to="/workouts"

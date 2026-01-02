@@ -96,6 +96,10 @@ const calculateMacros = (tdee, goal, weight) => {
       calories = tdee - 500; // Aggressive deficit for sprint
       proteinPerKg = 2.2; // Higher protein to preserve muscle
       break;
+    case 'lose_weight_extreme':
+      calories = tdee - 750; // Extreme deficit - not recommended long term
+      proteinPerKg = 2.4; // Very high protein to minimize muscle loss
+      break;
     case 'gain_muscle':
     case 'ganar_musculo':
       calories = tdee + 300;
