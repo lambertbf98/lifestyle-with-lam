@@ -64,6 +64,13 @@ const initDatabase = async () => {
       END $$;
     `);
 
+    // Set initial_weight_kg from current_weight_kg for existing users
+    await client.query(`
+      UPDATE user_profiles
+      SET initial_weight_kg = current_weight_kg
+      WHERE initial_weight_kg IS NULL AND current_weight_kg IS NOT NULL
+    `);
+
     // Weight history for tracking progress
     await client.query(`
       CREATE TABLE IF NOT EXISTS weight_history (

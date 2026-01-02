@@ -53,13 +53,15 @@ router.get('/', authenticateToken, async (req, res) => {
     );
 
     const profile = profileResult.rows[0] || {};
+    // Fallback: usar current_weight_kg si initial_weight_kg no existe
+    const initialWeight = profile.initial_weight_kg || profile.current_weight_kg;
 
     res.json({
       weight: {
         history: weightResult.rows,
         current: profile.current_weight_kg,
         target: profile.target_weight_kg,
-        initial: profile.initial_weight_kg
+        initial: initialWeight
       },
       workouts: workoutResult.rows,
       calories: {
