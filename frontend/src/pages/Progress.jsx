@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw, Edit3 } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -120,32 +120,50 @@ export default function Progress() {
   };
 
   const formatWeightData = () => {
-    if (!progressData?.weight?.history) return [];
+    const initial = progressData?.weight?.initial;
+    const current = progressData?.weight?.current;
+    const history = progressData?.weight?.history || [];
 
-    const historyData = progressData.weight.history.map(entry => ({
+    // Convertir historial a formato de gráfica
+    const historyData = history.map(entry => ({
       date: format(parseISO(entry.recorded_at), 'dd/MM', { locale: es }),
       weight: parseFloat(entry.weight_kg),
       fullDate: format(parseISO(entry.recorded_at), 'dd MMM yyyy', { locale: es })
     }));
 
-    // Si hay peso inicial y solo hay 0-1 puntos en el historial, agregar punto inicial
-    if (progressData?.weight?.initial && historyData.length <= 1) {
-      const initialPoint = {
-        date: 'Inicio',
-        weight: parseFloat(progressData.weight.initial),
-        fullDate: 'Peso inicial'
-      };
-      // Si no hay datos, solo mostrar inicial
-      if (historyData.length === 0) {
-        return [initialPoint];
-      }
-      // Si hay 1 punto, agregar inicial al principio si es diferente
-      if (historyData.length === 1 && parseFloat(progressData.weight.initial) !== historyData[0].weight) {
-        return [initialPoint, ...historyData];
-      }
+    // Si hay datos en el historial y más de 1 punto, usar historial normal
+    if (historyData.length > 1) {
+      return historyData;
     }
 
-    return historyData;
+    // Si no hay suficientes puntos pero tenemos inicial y actual, crear línea
+    if (initial && current) {
+      const initialWeight = parseFloat(initial);
+      const currentWeight = parseFloat(current);
+
+      // Si son diferentes, mostrar línea de progreso
+      if (initialWeight !== currentWeight) {
+        return [
+          { date: 'Inicio', weight: initialWeight, fullDate: 'Peso inicial' },
+          { date: 'Hoy', weight: currentWeight, fullDate: 'Peso actual' }
+        ];
+      }
+      // Si son iguales, mostrar solo un punto
+      return [{ date: 'Actual', weight: currentWeight, fullDate: 'Peso actual' }];
+    }
+
+    // Si solo hay historial con 1 punto
+    if (historyData.length === 1) {
+      if (initial && parseFloat(initial) !== historyData[0].weight) {
+        return [
+          { date: 'Inicio', weight: parseFloat(initial), fullDate: 'Peso inicial' },
+          ...historyData
+        ];
+      }
+      return historyData;
+    }
+
+    return [];
   };
 
   if (loading) {
@@ -278,25 +296,23 @@ export default function Progress() {
             className="text-center hover:bg-dark-700/50 rounded-lg p-1 transition-colors"
           >
             <p className="text-xl font-bold">{progressData?.weight?.initial || '--'}</p>
-            <p className="text-xs text-gray-400 flex items-center justify-center gap-1">
-              Inicial <Edit3 size={10} />
-            </p>
+            <p className="text-xs text-gray-400">Inicial</p>
           </button>
-          <div className="text-center">
+          <div className="text-center p-1">
             <p className="text-xl font-bold">{progressData?.weight?.current || '--'}</p>
             <p className="text-xs text-gray-400">Actual</p>
           </div>
-          <div className="text-center">
+          <div className="text-center p-1">
             <p className="text-xl font-bold">{progressData?.weight?.target || '--'}</p>
             <p className="text-xs text-gray-400">Objetivo</p>
           </div>
-          <div className="text-center">
+          <div className="text-center p-1">
             <p className={`text-xl font-bold ${
               weightToGoal && parseFloat(weightToGoal) <= 0 ? 'text-accent-success' : 'text-accent-warning'
             }`}>
               {weightToGoal ? `${Math.abs(parseFloat(weightToGoal)).toFixed(1)}` : '--'}
             </p>
-            <p className="text-xs text-gray-400">Faltan kg</p>
+            <p className="text-xs text-gray-400">Diferencia</p>
           </div>
         </div>
       </div>
