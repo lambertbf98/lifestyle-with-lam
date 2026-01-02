@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Lifestyle With Lam',
-        short_name: 'LWL Fitness',
+        name: 'Lifestyle with Lam',
+        short_name: 'Lifestyle with Lam',
         description: 'Tu entrenador personal con IA',
         theme_color: '#0f172a',
         background_color: '#0f172a',
