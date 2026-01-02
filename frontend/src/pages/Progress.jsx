@@ -121,11 +121,31 @@ export default function Progress() {
 
   const formatWeightData = () => {
     if (!progressData?.weight?.history) return [];
-    return progressData.weight.history.map(entry => ({
+
+    const historyData = progressData.weight.history.map(entry => ({
       date: format(parseISO(entry.recorded_at), 'dd/MM', { locale: es }),
       weight: parseFloat(entry.weight_kg),
       fullDate: format(parseISO(entry.recorded_at), 'dd MMM yyyy', { locale: es })
     }));
+
+    // Si hay peso inicial y solo hay 0-1 puntos en el historial, agregar punto inicial
+    if (progressData?.weight?.initial && historyData.length <= 1) {
+      const initialPoint = {
+        date: 'Inicio',
+        weight: parseFloat(progressData.weight.initial),
+        fullDate: 'Peso inicial'
+      };
+      // Si no hay datos, solo mostrar inicial
+      if (historyData.length === 0) {
+        return [initialPoint];
+      }
+      // Si hay 1 punto, agregar inicial al principio si es diferente
+      if (historyData.length === 1 && parseFloat(progressData.weight.initial) !== historyData[0].weight) {
+        return [initialPoint, ...historyData];
+      }
+    }
+
+    return historyData;
   };
 
   if (loading) {
