@@ -241,4 +241,25 @@ router.delete('/log/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Clear all today's meal logs
+router.delete('/clear-today', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM meal_logs
+       WHERE user_id = $1
+       AND DATE(logged_at) = CURRENT_DATE
+       RETURNING id`,
+      [req.user.id]
+    );
+
+    res.json({
+      message: 'Today\'s meals cleared',
+      deleted_count: result.rowCount
+    });
+  } catch (error) {
+    console.error('Clear today meals error:', error);
+    res.status(500).json({ error: 'Failed to clear today\'s meals' });
+  }
+});
+
 module.exports = router;

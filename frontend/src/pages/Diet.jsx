@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { diet as dietApi, coach as coachApi } from '../api';
-import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw, X } from 'lucide-react';
+import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw, X, RotateCcw } from 'lucide-react';
 
 const mealTypeLabels = {
   breakfast: 'Desayuno',
@@ -104,6 +104,16 @@ export default function Diet() {
       }
     } catch (error) {
       console.error('Error unlogging meal:', error);
+    }
+  };
+
+  const clearTodayLogs = async () => {
+    if (todayData.logged.length === 0) return;
+    try {
+      await dietApi.clearToday();
+      await loadData();
+    } catch (error) {
+      console.error('Error clearing today:', error);
     }
   };
 
@@ -277,7 +287,18 @@ export default function Diet() {
 
       {/* Today's Macros */}
       <div className="card-glow">
-        <h2 className="text-lg font-semibold mb-4">Progreso de Hoy</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Progreso de Hoy</h2>
+          {todayData.logged.length > 0 && (
+            <button
+              onClick={clearTodayLogs}
+              className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition-colors"
+              title="Reiniciar día"
+            >
+              <RotateCcw size={16} className="text-gray-400 hover:text-red-400" />
+            </button>
+          )}
+        </div>
 
         {/* Calories Progress */}
         <div className="mb-6">

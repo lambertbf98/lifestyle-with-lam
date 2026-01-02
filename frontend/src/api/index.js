@@ -71,7 +71,8 @@ export const diet = {
   createPlan: (data) => api.post('/diet/plans', data),
   logMeal: (data) => api.post('/diet/log', data),
   getSummary: (startDate, endDate) => api.get('/diet/summary', { params: { start_date: startDate, end_date: endDate } }),
-  deleteMealLog: (id) => api.delete(`/diet/log/${id}`)
+  deleteMealLog: (id) => api.delete(`/diet/log/${id}`),
+  clearToday: () => api.delete('/diet/clear-today')
 };
 
 // Progress
