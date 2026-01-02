@@ -15,6 +15,7 @@ const aiCoachRoutes = require('./routes/aiCoach');
 
 // Import database initialization
 const { initDatabase } = require('./db/init');
+const { forceUpdateAllGifs } = require('./db/seed');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -79,7 +80,11 @@ app.use((err, req, res, next) => {
 
 // Initialize database and start server
 initDatabase()
-  .then(() => {
+  .then(async () => {
+    // Update exercise GIFs on startup
+    console.log('Updating exercise GIFs...');
+    await forceUpdateAllGifs();
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);

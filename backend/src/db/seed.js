@@ -687,20 +687,144 @@ const seedExercises = async () => {
   }
 };
 
-// Update existing exercises with GIF URLs
+// Update existing exercises with GIF URLs using fuzzy matching
 const updateExerciseGifs = async (client) => {
   try {
+    let updated = 0;
     for (const exercise of exercises) {
-      // Update by name_es (Spanish name)
-      await client.query(
-        `UPDATE exercises SET gif_url = $1 WHERE name_es = $2 OR name = $3`,
-        [exercise.gif_url, exercise.name_es, exercise.name]
+      // Use ILIKE for partial matching
+      const result = await client.query(
+        `UPDATE exercises SET gif_url = $1
+         WHERE gif_url IS NULL OR gif_url = ''
+         AND (
+           LOWER(name_es) LIKE LOWER($2) OR
+           LOWER(name) LIKE LOWER($3) OR
+           LOWER(name_es) LIKE LOWER($4) OR
+           LOWER(name) LIKE LOWER($4)
+         )`,
+        [
+          exercise.gif_url,
+          exercise.name_es,
+          exercise.name,
+          `%${exercise.name_es.split(' ')[0]}%` // Match first word
+        ]
       );
+      updated += result.rowCount;
     }
-    console.log('Exercise GIFs updated successfully');
+    console.log(`Exercise GIFs updated: ${updated} exercises`);
   } catch (error) {
     console.error('Error updating exercise GIFs:', error);
   }
 };
 
-module.exports = { seedExercises, exercises };
+// Force update all exercises with GIFs by muscle group matching
+const forceUpdateAllGifs = async () => {
+  const client = await pool.connect();
+  try {
+    // Map of muscle groups to default GIFs
+    const muscleGroupGifs = {
+      'Pecho': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif',
+      'Espalda': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lat-Pulldown.gif',
+      'Hombros': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif',
+      'Bíceps': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Curl.gif',
+      'Tríceps': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pushdown.gif',
+      'Cuádriceps': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif',
+      'Isquiotibiales': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curl.gif',
+      'Glúteos': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif',
+      'Pantorrillas': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raise.gif',
+      'Abdominales': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif',
+      'Core': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Plank.gif',
+      'Piernas': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif',
+      'Trapecios': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shrug.gif',
+      'Oblicuos': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Side-Plank.gif',
+      'Aductores': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hip-Adduction-Machine.gif'
+    };
+
+    // Keyword-based GIF mapping for partial matches
+    const keywordGifs = {
+      'press banca': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif',
+      'press inclinado': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Incline-Dumbbell-Press.gif',
+      'press militar': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Overhead-Press.gif',
+      'press hombro': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif',
+      'dominada': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-Up.gif',
+      'remo': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bent-Over-Row.gif',
+      'jalón': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lat-Pulldown.gif',
+      'curl': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Curl.gif',
+      'sentadilla': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif',
+      'squat': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif',
+      'prensa': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif',
+      'zancada': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunges.gif',
+      'lunges': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunges.gif',
+      'peso muerto': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Deadlift.gif',
+      'deadlift': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Deadlift.gif',
+      'hip thrust': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif',
+      'elevación lateral': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lateral-Raise.gif',
+      'elevación frontal': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Front-Raise.gif',
+      'fondo': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Bench-Dips.gif',
+      'flexión': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif',
+      'flexiones': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif',
+      'plancha': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Plank.gif',
+      'crunch': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif',
+      'abdominal': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif',
+      'extensión tríceps': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pushdown.gif',
+      'extensión cuádriceps': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/LEG-EXTENSION.gif',
+      'curl pierna': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curl.gif',
+      'pantorrilla': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raise.gif',
+      'gemelo': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raise.gif',
+      'apertura': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Fly.gif',
+      'face pull': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif',
+      'encogimiento': 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shrug.gif'
+    };
+
+    let totalUpdated = 0;
+
+    // First, try exact matches from our exercise list
+    for (const exercise of exercises) {
+      const result = await client.query(
+        `UPDATE exercises SET gif_url = $1
+         WHERE (gif_url IS NULL OR gif_url = '')
+         AND (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($3))`,
+        [exercise.gif_url, exercise.name_es, exercise.name]
+      );
+      totalUpdated += result.rowCount;
+    }
+
+    // Try keyword-based partial matching
+    for (const [keyword, gifUrl] of Object.entries(keywordGifs)) {
+      const result = await client.query(
+        `UPDATE exercises SET gif_url = $1
+         WHERE (gif_url IS NULL OR gif_url = '')
+         AND (LOWER(name_es) ILIKE $2 OR LOWER(name) ILIKE $2)`,
+        [gifUrl, `%${keyword}%`]
+      );
+      totalUpdated += result.rowCount;
+    }
+
+    // Then, fill remaining with muscle group defaults
+    for (const [muscleGroup, gifUrl] of Object.entries(muscleGroupGifs)) {
+      const result = await client.query(
+        `UPDATE exercises SET gif_url = $1
+         WHERE (gif_url IS NULL OR gif_url = '')
+         AND LOWER(muscle_group) = LOWER($2)`,
+        [gifUrl, muscleGroup]
+      );
+      totalUpdated += result.rowCount;
+    }
+
+    // Count remaining without GIFs
+    const remaining = await client.query(
+      `SELECT COUNT(*) FROM exercises WHERE gif_url IS NULL OR gif_url = ''`
+    );
+
+    console.log(`GIFs updated: ${totalUpdated} exercises. Remaining without GIF: ${remaining.rows[0].count}`);
+
+    return { success: true, updated: totalUpdated, remaining: parseInt(remaining.rows[0].count) };
+  } catch (error) {
+    console.error('Error force updating GIFs:', error);
+    return { success: false, error: error.message };
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = { seedExercises, exercises, forceUpdateAllGifs };

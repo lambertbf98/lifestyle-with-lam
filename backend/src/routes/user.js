@@ -300,17 +300,12 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       [req.user.id]
     );
 
-    // Get streak
-    const streakResult = await pool.query(
-      `WITH dates AS (
-         SELECT DISTINCT DATE(completed_at) as workout_date
-         FROM workout_logs
-         WHERE user_id = $1 AND completed_at IS NOT NULL
-         ORDER BY workout_date DESC
-       )
-       SELECT COUNT(*) as streak
-       FROM dates
-       WHERE workout_date >= CURRENT_DATE - (SELECT COUNT(*) FROM dates WHERE workout_date <= CURRENT_DATE)::INTEGER`,
+    // Get workouts this month
+    const monthWorkoutsResult = await pool.query(
+      `SELECT COUNT(*) as workouts_this_month
+       FROM workout_logs
+       WHERE user_id = $1
+       AND completed_at >= DATE_TRUNC('month', CURRENT_DATE)`,
       [req.user.id]
     );
 
@@ -322,10 +317,10 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
       targetWeight: profile.target_weight_kg,
       fitnessGoal: profile.fitness_goal,
       workoutsThisWeek: parseInt(workoutsResult.rows[0]?.workouts_this_week || 0),
+      workoutsThisMonth: parseInt(monthWorkoutsResult.rows[0]?.workouts_this_month || 0),
       weightChange: weightData.current_weight && weightData.week_ago_weight
         ? (parseFloat(weightData.current_weight) - parseFloat(weightData.week_ago_weight)).toFixed(1)
-        : null,
-      streak: parseInt(streakResult.rows[0]?.streak || 0)
+        : null
     });
   } catch (error) {
     console.error('Get dashboard error:', error);

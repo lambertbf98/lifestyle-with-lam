@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db/pool');
 const { authenticateToken } = require('../middleware/auth');
+const { forceUpdateAllGifs } = require('../db/seed');
 
 const router = express.Router();
 
@@ -301,6 +302,17 @@ router.get('/history', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Get workout history error:', error);
     res.status(500).json({ error: 'Failed to get workout history' });
+  }
+});
+
+// Force update all exercise GIFs
+router.post('/update-gifs', authenticateToken, async (req, res) => {
+  try {
+    const result = await forceUpdateAllGifs();
+    res.json(result);
+  } catch (error) {
+    console.error('Update GIFs error:', error);
+    res.status(500).json({ error: 'Failed to update GIFs' });
   }
 });
 

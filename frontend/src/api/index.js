@@ -60,7 +60,8 @@ export const workouts = {
   startWorkout: (workoutDayId) => api.post('/workouts/start', { workout_day_id: workoutDayId }),
   completeWorkout: (data) => api.post('/workouts/complete', data),
   getHistory: (limit = 20, offset = 0) => api.get(`/workouts/history?limit=${limit}&offset=${offset}`),
-  clearHistory: () => api.delete('/workouts/clear-history')
+  clearHistory: () => api.delete('/workouts/clear-history'),
+  updateGifs: () => api.post('/workouts/update-gifs')
 };
 
 // Diet

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -12,7 +12,16 @@ export default function Progress() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(30);
   const [showWeightModal, setShowWeightModal] = useState(false);
+  const [showMeasurementsModal, setShowMeasurementsModal] = useState(false);
   const [newWeight, setNewWeight] = useState('');
+  const [measurements, setMeasurements] = useState({
+    chest_cm: '',
+    waist_cm: '',
+    hips_cm: '',
+    bicep_cm: '',
+    thigh_cm: ''
+  });
+  const [measurementsHistory, setMeasurementsHistory] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -20,14 +29,16 @@ export default function Progress() {
 
   const loadData = async () => {
     try {
-      const [progressRes, summaryRes, achievementsRes] = await Promise.all([
+      const [progressRes, summaryRes, achievementsRes, measurementsRes] = await Promise.all([
         progressApi.get(period),
         progressApi.getWeeklySummary(),
-        progressApi.getAchievements()
+        progressApi.getAchievements(),
+        userApi.getMeasurementsHistory(period)
       ]);
       setProgressData(progressRes.data);
       setWeeklySummary(summaryRes.data);
       setAchievements(achievementsRes.data);
+      setMeasurementsHistory(measurementsRes.data || []);
     } catch (error) {
       console.error('Error loading progress:', error);
     } finally {
@@ -45,6 +56,32 @@ export default function Progress() {
       await loadData();
     } catch (error) {
       console.error('Error adding weight:', error);
+    }
+  };
+
+  const addMeasurements = async () => {
+    const hasValue = Object.values(measurements).some(v => v !== '');
+    if (!hasValue) return;
+
+    try {
+      const data = {};
+      Object.entries(measurements).forEach(([key, value]) => {
+        if (value !== '') {
+          data[key] = parseFloat(value);
+        }
+      });
+      await userApi.addMeasurements(data);
+      setMeasurements({
+        chest_cm: '',
+        waist_cm: '',
+        hips_cm: '',
+        bicep_cm: '',
+        thigh_cm: ''
+      });
+      setShowMeasurementsModal(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error adding measurements:', error);
     }
   };
 
@@ -193,6 +230,68 @@ export default function Progress() {
         </div>
       </div>
 
+      {/* Body Measurements */}
+      <div className="card-glow">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold">Medidas Corporales</h2>
+            <p className="text-sm text-gray-400">Seguimiento en cm</p>
+          </div>
+          <button
+            onClick={() => setShowMeasurementsModal(true)}
+            className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center hover:bg-neon-purple/30 transition-colors"
+          >
+            <Plus size={20} className="text-neon-purple" />
+          </button>
+        </div>
+
+        {measurementsHistory.length > 0 ? (
+          <div className="space-y-3">
+            {/* Latest measurements */}
+            <div className="grid grid-cols-5 gap-2 text-center">
+              {[
+                { key: 'chest_cm', label: 'Pecho' },
+                { key: 'waist_cm', label: 'Cintura' },
+                { key: 'hips_cm', label: 'Cadera' },
+                { key: 'bicep_cm', label: 'Brazo' },
+                { key: 'thigh_cm', label: 'Muslo' }
+              ].map(({ key, label }) => {
+                const latest = measurementsHistory[0]?.[key];
+                const previous = measurementsHistory[1]?.[key];
+                const diff = latest && previous ? (latest - previous).toFixed(1) : null;
+                return (
+                  <div key={key} className="bg-dark-700/50 rounded-xl p-2">
+                    <p className="text-lg font-bold">{latest || '--'}</p>
+                    <p className="text-xs text-gray-400">{label}</p>
+                    {diff && (
+                      <p className={`text-xs ${parseFloat(diff) < 0 ? 'text-accent-success' : 'text-accent-warning'}`}>
+                        {parseFloat(diff) > 0 ? '+' : ''}{diff}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {measurementsHistory[0]?.recorded_at && (
+              <p className="text-xs text-gray-500 text-center">
+                Último registro: {format(parseISO(measurementsHistory[0].recorded_at), 'dd MMM yyyy', { locale: es })}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <Ruler size={32} className="text-gray-600 mx-auto mb-2" />
+            <p className="text-gray-500">Sin medidas registradas</p>
+            <button
+              onClick={() => setShowMeasurementsModal(true)}
+              className="text-neon-purple text-sm mt-2"
+            >
+              Registrar medidas
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Weekly Summary */}
       {weeklySummary && (
         <div className="grid grid-cols-2 gap-4">
@@ -245,8 +344,8 @@ export default function Progress() {
 
       {/* Weight Modal */}
       {showWeightModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center animate-fade-in">
-          <div className="bg-dark-800 rounded-t-3xl w-full p-6 animate-slide-up">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up">
             <h3 className="text-xl font-bold mb-4">Registrar Peso</h3>
             <div className="mb-4">
               <label className="label">Peso (kg)</label>
@@ -270,6 +369,88 @@ export default function Progress() {
               <button
                 onClick={addWeight}
                 disabled={!newWeight}
+                className="btn-primary flex-1 disabled:opacity-50"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Measurements Modal */}
+      {showMeasurementsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Registrar Medidas</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="label">Pecho (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.chest_cm}
+                  onChange={(e) => setMeasurements(prev => ({ ...prev, chest_cm: e.target.value }))}
+                  className="input"
+                  placeholder="95"
+                />
+              </div>
+              <div>
+                <label className="label">Cintura (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.waist_cm}
+                  onChange={(e) => setMeasurements(prev => ({ ...prev, waist_cm: e.target.value }))}
+                  className="input"
+                  placeholder="80"
+                />
+              </div>
+              <div>
+                <label className="label">Cadera (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.hips_cm}
+                  onChange={(e) => setMeasurements(prev => ({ ...prev, hips_cm: e.target.value }))}
+                  className="input"
+                  placeholder="95"
+                />
+              </div>
+              <div>
+                <label className="label">Brazo (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.bicep_cm}
+                  onChange={(e) => setMeasurements(prev => ({ ...prev, bicep_cm: e.target.value }))}
+                  className="input"
+                  placeholder="35"
+                />
+              </div>
+              <div>
+                <label className="label">Muslo (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.thigh_cm}
+                  onChange={(e) => setMeasurements(prev => ({ ...prev, thigh_cm: e.target.value }))}
+                  className="input"
+                  placeholder="55"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">Solo rellena las medidas que quieras registrar</p>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setShowMeasurementsModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={addMeasurements}
+                disabled={!Object.values(measurements).some(v => v !== '')}
                 className="btn-primary flex-1 disabled:opacity-50"
               >
                 Guardar

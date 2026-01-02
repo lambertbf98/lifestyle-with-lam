@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi, progress as progressApi, workouts as workoutsApi } from '../api';
-import { Dumbbell, Flame, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles } from 'lucide-react';
+import { Dumbbell, Flame, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles, CheckCircle } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
+  const [todayCompleted, setTodayCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,12 +17,21 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [dashboardRes, planRes] = await Promise.all([
+      const [dashboardRes, planRes, historyRes] = await Promise.all([
         userApi.getDashboard(),
-        workoutsApi.getActivePlan()
+        workoutsApi.getActivePlan(),
+        workoutsApi.getHistory(10, 0)
       ]);
       setDashboard(dashboardRes.data);
       setActivePlan(planRes.data);
+
+      // Check if today's workout was completed
+      const today = new Date().toDateString();
+      const completedToday = historyRes.data?.some(log => {
+        const logDate = new Date(log.completed_at).toDateString();
+        return logDate === today;
+      });
+      setTodayCompleted(completedToday);
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -101,16 +111,16 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">esta semana</p>
         </div>
 
-        {/* Streak */}
+        {/* Monthly Workouts */}
         <div className="stat-card">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-accent-warning/20 rounded-lg flex items-center justify-center">
               <Flame size={18} className="text-accent-warning" />
             </div>
-            <span className="text-sm text-gray-400">Racha</span>
+            <span className="text-sm text-gray-400">Este Mes</span>
           </div>
-          <p className="text-2xl font-bold">{dashboard?.streak || 0}</p>
-          <p className="text-sm text-gray-500">días seguidos</p>
+          <p className="text-2xl font-bold">{dashboard?.workoutsThisMonth || 0}</p>
+          <p className="text-sm text-gray-500">entrenos</p>
         </div>
 
         {/* Goal Progress */}
@@ -144,6 +154,22 @@ export default function Dashboard() {
 
             if (todayWorkoutIndex !== undefined && activePlan.days[todayWorkoutIndex]) {
               const todayWorkout = activePlan.days[todayWorkoutIndex];
+
+              // Show completed state if workout was done today
+              if (todayCompleted) {
+                return (
+                  <div className="bg-accent-success/10 rounded-xl p-6 border border-accent-success/30 text-center">
+                    <div className="w-16 h-16 bg-accent-success/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle size={32} className="text-accent-success" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1 text-accent-success">¡Entreno Completado!</h3>
+                    <p className="text-sm text-gray-400">
+                      Has completado tu entreno de hoy. ¡Buen trabajo!
+                    </p>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   to={`/workout-session/${todayWorkout.id}`}
@@ -217,6 +243,7 @@ export default function Dashboard() {
           </div>
         </div>
       </Link>
+
     </div>
   );
 }

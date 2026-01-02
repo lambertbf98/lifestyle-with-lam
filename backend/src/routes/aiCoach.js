@@ -961,7 +961,7 @@ router.post('/regenerate-exercise', authenticateToken, async (req, res) => {
 
 // Regenerate a single meal with same macros
 router.post('/regenerate-meal', authenticateToken, async (req, res) => {
-  const { meal_id, calories, protein_grams, meal_type } = req.body;
+  const { meal_id, calories, protein_grams, meal_type, current_meal_name } = req.body;
 
   try {
     const profileResult = await pool.query(
@@ -973,31 +973,41 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
     const expandedDisliked = expandFoodCategories(profile.disliked_foods);
     const dislikedFoods = expandedDisliked.join(', ') || '';
 
-    const prompt = `Genera UNA comida alternativa con estos macros EXACTOS:
-- Calorías: ${calories} kcal
-- Proteína: ${protein_grams}g
+    // Get current meal to avoid similar suggestions
+    const mealResult = await pool.query('SELECT name FROM meals WHERE id = $1', [meal_id]);
+    const currentName = current_meal_name || mealResult.rows[0]?.name || '';
+
+    const prompt = `Genera UNA comida COMPLETAMENTE DIFERENTE con estos macros:
+- Calorías: ${calories} kcal (±50)
+- Proteína: ${protein_grams}g (±5g)
 - Tipo de comida: ${meal_type}
 
-⚠️ MERCADONA (ESPAÑA) - Usa productos de Mercadona. NO pongas marca "Hacendado", solo el nombre del producto:
-Pechuga de pollo, Huevos, Atún claro, Salmón, Arroz, Pasta, Yogur griego, Queso fresco batido 0%, Avena, etc.
+🚨 IMPORTANTE - MÁXIMA VARIEDAD:
+- La comida actual es: "${currentName}"
+- NO sugieras nada parecido
+- Usa ingredientes DIFERENTES (si es pollo, usa pescado/huevos/ternera)
+- Cambia el estilo de cocina (si es salteado, haz al horno/crudo/guisado)
+- Sé CREATIVO: wraps, bowls, tortitas proteicas, ensaladas, revueltos, etc.
 
-🚫 ALIMENTOS PROHIBIDOS (NO incluir):
+⚠️ MERCADONA (ESPAÑA) - Productos disponibles:
+Pechuga de pollo, Huevos, Atún claro, Salmón, Gambas, Ternera picada, Lomo de cerdo,
+Arroz, Pasta, Pan de molde, Tortillas de trigo, Patatas, Boniato,
+Yogur griego, Queso fresco batido 0%, Leche, Avena, Frutas, Verduras frescas
+
+🚫 PROHIBIDO:
 ${dislikedFoods || 'Ninguno'}
-
-Preferencias del usuario:
-- Proteínas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
-- Carbohidratos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+${currentName} (la comida actual)
 
 Responde SOLO con JSON:
 {
-  "name": "Nombre del plato",
-  "description": "Descripción",
+  "name": "Nombre del plato (creativo y diferente)",
+  "description": "Descripción breve",
   "calories": ${calories},
   "protein_grams": ${protein_grams},
   "carbs_grams": XX,
   "fat_grams": XX,
   "ingredients": [{"name": "Ingrediente", "amount": "cantidad", "calories": XX, "protein": XX}],
-  "recipe": "Preparación"
+  "recipe": "Preparación paso a paso"
 }`;
 
     const response = await anthropic.messages.create({
