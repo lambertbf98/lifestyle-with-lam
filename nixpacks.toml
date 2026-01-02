@@ -10,7 +10,7 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "cd frontend && npm run build"
+    "cd frontend && npx vite build"
 ]
 
 [start]
