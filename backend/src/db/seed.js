@@ -1,6 +1,9 @@
 const pool = require('./pool');
 
-// Ejercicios con GIFs reales de la API pública de ejercicios
+// Cloudinary base URL for exercise GIFs
+const CLOUDINARY_GIF_BASE = 'https://res.cloudinary.com/dhehg2av2/image/upload/exercises';
+
+// Ejercicios con GIFs almacenados en Cloudinary
 const exercises = [
   // PECHO
   {
@@ -11,7 +14,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Acuéstate en el banco, agarra la barra con las manos separadas al ancho de los hombros. Baja la barra hasta el pecho y empuja hacia arriba.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif'
+    gif_url: `${CLOUDINARY_GIF_BASE}/press_banca.gif`
   },
   {
     name: 'Press Inclinado con Mancuernas',
@@ -241,7 +244,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Barra sobre los trapecios, baja hasta que los muslos estén paralelos al suelo.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif'
+    gif_url: `${CLOUDINARY_GIF_BASE}/sentadilla.gif`
   },
   {
     name: 'Prensa de Piernas',
@@ -880,44 +883,32 @@ const forceUpdateAllGifs = async () => {
 
     let totalUpdated = 0;
 
-    // Step 1: Try exact name matches
+    // Step 1: Try exact name matches - UPDATE ALL (including broken URLs)
     for (const [name, gifUrl] of Object.entries(exactNameGifs)) {
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '')
-         AND (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($2))`,
+         WHERE (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($2))`,
         [gifUrl, name]
       );
       totalUpdated += result.rowCount;
     }
 
-    // Step 2: Try from our seed exercises list
-    for (const exercise of exercises) {
-      const result = await client.query(
-        `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '')
-         AND (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($3))`,
-        [exercise.gif_url, exercise.name_es, exercise.name]
-      );
-      totalUpdated += result.rowCount;
-    }
-
-    // Step 3: Try keyword-based partial matching
+    // Step 2: Try keyword-based partial matching - for exercises not yet updated
     for (const [keyword, gifUrl] of Object.entries(keywordGifs)) {
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '')
+         WHERE (gif_url IS NULL OR gif_url = '' OR gif_url LIKE '%fitnessprogramer%')
          AND (LOWER(name_es) ILIKE $2 OR LOWER(name) ILIKE $2)`,
         [gifUrl, `%${keyword}%`]
       );
       totalUpdated += result.rowCount;
     }
 
-    // Step 4: Fill remaining with muscle group defaults
+    // Step 3: Fill remaining with muscle group defaults
     for (const [muscleGroup, gifUrl] of Object.entries(muscleGroupGifs)) {
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '')
+         WHERE (gif_url IS NULL OR gif_url = '' OR gif_url LIKE '%fitnessprogramer%')
          AND LOWER(muscle_group) = LOWER($2)`,
         [gifUrl, muscleGroup]
       );
