@@ -49,10 +49,12 @@ const calculateTDEE = (bmr, activityLevel) => {
 };
 
 // Expand food categories to individual items
+// NOTE: "atún de lata" / "atún en lata" is ALLOWED even if "pescado" is disliked
 const expandFoodCategories = (dislikedFoods) => {
   const categoryMap = {
-    'verduras': ['espinacas', 'brócoli', 'brócoli', 'calabacín', 'judías verdes', 'acelgas', 'col', 'repollo', 'coliflor', 'berenjenas', 'pimientos', 'tomate', 'lechuga', 'espárragos', 'alcachofas', 'champiñones', 'setas'],
-    'pescado': ['salmón', 'atún', 'merluza', 'bacalao', 'lubina', 'dorada', 'sardinas', 'anchoas', 'trucha', 'caballa', 'boquerones'],
+    'verduras': ['espinacas', 'brócoli', 'calabacín', 'judías verdes', 'acelgas', 'col', 'repollo', 'coliflor', 'berenjenas', 'pimientos', 'tomate', 'lechuga', 'espárragos', 'alcachofas', 'champiñones', 'setas'],
+    // IMPORTANT: "atún" is NOT included here - canned tuna is allowed
+    'pescado': ['salmón', 'merluza', 'bacalao', 'lubina', 'dorada', 'sardinas', 'anchoas', 'trucha', 'caballa', 'boquerones', 'rape', 'lenguado', 'pescado fresco'],
     'mariscos': ['gambas', 'langostinos', 'mejillones', 'almejas', 'calamares', 'pulpo', 'sepia'],
     'lácteos': ['leche', 'queso', 'yogur', 'yogur griego', 'queso cottage', 'requesón', 'nata', 'mantequilla'],
     'frutos secos': ['nueces', 'almendras', 'cacahuetes', 'avellanas', 'pistachos', 'anacardos'],
@@ -681,7 +683,13 @@ Verifica CADA ingrediente antes de incluirlo.
     // Build filtered product list
     let mercadonaProducts = `\nPRODUCTOS PERMITIDOS (usa SOLO estos):`;
     mercadonaProducts += `\n- Carnes: ${filterProducts(allProducts.carnes).join(', ') || 'N/A'}`;
-    if (!hasFish) mercadonaProducts += `\n- Pescados: ${filterProducts(allProducts.pescados).join(', ')}`;
+    // Fish section - but ALWAYS allow canned tuna even if fish is disliked
+    if (!hasFish) {
+      mercadonaProducts += `\n- Pescados: ${filterProducts(allProducts.pescados).join(', ')}`;
+    } else {
+      // Even with fish disliked, canned tuna is allowed
+      mercadonaProducts += `\n- Conservas: Atún en lata, Atún claro`;
+    }
     if (!hasEggs) mercadonaProducts += `\n- Huevos: ${filterProducts(allProducts.huevos).join(', ')}`;
     if (!hasDairy) mercadonaProducts += `\n- Lácteos: ${filterProducts(allProducts.lacteos).join(', ')}`;
     mercadonaProducts += `\n- Legumbres: ${filterProducts(allProducts.legumbres).join(', ')}`;
