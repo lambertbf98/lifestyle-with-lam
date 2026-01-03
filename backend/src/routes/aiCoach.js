@@ -597,40 +597,42 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
       mealDistribution = `Desayuno: 20%, Media mañana: 10%, Almuerzo: 30%, Merienda: 15%, Cena: 20%, Snack nocturno: 5%`;
     }
 
-    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas:
+    // Build forbidden foods warning - make it VERY clear
+    const forbiddenWarning = dislikedFoods
+      ? `
 
-⚠️ IMPORTANTE - SUPERMERCADO MERCADONA (ESPAÑA):
-Usa productos disponibles en MERCADONA España. NO pongas la marca "Hacendado" en los nombres, solo el producto:
-- Proteínas: Pechuga de pollo, Huevos, Atún claro, Salmón fresco, Ternera picada, Lomo de cerdo, Pavo
-- Lácteos: Yogur griego, Queso fresco batido 0%, Leche, Requesón
-- Carbohidratos: Arroz, Pasta, Pan integral, Avena, Patatas, Boniato
-- Verduras: Brócoli, Espinacas, Judías verdes, Calabacín, Pimientos, Tomate, Champiñones
-- Grasas: Aceite de oliva virgen extra, Aguacate, Frutos secos, Mantequilla de cacahuete
+🚨🚨🚨 ALIMENTOS TERMINANTEMENTE PROHIBIDOS 🚨🚨🚨
+El usuario ODIA estos alimentos. NUNCA los incluyas bajo NINGUNA circunstancia:
+❌ ${dislikedFoods.split(', ').join('\n❌ ')}
 
-DATOS NUTRICIONALES CALCULADOS (Mifflin-St Jeor):
-- TMB: ${Math.round(bmr)} kcal
-- TDEE: ${Math.round(tdee)} kcal
-- Calorías objetivo: ${macros.calories} kcal/día${profile.fitness_goal === 'lose_weight_aggressive' ? ' (DÉFICIT AGRESIVO -500kcal)' : ''}
-- Proteínas: ${macros.protein}g (${Math.round(macros.protein/weight*10)/10}g/kg)
-- Carbohidratos: ${macros.carbs}g
-- Grasas: ${macros.fat}g
+Si incluyes CUALQUIERA de estos alimentos, el plan será RECHAZADO.
+Verifica CADA ingrediente antes de incluirlo.
+`
+      : '';
+
+    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas.
+${forbiddenWarning}
+⚠️ SUPERMERCADO MERCADONA (ESPAÑA):
+Usa productos de MERCADONA. NO usar marca "Hacendado":
+- Proteínas: Pechuga de pollo, Huevos, Ternera picada, Lomo de cerdo, Pavo
+- Lácteos: Yogur griego, Queso fresco batido 0%, Leche
+- Carbohidratos: Arroz, Pasta, Pan integral, Patatas, Boniato
+- Grasas: Aceite de oliva virgen extra, Aguacate, Frutos secos
+
+DATOS NUTRICIONALES (Mifflin-St Jeor):
+- TMB: ${Math.round(bmr)} kcal | TDEE: ${Math.round(tdee)} kcal
+- Calorías objetivo: ${macros.calories} kcal/día
+- Proteínas: ${macros.protein}g | Carbos: ${macros.carbs}g | Grasas: ${macros.fat}g
 
 DATOS DEL USUARIO:
-- Peso: ${weight}kg
-- Objetivo: ${profile.fitness_goal || 'mantener'}
-- Restricciones: ${profile.dietary_restrictions?.join(', ') || 'ninguna'}
-- Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
+- Peso: ${weight}kg | Objetivo: ${profile.fitness_goal || 'mantener'}
+- Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'}
 - Carbohidratos preferidos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
 
-🚫 ALIMENTOS PROHIBIDOS (el usuario los odia, NO incluir):
-${dislikedFoods || 'Ninguno especificado'}
-
-PROTOCOLO NUTRICIONAL:
-1. ${mealsPerDay} COMIDAS al día: ${mealStructure}
-2. DISTRIBUCIÓN de calorías: ${mealDistribution}
-3. PROTEÍNA distribuida: ${Math.round(macros.protein/mealsPerDay)}g por comida aprox
-4. PRE-ENTRENO (merienda): Carbohidratos complejos + proteína ligera
-5. POST-ENTRENO (cena): Proteína alta + carbohidratos para recuperación
+PROTOCOLO:
+1. ${mealsPerDay} COMIDAS: ${mealStructure}
+2. DISTRIBUCIÓN: ${mealDistribution}
+3. ~${Math.round(macros.protein/mealsPerDay)}g proteína por comida
 
 Responde SOLO con JSON válido:
 {
@@ -642,29 +644,29 @@ Responde SOLO con JSON válido:
   "meals": [
     {
       "meal_type": "breakfast",
-      "name": "Desayuno Energético",
-      "description": "Descripción del plato con productos Mercadona",
+      "name": "Nombre del plato",
+      "description": "Descripción breve",
       "calories": ${Math.round(macros.calories/mealsPerDay)},
       "protein_grams": ${Math.round(macros.protein/mealsPerDay)},
       "carbs_grams": ${Math.round(macros.carbs/mealsPerDay)},
       "fat_grams": ${Math.round(macros.fat/mealsPerDay)},
-      "ingredients": [
-        {"name": "Producto Mercadona", "amount": "cantidad en g", "calories": 100, "protein": 20}
-      ],
-      "recipe": "Preparación paso a paso"
+      "ingredients": [{"name": "Producto", "amount": "100g", "calories": 100, "protein": 20}],
+      "recipe": "Preparación"
     }
   ]
 }
 
-IMPORTANTE:
-- Las ${mealsPerDay} comidas deben sumar EXACTAMENTE ${macros.calories} kcal y ${macros.protein}g proteína
-- NO incluir ningún alimento de la lista de prohibidos
-- Usar productos específicos de MERCADONA España`;
+⚠️ RECUERDA: Las ${mealsPerDay} comidas deben sumar ~${macros.calories} kcal y ~${macros.protein}g proteína.
+${dislikedFoods ? `🚫 VERIFICACIÓN FINAL: NO incluir: ${dislikedFoods}` : ''}`;
+
+    const systemPrompt = dislikedFoods
+      ? `Eres un nutricionista deportivo certificado. REGLA CRÍTICA: El usuario ha especificado alimentos que ODIA y NO PUEDE COMER: ${dislikedFoods}. NUNCA incluyas estos alimentos ni sus derivados. Verifica CADA ingrediente. Si dudas, usa una alternativa. Responde ÚNICAMENTE con JSON válido.`
+      : 'Eres un nutricionista deportivo certificado ISSN. Creas planes con comidas balanceadas y cantidades exactas en gramos. Responde ÚNICAMENTE con JSON válido.';
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 4000,
-      system: 'Eres un nutricionista deportivo certificado ISSN especializado en nutrición para rendimiento. Creas planes con 5 comidas cada 3 horas, timing de nutrientes pre/post entreno, y cantidades EXACTAS en gramos. Responde ÚNICAMENTE con JSON válido.',
+      system: systemPrompt,
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -977,26 +979,28 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
     const mealResult = await pool.query('SELECT name FROM meals WHERE id = $1', [meal_id]);
     const currentName = current_meal_name || mealResult.rows[0]?.name || '';
 
+    // Build strong forbidden warning
+    const forbiddenList = dislikedFoods
+      ? `🚨🚨🚨 ALIMENTOS TERMINANTEMENTE PROHIBIDOS 🚨🚨🚨
+❌ ${dislikedFoods.split(', ').join('\n❌ ')}
+Si incluyes CUALQUIERA de estos, la comida será RECHAZADA.`
+      : '';
+
     const prompt = `Genera UNA comida COMPLETAMENTE DIFERENTE con estos macros:
 - Calorías: ${calories} kcal (±50)
 - Proteína: ${protein_grams}g (±5g)
-- Tipo de comida: ${meal_type}
+- Tipo: ${meal_type}
+${forbiddenList}
 
-🚨 IMPORTANTE - MÁXIMA VARIEDAD:
-- La comida actual es: "${currentName}"
-- NO sugieras nada parecido
-- Usa ingredientes DIFERENTES (si es pollo, usa pescado/huevos/ternera)
-- Cambia el estilo de cocina (si es salteado, haz al horno/crudo/guisado)
-- Sé CREATIVO: wraps, bowls, tortitas proteicas, ensaladas, revueltos, etc.
+🚨 VARIEDAD OBLIGATORIA:
+- Comida actual: "${currentName}" - NO sugieras nada similar
+- Usa ingredientes DIFERENTES
+- Sé CREATIVO: wraps, bowls, tortitas proteicas, revueltos, etc.
 
-⚠️ MERCADONA (ESPAÑA) - Productos disponibles:
-Pechuga de pollo, Huevos, Atún claro, Salmón, Gambas, Ternera picada, Lomo de cerdo,
-Arroz, Pasta, Pan de molde, Tortillas de trigo, Patatas, Boniato,
-Yogur griego, Queso fresco batido 0%, Leche, Avena, Frutas, Verduras frescas
-
-🚫 PROHIBIDO:
-${dislikedFoods || 'Ninguno'}
-${currentName} (la comida actual)
+⚠️ MERCADONA ESPAÑA:
+Pechuga de pollo, Huevos, Ternera picada, Lomo de cerdo, Pavo,
+Arroz, Pasta, Pan integral, Patatas, Boniato,
+Yogur griego, Queso fresco batido 0%
 
 Responde SOLO con JSON:
 {
@@ -1114,24 +1118,24 @@ router.post('/regenerate-ingredient', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'No hay ingredientes en esta comida' });
     }
 
-    const prompt = `Necesito reemplazar UN ingrediente de una receta:
+    // Build strong forbidden warning
+    const forbiddenIngredients = dislikedFoods
+      ? `🚨 PROHIBIDO - El usuario ODIA estos alimentos:
+❌ ${dislikedFoods.split(', ').join('\n❌ ')}`
+      : '';
+
+    const prompt = `Reemplaza UN ingrediente:
 
 INGREDIENTE A REEMPLAZAR: ${ingredient_name}
-- Calorías aprox: ${ingredient_calories || 'desconocidas'}
-- Proteína aprox: ${ingredient_protein || 'desconocida'}g
+- Calorías: ~${ingredient_calories || 100} | Proteína: ~${ingredient_protein || 10}g
 
-OTROS INGREDIENTES DE LA RECETA (no cambiar):
+OTROS INGREDIENTES (no cambiar):
 ${currentIngredients.filter(i => i.name !== ingredient_name).map(i => `- ${i.name}: ${i.amount}`).join('\n')}
+${forbiddenIngredients}
 
-⚠️ MERCADONA ESPAÑA - Usa productos de Mercadona. NO usar marca "Hacendado".
+⚠️ MERCADONA ESPAÑA - NO usar: ${ingredient_name}
 
-🚫 ALIMENTOS PROHIBIDOS (NO usar):
-${dislikedFoods || 'Ninguno'}
-${ingredient_name} (el ingrediente a reemplazar)
-
-Preferencias del usuario:
-- Proteínas: ${profile.preferred_proteins?.join(', ') || 'pollo, pescado, huevos'}
-- Carbohidratos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+Preferencias: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'}, ${profile.preferred_carbs?.join(', ') || 'arroz, patata'}
 
 Responde SOLO con JSON:
 {
