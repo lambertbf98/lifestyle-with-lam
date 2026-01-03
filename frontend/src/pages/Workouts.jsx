@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { workouts as workoutsApi, coach as coachApi } from '../api';
+import { useTheme } from '../contexts/ThemeContext';
 import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 
 export default function Workouts() {
+  const { isDark } = useTheme();
   const [activePlan, setActivePlan] = useState(null);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,11 +38,8 @@ export default function Workouts() {
   const generatePlan = async () => {
     setGenerating(true);
     try {
-      // El endpoint generate-workout ahora guarda el plan directamente
       const response = await coachApi.generateWorkout({});
-
       if (response.data.success) {
-        // Recargar datos para mostrar el nuevo plan
         await loadData();
       }
     } catch (error) {
@@ -53,7 +52,6 @@ export default function Workouts() {
 
   const activatePlan = async (planId) => {
     try {
-      // TODO: Implementar endpoint para activar plan
       await loadData();
     } catch (error) {
       console.error('Error activating plan:', error);
@@ -72,7 +70,6 @@ export default function Workouts() {
       });
 
       if (response.data.success) {
-        // Update local state with new exercise
         setActivePlan(prev => ({
           ...prev,
           days: prev.days.map((day, idx) =>
@@ -97,7 +94,6 @@ export default function Workouts() {
     }
   };
 
-  // Calculate weekly stats
   const weekStats = {
     totalHours: history
       .filter(h => {
@@ -113,6 +109,22 @@ export default function Workouts() {
       weekAgo.setDate(weekAgo.getDate() - 7);
       return date >= weekAgo;
     }).length
+  };
+
+  // Dynamic styles for light/dark mode
+  const dayCardStyle = {
+    background: isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 0.6)',
+    backdropFilter: isDark ? 'none' : 'blur(10px)',
+    border: isDark ? '1px solid rgba(51, 65, 85, 1)' : '1px solid rgba(255, 255, 255, 0.5)'
+  };
+
+  const exerciseStyle = {
+    background: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+    backdropFilter: isDark ? 'none' : 'blur(8px)'
+  };
+
+  const buttonStyle = {
+    background: isDark ? 'rgba(51, 65, 85, 1)' : 'rgba(255, 255, 255, 0.6)'
   };
 
   if (loading) {
@@ -162,13 +174,13 @@ export default function Workouts() {
               <h2 className="text-xl font-bold">{activePlan.name}</h2>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-400">Semana {activePlan.week_number}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Semana {activePlan.week_number}</p>
               <p className="text-sm text-gray-500">{activePlan.days?.length || 0} días</p>
             </div>
           </div>
 
           {activePlan.description && (
-            <p className="text-sm text-gray-400 mb-4">{activePlan.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{activePlan.description}</p>
           )}
 
           {/* Workout Days */}
@@ -178,7 +190,7 @@ export default function Workouts() {
               const isExpanded = expandedDay === day.id;
 
               return (
-                <div key={day.id} className="rounded-xl border border-dark-600 bg-dark-800 overflow-hidden">
+                <div key={day.id} className="rounded-xl overflow-hidden" style={dayCardStyle}>
                   {/* Day Header */}
                   <button
                     onClick={() => setExpandedDay(isExpanded ? null : day.id)}
@@ -189,7 +201,7 @@ export default function Workouts() {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <h3 className="font-semibold truncate">{day.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1">
                           <Dumbbell size={14} />
                           {exerciseCount} ejercicios
@@ -211,17 +223,18 @@ export default function Workouts() {
 
                   {/* Exercises List (Expandable) */}
                   {isExpanded && (
-                    <div className="border-t border-dark-600 p-3 space-y-2 animate-fade-in">
+                    <div className="border-t border-gray-200 dark:border-dark-600 p-3 space-y-2 animate-fade-in">
                       {day.exercises?.map((exercise) => (
                         <div
                           key={exercise.id}
-                          className="flex items-center gap-3 p-3 bg-dark-700/50 rounded-xl"
+                          className="flex items-center gap-3 p-3 rounded-xl"
+                          style={exerciseStyle}
                         >
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">
                               {exercise.exercise?.name_es || exercise.exercise?.name || 'Ejercicio'}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {exercise.sets} series × {exercise.reps} • {exercise.rest_seconds}s descanso
                             </p>
                           </div>
@@ -231,7 +244,8 @@ export default function Workouts() {
                               regenerateExercise(exercise, dayIndex);
                             }}
                             disabled={regeneratingExercise === exercise.id}
-                            className="w-9 h-9 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                            className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                            style={buttonStyle}
                             title="Cambiar ejercicio"
                           >
                             {regeneratingExercise === exercise.id ? (
@@ -259,11 +273,14 @@ export default function Workouts() {
         </div>
       ) : (
         <div className="card text-center py-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-dark-700 to-dark-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: isDark ? 'linear-gradient(to bottom right, #334155, #1e293b)' : 'rgba(255, 255, 255, 0.6)' }}
+          >
             <Dumbbell size={40} className="text-gray-500" />
           </div>
           <h3 className="text-lg font-semibold mb-2">Sin plan activo</h3>
-          <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs mx-auto">
             Genera un plan de entrenamiento personalizado basado en tus objetivos y nivel de experiencia
           </p>
           <button
@@ -291,19 +308,19 @@ export default function Workouts() {
         <div className="stat-card">
           <div className="flex items-center gap-2 mb-2">
             <Clock size={18} className="text-accent-primary" />
-            <span className="text-sm text-gray-400">Esta Semana</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Esta Semana</span>
           </div>
           <p className="text-2xl font-bold">
-            {weekStats.totalHours.toFixed(1)} <span className="text-base font-normal text-gray-400">hrs</span>
+            {weekStats.totalHours.toFixed(1)} <span className="text-base font-normal text-gray-500 dark:text-gray-400">hrs</span>
           </p>
         </div>
         <div className="stat-card">
           <div className="flex items-center gap-2 mb-2">
             <Trophy size={18} className="text-neon-purple" />
-            <span className="text-sm text-gray-400">Completados</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Completados</span>
           </div>
           <p className="text-2xl font-bold">
-            {weekStats.completedWorkouts} <span className="text-base font-normal text-gray-400">entrenos</span>
+            {weekStats.completedWorkouts} <span className="text-base font-normal text-gray-500 dark:text-gray-400">entrenos</span>
           </p>
         </div>
       </div>
@@ -320,7 +337,7 @@ export default function Workouts() {
               <div key={plan.id} className="card flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">{plan.name}</h3>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {plan.days_count} días • Semana {plan.week_number}
                   </p>
                 </div>
