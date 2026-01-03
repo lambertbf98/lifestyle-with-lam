@@ -489,7 +489,14 @@ Responde SOLO con JSON válido:
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 4000,
-      system: 'Eres un entrenador personal certificado NSCA con especialización en entrenamiento femenino y masculino. Responde ÚNICAMENTE con JSON válido. Genera entrenamientos COMPLETOS de 45 minutos con 6-7 ejercicios por día.',
+      temperature: 0.9, // Higher temperature for more variety
+      system: `Eres un entrenador personal certificado NSCA. IMPORTANTE: Genera entrenamientos VARIADOS.
+
+Semilla de variación: ${varietySeed} - usa esto para seleccionar ejercicios DIFERENTES en cada generación.
+
+Responde ÚNICAMENTE con JSON válido. Genera entrenamientos COMPLETOS de 45 minutos con 6-7 ejercicios por día.
+
+REGLA DE VARIEDAD: Para cada grupo muscular, elige ejercicios DISTINTOS a los que normalmente elegirías. Si hay 5 ejercicios para pecho, NO siempre elijas Press de Banca primero - varía el orden y la selección.`,
       messages: [{ role: 'user', content: prompt }]
     });
 

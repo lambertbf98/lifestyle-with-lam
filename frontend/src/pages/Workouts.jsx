@@ -325,33 +325,6 @@ export default function Workouts() {
         </div>
       </div>
 
-      {/* Previous Plans */}
-      {plans.filter(p => !p.is_active).length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <Calendar size={20} className="text-gray-400" />
-            Planes Anteriores
-          </h2>
-          <div className="space-y-3">
-            {plans.filter(p => !p.is_active).map(plan => (
-              <div key={plan.id} className="card flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">{plan.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {plan.days_count} días • Semana {plan.week_number}
-                  </p>
-                </div>
-                <button
-                  onClick={() => activatePlan(plan.id)}
-                  className="text-accent-primary text-sm font-medium hover:underline"
-                >
-                  Activar
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -316,6 +316,35 @@ router.post('/update-gifs', authenticateToken, async (req, res) => {
   }
 });
 
+// Debug endpoint - check exercises and their GIFs
+router.get('/debug-exercises', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, name_es, muscle_group, gif_url
+       FROM exercises
+       ORDER BY name_es`
+    );
+
+    // Check for specific exercises
+    const prensa = result.rows.find(e => e.name_es?.toLowerCase().includes('prensa de pierna'));
+    const elevaciones = result.rows.find(e => e.name_es?.toLowerCase().includes('elevaciones laterales'));
+    const sentadilla = result.rows.find(e => e.name_es?.toLowerCase().includes('sentadilla con barra'));
+
+    res.json({
+      total: result.rows.length,
+      specificExercises: {
+        prensaDePiernas: prensa || 'NOT FOUND',
+        elevacionesLaterales: elevaciones || 'NOT FOUND',
+        sentadillaConBarra: sentadilla || 'NOT FOUND'
+      },
+      allExercises: result.rows
+    });
+  } catch (error) {
+    console.error('Debug exercises error:', error);
+    res.status(500).json({ error: 'Failed to get debug info' });
+  }
+});
+
 // Clear workout history (for testing)
 router.delete('/clear-history', authenticateToken, async (req, res) => {
   const client = await pool.connect();
