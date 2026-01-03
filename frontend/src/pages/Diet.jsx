@@ -148,12 +148,13 @@ export default function Diet() {
     }
   };
 
-  const regenerateIngredient = async (mealId, ingredient) => {
-    const key = `${mealId}-${ingredient.name}`;
+  const regenerateIngredient = async (mealId, ingredient, ingredientIndex) => {
+    const key = `${mealId}-${ingredientIndex}`;
     setRegeneratingIngredient(key);
     try {
       const response = await coachApi.regenerateIngredient({
         meal_id: mealId,
+        ingredient_index: ingredientIndex,
         ingredient_name: ingredient.name,
         ingredient_calories: ingredient.calories,
         ingredient_protein: ingredient.protein
@@ -511,13 +512,13 @@ export default function Diet() {
                             <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Ingredientes:</h4>
                             <div className={`rounded-xl p-3 space-y-2 ${isDark ? 'bg-dark-700/50' : 'bg-gray-100/80'}`}>
                               {ingredients.main.map((ing, i) => {
-                                const isRegenerating = regeneratingIngredient === `${meal.id}-${ing.name}`;
+                                const isRegenerating = regeneratingIngredient === `${meal.id}-${i}`;
                                 return (
                                   <div key={i} className="flex items-center justify-between text-sm">
                                     <span className={`flex-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>{ing.name}</span>
                                     <span className="text-accent-primary font-medium mr-2">{ing.amount}</span>
                                     <button
-                                      onClick={() => regenerateIngredient(meal.id, ing)}
+                                      onClick={() => regenerateIngredient(meal.id, ing, i)}
                                       disabled={isRegenerating}
                                       className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 ${
                                         isDark ? 'bg-dark-600 hover:bg-dark-500' : 'bg-gray-200 hover:bg-gray-300'

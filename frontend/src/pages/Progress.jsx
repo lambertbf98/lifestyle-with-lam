@@ -4,8 +4,10 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, Area
 import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function Progress() {
+  const { isDark } = useTheme();
   const [progressData, setProgressData] = useState(null);
   const [weeklySummary, setWeeklySummary] = useState(null);
   const [achievements, setAchievements] = useState([]);
@@ -188,7 +190,7 @@ export default function Progress() {
               className={`px-3 py-1 rounded-lg text-sm transition-all ${
                 period === p
                   ? 'bg-accent-primary text-dark-900'
-                  : 'bg-dark-700 text-gray-400'
+                  : isDark ? 'bg-dark-700 text-gray-400' : 'bg-gray-200 text-gray-600'
               }`}
             >
               {p}d
@@ -202,7 +204,7 @@ export default function Progress() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">Peso</h2>
-            <p className="text-sm text-gray-400">Últimos {period} días</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Últimos {period} días</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -250,10 +252,10 @@ export default function Progress() {
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#1e293b',
-                    border: '1px solid #334155',
+                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                    border: isDark ? '1px solid #334155' : '1px solid #e5e7eb',
                     borderRadius: '12px',
-                    color: '#fff'
+                    color: isDark ? '#fff' : '#1f2937'
                   }}
                   formatter={(value) => [`${value} kg`, 'Peso']}
                   labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
@@ -270,7 +272,7 @@ export default function Progress() {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center border border-dashed border-dark-600 rounded-xl">
+            <div className={`h-full flex items-center justify-center border border-dashed rounded-xl ${isDark ? 'border-dark-600' : 'border-gray-300'}`}>
               <div className="text-center">
                 <Scale size={28} className="text-gray-600 mx-auto mb-2" />
                 <p className="text-gray-500 text-sm">Registra tu peso para ver el gráfico</p>
@@ -280,21 +282,21 @@ export default function Progress() {
         </div>
 
         {/* Weight Stats */}
-        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-dark-600">
+        <div className={`grid grid-cols-4 gap-2 mt-4 pt-4 border-t ${isDark ? 'border-dark-600' : 'border-gray-200'}`}>
           <button
             onClick={() => setShowInitialWeightModal(true)}
-            className="text-center hover:bg-dark-700/50 rounded-lg p-1 transition-colors"
+            className={`text-center rounded-lg p-1 transition-colors ${isDark ? 'hover:bg-dark-700/50' : 'hover:bg-gray-100'}`}
           >
             <p className="text-xl font-bold">{progressData?.weight?.initial || '--'}</p>
-            <p className="text-xs text-gray-400">Inicial</p>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Inicial</p>
           </button>
           <div className="text-center p-1">
             <p className="text-xl font-bold">{progressData?.weight?.current || '--'}</p>
-            <p className="text-xs text-gray-400">Actual</p>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Actual</p>
           </div>
           <div className="text-center p-1">
             <p className="text-xl font-bold">{progressData?.weight?.target || '--'}</p>
-            <p className="text-xs text-gray-400">Objetivo</p>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Objetivo</p>
           </div>
           <div className="text-center p-1">
             <p className={`text-xl font-bold ${
@@ -302,7 +304,7 @@ export default function Progress() {
             }`}>
               {weightToGoal ? `${Math.abs(parseFloat(weightToGoal)).toFixed(1)}` : '--'}
             </p>
-            <p className="text-xs text-gray-400">Diferencia</p>
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Diferencia</p>
           </div>
         </div>
       </div>
@@ -312,7 +314,7 @@ export default function Progress() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold">Medidas Corporales</h2>
-            <p className="text-sm text-gray-400">Seguimiento en cm</p>
+            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Seguimiento en cm</p>
           </div>
           <button
             onClick={() => setShowMeasurementsModal(true)}
@@ -337,9 +339,9 @@ export default function Progress() {
                 const previous = measurementsHistory[1]?.[key];
                 const diff = latest && previous ? (latest - previous).toFixed(1) : null;
                 return (
-                  <div key={key} className="bg-dark-700/50 rounded-xl p-2">
+                  <div key={key} className={`rounded-xl p-2 ${isDark ? 'bg-dark-700/50' : 'bg-white/80 border border-gray-200'}`}>
                     <p className="text-lg font-bold">{latest || '--'}</p>
-                    <p className="text-xs text-gray-400">{label}</p>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
                     {diff && (
                       <p className={`text-xs ${parseFloat(diff) < 0 ? 'text-accent-success' : 'text-accent-warning'}`}>
                         {parseFloat(diff) > 0 ? '+' : ''}{diff}
@@ -430,7 +432,7 @@ export default function Progress() {
       {/* Weight Modal */}
       {showWeightModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up">
+          <div className={`rounded-2xl w-full max-w-sm p-6 animate-slide-up ${isDark ? 'bg-dark-800' : 'bg-white'}`}>
             <h3 className="text-xl font-bold mb-4">Registrar Peso</h3>
             <div className="mb-4">
               <label className="label">Peso (kg)</label>
@@ -465,9 +467,9 @@ export default function Progress() {
       {/* Initial Weight Modal */}
       {showInitialWeightModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up">
+          <div className={`rounded-2xl w-full max-w-sm p-6 animate-slide-up ${isDark ? 'bg-dark-800' : 'bg-white'}`}>
             <h3 className="text-xl font-bold mb-4">Peso Inicial</h3>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               Este es el peso con el que empezaste tu camino fitness.
             </p>
             <div className="mb-4">
@@ -503,7 +505,7 @@ export default function Progress() {
       {/* Measurements Modal */}
       {showMeasurementsModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-dark-800 rounded-2xl w-full max-w-sm p-6 animate-slide-up max-h-[80vh] overflow-y-auto">
+          <div className={`rounded-2xl w-full max-w-sm p-6 animate-slide-up max-h-[80vh] overflow-y-auto ${isDark ? 'bg-dark-800' : 'bg-white'}`}>
             <h3 className="text-xl font-bold mb-4">Registrar Medidas</h3>
             <div className="space-y-3">
               <div>
@@ -557,7 +559,7 @@ export default function Progress() {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-3">Solo rellena las medidas que quieras registrar</p>
+            <p className={`text-xs mt-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Solo rellena las medidas que quieras registrar</p>
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setShowMeasurementsModal(false)}

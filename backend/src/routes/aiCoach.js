@@ -671,22 +671,20 @@ CONDIMENTOS Y EXTRAS:
 Ajo, Limón, Lima, Especias (pimentón, comino, curry, orégano, albahaca), Salsa de soja, Vinagre balsámico, Mostaza, Miel, Cacao puro
 `;
 
-    // Build JSON template with EXACT values per meal - require 4-6 ingredients
+    // Build JSON template with EXACT values per meal - 2-5 ingredients depending on meal complexity
     const mealsJsonTemplate = mealsWithMacros.map(m => `    {
       "meal_type": "${m.type}",
-      "name": "${m.name} - [nombre creativo del plato]",
-      "description": "Descripción del plato",
+      "name": "${m.name} - [nombre del plato]",
+      "description": "Descripción breve",
       "calories": ${m.calories},
       "protein_grams": ${m.protein},
       "carbs_grams": ${m.carbs},
       "fat_grams": ${m.fat},
       "ingredients": [
-        {"name": "Proteína principal", "amount": "Xg", "calories": XX, "protein": XX},
-        {"name": "Carbohidrato", "amount": "Xg", "calories": XX, "protein": XX},
-        {"name": "Verdura/Fruta", "amount": "Xg", "calories": XX, "protein": XX},
-        {"name": "Grasa/Extra", "amount": "Xg", "calories": XX, "protein": XX}
+        {"name": "Ingrediente 1", "amount": "Xg", "calories": XX, "protein": XX},
+        {"name": "Ingrediente 2", "amount": "Xg", "calories": XX, "protein": XX}
       ],
-      "recipe": "1. Paso uno\\n2. Paso dos\\n3. Paso tres"
+      "recipe": "Preparación sencilla"
     }`).join(',\n');
 
     const prompt = `Genera un plan de dieta VARIADO y DELICIOSO:
@@ -703,12 +701,12 @@ ${mercadonaProducts}
 - Proteínas favoritas: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos, ternera'}
 - Carbos favoritos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
 
-📝 REGLAS IMPORTANTES:
-1. MÍNIMO 4 ingredientes por comida (proteína + carbo + verdura/fruta + grasa/extra)
-2. Usa ingredientes DIFERENTES en cada comida (no repetir el mismo pollo en todas)
-3. Varía los métodos de cocción: plancha, horno, salteado, crudo, hervido
-4. Sé CREATIVO: bowls, wraps, ensaladas, revueltos, tortillas, tostadas, etc.
-5. Incluye recetas DETALLADAS paso a paso
+📝 REGLAS:
+1. Entre 2-5 ingredientes por comida (comidas simples o elaboradas según el tipo)
+2. Usa ingredientes DIFERENTES en cada comida (no repetir la misma proteína)
+3. Varía métodos: plancha, horno, salteado, crudo, hervido
+4. Snacks/media mañana pueden ser simples (2-3 ingredientes)
+5. Comidas principales pueden ser más elaboradas (3-5 ingredientes)
 
 Responde SOLO con JSON válido:
 {
@@ -1099,27 +1097,24 @@ ${forbiddenList}
 ${foodOptions}
 
 📝 REQUISITOS:
-1. MÍNIMO 4-5 ingredientes diferentes
-2. Sé MUY CREATIVO: bowls hawaianos, wraps mexicanos, tortillas rellenas, ensaladas templadas, revueltos gourmet, tostadas fitness, poke bowls, burritos, quesadillas, etc.
-3. Usa una proteína DIFERENTE a la comida actual
-4. Incluye receta detallada paso a paso
+1. Entre 2-5 ingredientes (simple o elaborado según prefieras)
+2. Sé CREATIVO: bowls, wraps, tortillas, ensaladas, revueltos, tostadas, etc.
+3. Usa proteína DIFERENTE a la comida actual
+4. Receta paso a paso
 
 Responde SOLO con JSON:
 {
-  "name": "Nombre creativo del plato",
-  "description": "Descripción apetitosa",
+  "name": "Nombre del plato",
+  "description": "Descripción breve",
   "calories": ${calories},
   "protein_grams": ${protein_grams},
   "carbs_grams": XX,
   "fat_grams": XX,
   "ingredients": [
-    {"name": "Proteína", "amount": "Xg", "calories": XX, "protein": XX},
-    {"name": "Carbohidrato", "amount": "Xg", "calories": XX, "protein": XX},
-    {"name": "Verdura/Fruta", "amount": "Xg", "calories": XX, "protein": XX},
-    {"name": "Grasa/Extra", "amount": "Xg", "calories": XX, "protein": XX},
-    {"name": "Condimento/Salsa", "amount": "Xg", "calories": XX, "protein": XX}
+    {"name": "Ingrediente 1", "amount": "Xg", "calories": XX, "protein": XX},
+    {"name": "Ingrediente 2", "amount": "Xg", "calories": XX, "protein": XX}
   ],
-  "recipe": "1. Primer paso\\n2. Segundo paso\\n3. Tercer paso\\n4. Servir"
+  "recipe": "1. Paso uno\\n2. Paso dos"
 }`;
 
     const response = await anthropic.messages.create({
@@ -1187,7 +1182,7 @@ Responde SOLO con JSON:
 
 // Regenerate a single ingredient in a meal
 router.post('/regenerate-ingredient', authenticateToken, async (req, res) => {
-  const { meal_id, ingredient_name, ingredient_calories, ingredient_protein } = req.body;
+  const { meal_id, ingredient_index, ingredient_name, ingredient_calories, ingredient_protein } = req.body;
 
   try {
     const profileResult = await pool.query(
@@ -1299,14 +1294,11 @@ Responde SOLO con JSON (macros similares):
       throw new Error('AI did not return a valid ingredient name');
     }
 
-    // Update the meal ingredients in database (case-insensitive match)
-    const ingredientNameLower = ingredient_name.toLowerCase().trim();
-    let found = false;
+    // Update the meal ingredients in database using INDEX (fixes duplicate name bug)
+    const idx = typeof ingredient_index === 'number' ? ingredient_index : parseInt(ingredient_index);
 
-    const updatedIngredients = currentIngredients.map(ing => {
-      const ingNameLower = (ing.name || '').toLowerCase().trim();
-      if (ingNameLower === ingredientNameLower || ingNameLower.includes(ingredientNameLower) || ingredientNameLower.includes(ingNameLower)) {
-        found = true;
+    const updatedIngredients = currentIngredients.map((ing, i) => {
+      if (i === idx) {
         return {
           name: newIngredient.name,
           amount: newIngredient.amount || ing.amount,
@@ -1317,16 +1309,7 @@ Responde SOLO con JSON (macros similares):
       return ing;
     });
 
-    // If not found by name, replace the first ingredient as fallback
-    if (!found && updatedIngredients.length > 0) {
-      console.log(`Ingredient "${ingredient_name}" not found, replacing first ingredient`);
-      updatedIngredients[0] = {
-        name: newIngredient.name,
-        amount: newIngredient.amount || updatedIngredients[0].amount,
-        calories: newIngredient.calories || updatedIngredients[0].calories,
-        protein: newIngredient.protein || updatedIngredients[0].protein
-      };
-    }
+    console.log(`Replacing ingredient at index ${idx}: "${ingredient_name}" -> "${newIngredient.name}"`);
 
     // Preserve any other properties in ingredientsObj (like extras)
     const updatedIngredientsObj = {
