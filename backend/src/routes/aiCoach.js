@@ -646,35 +646,71 @@ Verifica CADA ingrediente antes de incluirlo.
 `
       : '';
 
-    // Build JSON template with EXACT values per meal
+    // HUGE list of Mercadona products for variety
+    const mercadonaProducts = `
+PROTEÍNAS (elige variedad):
+- Carnes: Pechuga de pollo, Contramuslos de pollo, Pechuga de pavo, Filetes de pavo, Solomillo de cerdo, Lomo de cerdo, Chuletas de cerdo, Ternera picada, Filetes de ternera, Hamburguesas de pollo, Albóndigas
+- Pescados: Salmón fresco, Lomos de salmón, Merluza, Bacalao, Lubina, Dorada, Atún fresco, Gambas peladas, Langostinos, Mejillones, Calamares, Sepia
+- Huevos: Huevos enteros, Claras de huevo líquidas, Huevos cocidos
+- Lácteos proteicos: Yogur griego natural, Skyr, Queso fresco batido 0%, Requesón, Queso cottage, Queso fresco en tacos, Mozzarella fresca
+- Legumbres: Lentejas cocidas, Garbanzos cocidos, Alubias blancas, Edamame, Tofu firme
+
+CARBOHIDRATOS (elige variedad):
+- Cereales: Arroz basmati, Arroz integral, Quinoa, Cuscús, Bulgur, Copos de avena, Avena instantánea
+- Tubérculos: Patatas, Boniato, Yuca
+- Pan/Pasta: Pan integral de molde, Pan de centeno, Tortitas de arroz, Tortitas de maíz, Tortillas de trigo, Pasta integral, Macarrones, Espaguetis, Fideos de arroz
+- Frutas: Plátano, Manzana, Pera, Naranja, Mandarina, Kiwi, Fresas, Arándanos, Frambuesas, Mango, Piña, Uvas, Melocotón, Dátiles, Pasas
+
+VERDURAS Y HORTALIZAS:
+Brócoli, Espinacas frescas, Espinacas baby, Judías verdes, Calabacín, Berenjena, Pimientos rojos, Pimientos verdes, Tomate, Tomate cherry, Lechuga, Rúcula, Canónigos, Zanahoria, Pepino, Cebolla, Champiñones, Setas, Espárragos, Alcachofas, Aguacate, Maíz dulce, Guisantes
+
+GRASAS SALUDABLES:
+Aceite de oliva virgen extra, Aceite de coco, Aguacate, Almendras, Nueces, Cacahuetes, Anacardos, Pistachos, Mantequilla de cacahuete, Mantequilla de almendras, Semillas de chía, Semillas de lino, Aceitunas
+
+CONDIMENTOS Y EXTRAS:
+Ajo, Limón, Lima, Especias (pimentón, comino, curry, orégano, albahaca), Salsa de soja, Vinagre balsámico, Mostaza, Miel, Cacao puro
+`;
+
+    // Build JSON template with EXACT values per meal - require 4-6 ingredients
     const mealsJsonTemplate = mealsWithMacros.map(m => `    {
       "meal_type": "${m.type}",
-      "name": "${m.name} - [nombre del plato]",
-      "description": "Descripción breve",
+      "name": "${m.name} - [nombre creativo del plato]",
+      "description": "Descripción del plato",
       "calories": ${m.calories},
       "protein_grams": ${m.protein},
       "carbs_grams": ${m.carbs},
       "fat_grams": ${m.fat},
-      "ingredients": [{"name": "Producto", "amount": "100g", "calories": XX, "protein": XX}],
-      "recipe": "Preparación"
+      "ingredients": [
+        {"name": "Proteína principal", "amount": "Xg", "calories": XX, "protein": XX},
+        {"name": "Carbohidrato", "amount": "Xg", "calories": XX, "protein": XX},
+        {"name": "Verdura/Fruta", "amount": "Xg", "calories": XX, "protein": XX},
+        {"name": "Grasa/Extra", "amount": "Xg", "calories": XX, "protein": XX}
+      ],
+      "recipe": "1. Paso uno\\n2. Paso dos\\n3. Paso tres"
     }`).join(',\n');
 
-    const prompt = `Genera un plan de dieta con EXACTAMENTE estas calorías:
+    const prompt = `Genera un plan de dieta VARIADO y DELICIOSO:
 ${forbiddenWarning}
-📊 OBJETIVO CALÓRICO TOTAL: ${macros.calories} kcal/día
-(TDEE: ${Math.round(tdee)} - Déficit aplicado = ${macros.calories} kcal)
+📊 OBJETIVO: ${macros.calories} kcal/día
 
-🎯 CALORÍAS EXACTAS POR COMIDA (NO CAMBIAR):
+🎯 CALORÍAS EXACTAS POR COMIDA:
 ${mealRequirements}
 
-TOTAL: ${macros.calories} kcal | ${macros.protein}g prot | ${macros.carbs}g carbs | ${macros.fat}g grasa
+🛒 PRODUCTOS MERCADONA DISPONIBLES:
+${mercadonaProducts}
 
-⚠️ MERCADONA ESPAÑA - Productos:
-Pollo, Huevos, Ternera, Cerdo, Pavo, Arroz, Pasta, Pan integral, Patatas, Boniato, Yogur griego, Queso fresco 0%
+👤 PREFERENCIAS:
+- Proteínas favoritas: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos, ternera'}
+- Carbos favoritos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
 
-Preferencias: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'} | ${profile.preferred_carbs?.join(', ') || 'arroz, patata'}
+📝 REGLAS IMPORTANTES:
+1. MÍNIMO 4 ingredientes por comida (proteína + carbo + verdura/fruta + grasa/extra)
+2. Usa ingredientes DIFERENTES en cada comida (no repetir el mismo pollo en todas)
+3. Varía los métodos de cocción: plancha, horno, salteado, crudo, hervido
+4. Sé CREATIVO: bowls, wraps, ensaladas, revueltos, tortillas, tostadas, etc.
+5. Incluye recetas DETALLADAS paso a paso
 
-Responde SOLO con JSON. USA LAS CALORÍAS EXACTAS indicadas arriba:
+Responde SOLO con JSON válido:
 {
   "name": "Plan Nutricional ${macros.calories} kcal",
   "daily_calories": ${macros.calories},
@@ -685,9 +721,7 @@ Responde SOLO con JSON. USA LAS CALORÍAS EXACTAS indicadas arriba:
 ${mealsJsonTemplate}
   ]
 }
-
-🚨 VERIFICACIÓN: La suma de calorías de todas las comidas DEBE ser ${macros.calories} kcal (±20).
-${dislikedFoods ? `🚫 NO incluir: ${dislikedFoods}` : ''}`;
+${dislikedFoods ? `\n🚫 RECORDATORIO FINAL - NO INCLUIR: ${dislikedFoods}` : ''}`;
 
     const systemPrompt = dislikedFoods
       ? `Eres un nutricionista deportivo certificado. REGLA CRÍTICA: El usuario ha especificado alimentos que ODIA y NO PUEDE COMER: ${dislikedFoods}. NUNCA incluyas estos alimentos ni sus derivados. Verifica CADA ingrediente. Si dudas, usa una alternativa. Responde ÚNICAMENTE con JSON válido.`
@@ -1041,37 +1075,51 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
 
     // Build strong forbidden warning
     const forbiddenList = dislikedFoods
-      ? `🚨🚨🚨 ALIMENTOS TERMINANTEMENTE PROHIBIDOS 🚨🚨🚨
-❌ ${dislikedFoods.split(', ').join('\n❌ ')}
-Si incluyes CUALQUIERA de estos, la comida será RECHAZADA.`
+      ? `🚨 ALIMENTOS PROHIBIDOS:
+❌ ${dislikedFoods.split(', ').join(', ')}`
       : '';
 
-    const prompt = `Genera UNA comida COMPLETAMENTE DIFERENTE con estos macros:
-- Calorías: ${calories} kcal (±50)
-- Proteína: ${protein_grams}g (±5g)
+    // Huge variety of options
+    const foodOptions = `
+PROTEÍNAS: Pechuga de pollo, Contramuslos, Pavo, Solomillo de cerdo, Lomo de cerdo, Ternera picada, Filetes de ternera, Salmón, Atún fresco, Gambas, Langostinos, Huevos, Yogur griego, Skyr, Queso fresco 0%, Lentejas, Garbanzos, Tofu
+CARBOS: Arroz basmati, Arroz integral, Quinoa, Cuscús, Avena, Patatas, Boniato, Pan integral, Tortillas de trigo, Pasta integral, Plátano, Manzana, Fresas, Arándanos, Mango
+VERDURAS: Brócoli, Espinacas, Calabacín, Pimientos, Tomate, Champiñones, Zanahoria, Pepino, Cebolla, Aguacate, Lechuga, Rúcula
+GRASAS: Aceite de oliva, Aguacate, Almendras, Nueces, Mantequilla de cacahuete, Semillas de chía`;
+
+    const prompt = `Genera UNA comida COMPLETAMENTE DIFERENTE:
+
+📊 MACROS EXACTOS:
+- Calorías: ${calories} kcal | Proteína: ${protein_grams}g
 - Tipo: ${meal_type}
 ${forbiddenList}
 
-🚨 VARIEDAD OBLIGATORIA:
-- Comida actual: "${currentName}" - NO sugieras nada similar
-- Usa ingredientes DIFERENTES
-- Sé CREATIVO: wraps, bowls, tortitas proteicas, revueltos, etc.
+🚫 COMIDA ACTUAL (no repetir): "${currentName}"
 
-⚠️ MERCADONA ESPAÑA:
-Pechuga de pollo, Huevos, Ternera picada, Lomo de cerdo, Pavo,
-Arroz, Pasta, Pan integral, Patatas, Boniato,
-Yogur griego, Queso fresco batido 0%
+🛒 OPCIONES MERCADONA:
+${foodOptions}
+
+📝 REQUISITOS:
+1. MÍNIMO 4-5 ingredientes diferentes
+2. Sé MUY CREATIVO: bowls hawaianos, wraps mexicanos, tortillas rellenas, ensaladas templadas, revueltos gourmet, tostadas fitness, poke bowls, burritos, quesadillas, etc.
+3. Usa una proteína DIFERENTE a la comida actual
+4. Incluye receta detallada paso a paso
 
 Responde SOLO con JSON:
 {
-  "name": "Nombre del plato (creativo y diferente)",
-  "description": "Descripción breve",
+  "name": "Nombre creativo del plato",
+  "description": "Descripción apetitosa",
   "calories": ${calories},
   "protein_grams": ${protein_grams},
   "carbs_grams": XX,
   "fat_grams": XX,
-  "ingredients": [{"name": "Ingrediente", "amount": "cantidad", "calories": XX, "protein": XX}],
-  "recipe": "Preparación paso a paso"
+  "ingredients": [
+    {"name": "Proteína", "amount": "Xg", "calories": XX, "protein": XX},
+    {"name": "Carbohidrato", "amount": "Xg", "calories": XX, "protein": XX},
+    {"name": "Verdura/Fruta", "amount": "Xg", "calories": XX, "protein": XX},
+    {"name": "Grasa/Extra", "amount": "Xg", "calories": XX, "protein": XX},
+    {"name": "Condimento/Salsa", "amount": "Xg", "calories": XX, "protein": XX}
+  ],
+  "recipe": "1. Primer paso\\n2. Segundo paso\\n3. Tercer paso\\n4. Servir"
 }`;
 
     const response = await anthropic.messages.create({
@@ -1180,26 +1228,47 @@ router.post('/regenerate-ingredient', authenticateToken, async (req, res) => {
 
     // Build strong forbidden warning
     const forbiddenIngredients = dislikedFoods
-      ? `🚨 PROHIBIDO - El usuario ODIA estos alimentos:
-❌ ${dislikedFoods.split(', ').join('\n❌ ')}`
+      ? `🚨 PROHIBIDO: ${dislikedFoods}`
       : '';
 
-    const prompt = `Reemplaza UN ingrediente:
+    // Determine ingredient type for better suggestions
+    const proteinKeywords = ['pollo', 'pavo', 'cerdo', 'ternera', 'huevo', 'pescado', 'salmón', 'atún', 'gambas', 'yogur', 'queso', 'tofu', 'lentejas', 'garbanzos'];
+    const carbKeywords = ['arroz', 'pasta', 'pan', 'patata', 'boniato', 'avena', 'quinoa', 'tortilla', 'plátano', 'fruta'];
+    const vegKeywords = ['brócoli', 'espinaca', 'calabacín', 'pimiento', 'tomate', 'lechuga', 'zanahoria', 'pepino', 'cebolla', 'champiñón'];
 
-INGREDIENTE A REEMPLAZAR: ${ingredient_name}
-- Calorías: ~${ingredient_calories || 100} | Proteína: ~${ingredient_protein || 10}g
+    const ingredientLower = ingredient_name.toLowerCase();
+    let ingredientType = 'general';
+    let alternatives = '';
 
-OTROS INGREDIENTES (no cambiar):
-${currentIngredients.filter(i => i.name !== ingredient_name).map(i => `- ${i.name}: ${i.amount}`).join('\n')}
-${forbiddenIngredients}
+    if (proteinKeywords.some(k => ingredientLower.includes(k))) {
+      ingredientType = 'proteína';
+      alternatives = 'Pechuga de pollo, Pavo, Lomo de cerdo, Ternera, Salmón, Atún, Gambas, Huevos, Yogur griego, Queso fresco 0%, Lentejas, Garbanzos, Tofu';
+    } else if (carbKeywords.some(k => ingredientLower.includes(k))) {
+      ingredientType = 'carbohidrato';
+      alternatives = 'Arroz basmati, Arroz integral, Quinoa, Cuscús, Pasta integral, Patatas, Boniato, Pan integral, Tortillas de trigo, Avena, Plátano';
+    } else if (vegKeywords.some(k => ingredientLower.includes(k))) {
+      ingredientType = 'verdura';
+      alternatives = 'Brócoli, Espinacas, Calabacín, Pimientos, Tomate, Champiñones, Zanahoria, Pepino, Cebolla, Lechuga, Rúcula, Aguacate';
+    } else {
+      alternatives = 'Aceite de oliva, Aguacate, Almendras, Nueces, Mantequilla de cacahuete, Semillas de chía, Limón, Especias';
+    }
 
-⚠️ MERCADONA ESPAÑA - NO usar: ${ingredient_name}
+    const prompt = `Reemplaza este ingrediente por otro SIMILAR en macros:
 
-Preferencias: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'}, ${profile.preferred_carbs?.join(', ') || 'arroz, patata'}
+🔄 INGREDIENTE A CAMBIAR: ${ingredient_name} (${ingredientType})
+- Calorías: ~${ingredient_calories || 100} kcal
+- Proteína: ~${ingredient_protein || 10}g
 
-Responde SOLO con JSON:
+🛒 ALTERNATIVAS SUGERIDAS (${ingredientType}):
+${alternatives}
+
+${forbiddenIngredients ? forbiddenIngredients : ''}
+
+⚠️ NO usar: ${ingredient_name}
+
+Responde SOLO con JSON (macros similares):
 {
-  "name": "Nombre del nuevo ingrediente",
+  "name": "Nombre del ingrediente nuevo",
   "amount": "cantidad (ej: 100g, 2 unidades)",
   "calories": ${ingredient_calories || 100},
   "protein": ${ingredient_protein || 10}
@@ -1225,10 +1294,39 @@ Responde SOLO con JSON:
       }
     }
 
-    // Update the meal ingredients in database (preserve other properties)
-    const updatedIngredients = currentIngredients.map(ing =>
-      ing.name === ingredient_name ? { ...ing, ...newIngredient } : ing
-    );
+    // Ensure newIngredient has all required fields
+    if (!newIngredient.name) {
+      throw new Error('AI did not return a valid ingredient name');
+    }
+
+    // Update the meal ingredients in database (case-insensitive match)
+    const ingredientNameLower = ingredient_name.toLowerCase().trim();
+    let found = false;
+
+    const updatedIngredients = currentIngredients.map(ing => {
+      const ingNameLower = (ing.name || '').toLowerCase().trim();
+      if (ingNameLower === ingredientNameLower || ingNameLower.includes(ingredientNameLower) || ingredientNameLower.includes(ingNameLower)) {
+        found = true;
+        return {
+          name: newIngredient.name,
+          amount: newIngredient.amount || ing.amount,
+          calories: newIngredient.calories || ing.calories,
+          protein: newIngredient.protein || ing.protein
+        };
+      }
+      return ing;
+    });
+
+    // If not found by name, replace the first ingredient as fallback
+    if (!found && updatedIngredients.length > 0) {
+      console.log(`Ingredient "${ingredient_name}" not found, replacing first ingredient`);
+      updatedIngredients[0] = {
+        name: newIngredient.name,
+        amount: newIngredient.amount || updatedIngredients[0].amount,
+        calories: newIngredient.calories || updatedIngredients[0].calories,
+        protein: newIngredient.protein || updatedIngredients[0].protein
+      };
+    }
 
     // Preserve any other properties in ingredientsObj (like extras)
     const updatedIngredientsObj = {
@@ -1240,6 +1338,8 @@ Responde SOLO con JSON:
       `UPDATE meals SET ingredients = $1 WHERE id = $2`,
       [JSON.stringify(updatedIngredientsObj), meal_id]
     );
+
+    console.log('Ingredient updated successfully:', ingredient_name, '->', newIngredient.name);
 
     res.json({
       success: true,
