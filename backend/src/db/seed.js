@@ -655,7 +655,7 @@ const seedExercises = async () => {
     if (count > 0) {
       console.log(`Exercises table already has ${count} exercises, force updating all GIFs...`);
       // Force update ALL exercises with correct GIFs (not just empty ones)
-      client.release(); // Release before calling forceUpdateAllGifs which gets its own connection
+      // Note: forceUpdateAllGifs gets its own connection, and finally block will release this client
       await forceUpdateAllGifs();
       return;
     }
