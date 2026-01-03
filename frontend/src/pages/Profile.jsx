@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { user as userApi, workouts as workoutsApi } from '../api';
-import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check, Plus } from 'lucide-react';
+import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check, Plus, Sun, Moon } from 'lucide-react';
 
 const activityLabels = {
   sedentary: 'Sedentario',
@@ -40,6 +41,7 @@ const goalOptions = [
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -150,7 +152,7 @@ export default function Profile() {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 bg-dark-700 rounded-xl flex items-center justify-center"
+          className="w-10 h-10 bg-gray-200 dark:bg-dark-700 rounded-xl flex items-center justify-center"
         >
           <ArrowLeft size={20} />
         </button>
@@ -175,13 +177,38 @@ export default function Profile() {
         )}
       </div>
 
+      {/* Apariencia */}
+      <div className="card">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {isDark ? <Moon size={20} className="text-accent-primary" /> : <Sun size={20} className="text-accent-warning" />}
+            <div>
+              <h3 className="font-semibold">Apariencia</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{isDark ? 'Modo Oscuro' : 'Modo Claro'}</p>
+            </div>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className={`relative w-14 h-8 rounded-full transition-colors ${
+              isDark ? 'bg-accent-primary' : 'bg-gray-300'
+            }`}
+          >
+            <div
+              className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                isDark ? 'translate-x-7' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* Configuración General */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Configuración</h3>
           {editMode === 'settings' ? (
             <div className="flex gap-2">
-              <button onClick={() => setEditMode(null)} className="p-2 bg-dark-600 rounded-lg">
+              <button onClick={() => setEditMode(null)} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
                 <X size={18} />
               </button>
               <button onClick={handleSave} disabled={saving} className="p-2 bg-accent-primary rounded-lg text-dark-900">
@@ -189,7 +216,7 @@ export default function Profile() {
               </button>
             </div>
           ) : (
-            <button onClick={() => setEditMode('settings')} className="p-2 bg-dark-600 rounded-lg">
+            <button onClick={() => setEditMode('settings')} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
               <Edit3 size={18} />
             </button>
           )}
@@ -208,7 +235,7 @@ export default function Profile() {
                     className={`w-full p-3 rounded-xl border text-left transition-all ${
                       formData.fitness_goal === opt.value
                         ? 'bg-accent-primary/20 border-accent-primary'
-                        : 'bg-dark-700 border-dark-600'
+                        : 'bg-gray-100 border-gray-200 dark:bg-dark-700 dark:border-dark-600'
                     }`}
                   >
                     <div className={`font-medium ${formData.fitness_goal === opt.value ? 'text-accent-primary' : ''}`}>
@@ -231,7 +258,7 @@ export default function Profile() {
                     className={`w-full p-3 rounded-xl border text-left transition-all ${
                       formData.activity_level === opt.value
                         ? 'bg-accent-primary/20 border-accent-primary'
-                        : 'bg-dark-700 border-dark-600'
+                        : 'bg-gray-100 border-gray-200 dark:bg-dark-700 dark:border-dark-600'
                     }`}
                   >
                     <div className={`font-medium ${formData.activity_level === opt.value ? 'text-accent-primary' : ''}`}>
@@ -305,24 +332,24 @@ export default function Profile() {
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-dark-700">
-              <span className="text-gray-300">Objetivo</span>
+            <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-dark-700">
+              <span className="text-gray-700 dark:text-gray-300">Objetivo</span>
               <span className="text-gray-400">{goalLabels[profile?.fitness_goal] || 'No definido'}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-dark-700">
-              <span className="text-gray-300">Nivel de Actividad</span>
+            <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-dark-700">
+              <span className="text-gray-700 dark:text-gray-300">Nivel de Actividad</span>
               <span className="text-gray-400">{activityLabels[profile?.activity_level] || 'No definido'}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-dark-700">
-              <span className="text-gray-300">Días de Entreno</span>
+            <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-dark-700">
+              <span className="text-gray-700 dark:text-gray-300">Días de Entreno</span>
               <span className="text-gray-400">{profile?.workout_days_per_week || 3} días/semana</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-dark-700">
-              <span className="text-gray-300">Comidas por día</span>
+            <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-dark-700">
+              <span className="text-gray-700 dark:text-gray-300">Comidas por día</span>
               <span className="text-gray-400">{profile?.meals_per_day || 5}</span>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-gray-300">Peso</span>
+              <span className="text-gray-700 dark:text-gray-300">Peso</span>
               <span className="text-gray-400">{profile?.current_weight_kg || '--'} → {profile?.target_weight_kg || '--'} kg</span>
             </div>
           </div>
@@ -335,7 +362,7 @@ export default function Profile() {
           <h3 className="font-semibold text-lg">Medidas Corporales</h3>
           {editMode === 'measurements' ? (
             <div className="flex gap-2">
-              <button onClick={() => setEditMode(null)} className="p-2 bg-dark-600 rounded-lg">
+              <button onClick={() => setEditMode(null)} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
                 <X size={18} />
               </button>
               <button onClick={handleSave} disabled={saving} className="p-2 bg-accent-primary rounded-lg text-dark-900">
@@ -343,7 +370,7 @@ export default function Profile() {
               </button>
             </div>
           ) : (
-            <button onClick={() => setEditMode('measurements')} className="p-2 bg-dark-600 rounded-lg">
+            <button onClick={() => setEditMode('measurements')} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
               <Edit3 size={18} />
             </button>
           )}
@@ -414,27 +441,27 @@ export default function Profile() {
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Pecho</p>
               <p className="font-bold">{profile?.chest_cm || '--'} cm</p>
             </div>
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Cintura</p>
               <p className="font-bold">{profile?.waist_cm || '--'} cm</p>
             </div>
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Cadera</p>
               <p className="font-bold">{profile?.hips_cm || '--'} cm</p>
             </div>
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Bícep</p>
               <p className="font-bold">{profile?.bicep_cm || '--'} cm</p>
             </div>
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Muslo</p>
               <p className="font-bold">{profile?.thigh_cm || '--'} cm</p>
             </div>
-            <div className="bg-dark-700/50 rounded-xl p-3 text-center">
+            <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-400">Gemelo</p>
               <p className="font-bold">{profile?.calf_cm || '--'} cm</p>
             </div>
@@ -448,7 +475,7 @@ export default function Profile() {
           <h3 className="font-semibold text-lg">Alimentos NO Deseados</h3>
           {editMode === 'disliked' ? (
             <div className="flex gap-2">
-              <button onClick={() => setEditMode(null)} className="p-2 bg-dark-600 rounded-lg">
+              <button onClick={() => setEditMode(null)} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
                 <X size={18} />
               </button>
               <button onClick={handleSave} disabled={saving} className="p-2 bg-accent-primary rounded-lg text-dark-900">
@@ -456,7 +483,7 @@ export default function Profile() {
               </button>
             </div>
           ) : (
-            <button onClick={() => setEditMode('disliked')} className="p-2 bg-dark-600 rounded-lg">
+            <button onClick={() => setEditMode('disliked')} className="p-2 bg-gray-200 dark:bg-dark-600 rounded-lg">
               <Edit3 size={18} />
             </button>
           )}

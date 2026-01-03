@@ -66,7 +66,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-400">{getGreeting()}</p>
+          <p className="text-gray-500 dark:text-gray-400">{getGreeting()}</p>
           <h1 className="text-2xl font-bold">{user?.name?.split(' ')[0]}</h1>
         </div>
         <Link
@@ -113,14 +113,14 @@ export default function Dashboard() {
       </div>
 
       {/* Objetivo - Full Width */}
-      <div className="bg-gradient-to-r from-accent-success/10 to-dark-800 rounded-2xl p-4 border border-accent-success/30">
+      <div className="bg-gradient-to-r from-accent-success/10 to-gray-100 dark:to-dark-800 rounded-2xl p-4 border border-accent-success/30">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-accent-success/20 rounded-2xl flex items-center justify-center">
             <Trophy size={28} className="text-accent-success" />
           </div>
           <div className="flex-1">
-            <p className="text-sm text-gray-400">Objetivo de peso</p>
-            <p className="font-bold text-2xl text-white">{dashboard?.targetWeight || '--'} kg</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Objetivo de peso</p>
+            <p className="font-bold text-2xl">{dashboard?.targetWeight || '--'} kg</p>
           </div>
           {dashboard?.currentWeight && dashboard?.targetWeight && (
             <div className="text-right">
@@ -170,7 +170,7 @@ export default function Dashboard() {
               return (
                 <Link
                   to={`/workout-session/${todayWorkout.id}`}
-                  className="block bg-dark-700/50 rounded-xl p-4 border border-dark-600 hover:border-accent-primary/30 transition-all"
+                  className="block bg-gray-100 dark:bg-dark-700/50 rounded-xl p-4 border border-gray-200 dark:border-dark-600 hover:border-accent-primary/30 transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -189,12 +189,12 @@ export default function Dashboard() {
               // Rest day (Tuesday, Thursday, Saturday, Sunday)
               const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
               return (
-                <div className="bg-dark-700/50 rounded-xl p-6 border border-dark-600 text-center">
+                <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-6 border border-gray-200 dark:border-dark-600 text-center">
                   <div className="w-16 h-16 bg-neon-purple/20 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-3xl">😴</span>
                   </div>
                   <h3 className="font-semibold text-lg mb-1">Día de Descanso</h3>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Hoy es {dayNames[today]}. Próximo entreno: {today < 5 ? 'Viernes' : 'Lunes'}
                   </p>
                 </div>
@@ -225,15 +225,15 @@ export default function Dashboard() {
       {/* Quick Action */}
       <Link
         to="/progress"
-        className="block bg-gradient-to-br from-neon-purple/10 to-dark-800 rounded-2xl p-4 border border-neon-purple/30 hover:border-neon-purple/50 transition-all shadow-lg"
+        className="block bg-gradient-to-br from-neon-purple/10 to-gray-100 dark:to-dark-800 rounded-2xl p-4 border border-neon-purple/30 hover:border-neon-purple/50 transition-all shadow-lg"
       >
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-neon-purple/20 rounded-2xl flex items-center justify-center">
             <TrendingUp size={28} className="text-neon-purple" />
           </div>
           <div className="flex-1">
-            <p className="font-bold text-xl text-white">Ver Progreso</p>
-            <p className="text-sm text-gray-400">Gráficas, estadísticas y logros</p>
+            <p className="font-bold text-xl">Ver Progreso</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Gráficas, estadísticas y logros</p>
           </div>
           <div className="w-10 h-10 bg-neon-purple/20 rounded-full flex items-center justify-center">
             <ChevronRight size={22} className="text-neon-purple" />

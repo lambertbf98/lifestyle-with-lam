@@ -20,7 +20,7 @@ export default function Layout() {
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-dark-800/95 backdrop-blur-lg border-t border-dark-700 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-dark-800/95 backdrop-blur-lg border-t border-gray-200 dark:border-dark-700 z-50">
         <div
           className="flex justify-around items-center py-2"
           style={{ paddingBottom: 'calc(8px + env(safe-area-inset-bottom))' }}
