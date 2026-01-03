@@ -883,38 +883,55 @@ const forceUpdateAllGifs = async () => {
     };
 
     let totalUpdated = 0;
+    const updatedIds = new Set();
 
-    // Step 1: Try exact name matches - UPDATE ALL (including broken URLs)
+    // Step 1: Try exact name matches - UPDATE ALL (highest priority)
     for (const [name, gifUrl] of Object.entries(exactNameGifs)) {
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($2))`,
+         WHERE (LOWER(name_es) = LOWER($2) OR LOWER(name) = LOWER($2))
+         RETURNING id`,
         [gifUrl, name]
       );
+      result.rows.forEach(r => updatedIds.add(r.id));
       totalUpdated += result.rowCount;
     }
 
-    // Step 2: Try keyword-based partial matching - for exercises not yet updated
+    console.log(`Step 1: Updated ${updatedIds.size} exercises by exact name match`);
+
+    // Step 2: Try keyword-based partial matching - ONLY for exercises NOT already updated
     for (const [keyword, gifUrl] of Object.entries(keywordGifs)) {
+      const idsArray = Array.from(updatedIds);
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '' OR gif_url LIKE '%fitnessprogramer%')
-         AND (LOWER(name_es) ILIKE $2 OR LOWER(name) ILIKE $2)`,
+         WHERE (gif_url IS NULL OR gif_url = '')
+         AND (LOWER(name_es) ILIKE $2 OR LOWER(name) ILIKE $2)
+         ${idsArray.length > 0 ? `AND id NOT IN (${idsArray.join(',')})` : ''}
+         RETURNING id`,
         [gifUrl, `%${keyword}%`]
       );
+      result.rows.forEach(r => updatedIds.add(r.id));
       totalUpdated += result.rowCount;
     }
 
-    // Step 3: Fill remaining with muscle group defaults
+    console.log(`Step 2: Total updated after keyword match: ${updatedIds.size}`);
+
+    // Step 3: Fill remaining with muscle group defaults - ONLY for exercises NOT already updated
     for (const [muscleGroup, gifUrl] of Object.entries(muscleGroupGifs)) {
+      const idsArray = Array.from(updatedIds);
       const result = await client.query(
         `UPDATE exercises SET gif_url = $1
-         WHERE (gif_url IS NULL OR gif_url = '' OR gif_url LIKE '%fitnessprogramer%')
-         AND LOWER(muscle_group) = LOWER($2)`,
+         WHERE (gif_url IS NULL OR gif_url = '')
+         AND LOWER(muscle_group) = LOWER($2)
+         ${idsArray.length > 0 ? `AND id NOT IN (${idsArray.join(',')})` : ''}
+         RETURNING id`,
         [gifUrl, muscleGroup]
       );
+      result.rows.forEach(r => updatedIds.add(r.id));
       totalUpdated += result.rowCount;
     }
+
+    console.log(`Step 3: Total updated after muscle group fallback: ${updatedIds.size}`);
 
     // Count remaining without GIFs
     const remaining = await client.query(
