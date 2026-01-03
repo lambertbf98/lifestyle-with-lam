@@ -16,7 +16,7 @@
   body {
     @apply text-gray-800 min-h-screen;
     font-family: 'Inter', system-ui, sans-serif;
-    background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%) !important;
+    background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
     background-attachment: fixed;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -26,8 +26,8 @@
 
   /* Dark mode */
   .dark body {
-    @apply bg-dark-900 text-white;
-    background: linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
+    @apply text-white;
+    background: linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%) !important;
   }
 
   /* Hide scrollbar but keep functionality */
