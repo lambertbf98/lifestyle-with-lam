@@ -362,7 +362,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Principiante',
     instructions: 'Acostado, eleva los hombros del suelo contrayendo el abdomen.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Crunch.gif'
   },
   {
     name: 'Plancha',
@@ -402,7 +402,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Intermedio',
     instructions: 'En posición de plancha alta, alterna llevando las rodillas al pecho rápidamente.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-up.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif'
   },
 
   // EJERCICIOS ADICIONALES - Variaciones comunes
@@ -630,7 +630,7 @@ const exercises = [
     equipment: 'Polea',
     difficulty: 'Intermedio',
     instructions: 'De rodillas, flexiona el torso hacia abajo contra la resistencia.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Crunch.gif'
   },
   {
     name: 'Plancha Lateral',
@@ -737,7 +737,7 @@ const forceUpdateAllGifs = async () => {
       'Aperturas': `${FP_BASE}/2021/02/Dumbbell-Fly.gif`,
       'Fondos en Paralelas': `${FP_BASE}/2021/06/Chest-Dips.gif`,
       'Fondos': `${FP_BASE}/2021/06/Chest-Dips.gif`,
-      'Flexiones': `${FP_BASE}/2021/02/Push-up.gif`,
+      'Flexiones': `${FP_BASE}/2021/02/Push-Up.gif`,
       'Press de Pecho en Máquina': `${FP_BASE}/2021/02/Barbell-Bench-Press.gif`,
       'Cruces en Polea': `${FP_BASE}/2021/02/Cable-Crossover.gif`,
 
@@ -814,16 +814,16 @@ const forceUpdateAllGifs = async () => {
       'Elevación de Talones': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
 
       // ABDOMINALES
-      'Crunch': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Crunch Abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Crunch en Polea': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Crunch': `${FP_BASE}/2015/11/Crunch.gif`,
+      'Crunch Abdominal': `${FP_BASE}/2015/11/Crunch.gif`,
+      'Crunch en Polea': `${FP_BASE}/2015/11/Crunch.gif`,
       'Plancha': `${FP_BASE}/2021/02/plank.gif`,
       'Plancha Lateral': `${FP_BASE}/2021/02/plank.gif`,
       'Elevación de Piernas': `${FP_BASE}/2021/02/Leg-Raise.gif`,
-      'Russian Twist': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Giro Ruso': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Mountain Climbers': `${FP_BASE}/2021/02/Push-up.gif`,
-      'Escaladores': `${FP_BASE}/2021/02/Push-up.gif`
+      'Russian Twist': `${FP_BASE}/2015/11/Crunch.gif`,
+      'Giro Ruso': `${FP_BASE}/2015/11/Crunch.gif`,
+      'Mountain Climbers': `${FP_BASE}/2021/02/Push-Up.gif`,
+      'Escaladores': `${FP_BASE}/2021/02/Push-Up.gif`
     };
 
     // Keyword-based GIF mapping for partial matches
@@ -849,11 +849,11 @@ const forceUpdateAllGifs = async () => {
       'elevación frontal': `${FP_BASE}/2021/02/Dumbbell-Front-Raise.gif`,
       'fondo': `${FP_BASE}/2021/06/Chest-Dips.gif`,
       'dips': `${FP_BASE}/2021/06/Chest-Dips.gif`,
-      'flexión': `${FP_BASE}/2021/02/Push-up.gif`,
-      'flexiones': `${FP_BASE}/2021/02/Push-up.gif`,
+      'flexión': `${FP_BASE}/2021/02/Push-Up.gif`,
+      'flexiones': `${FP_BASE}/2021/02/Push-Up.gif`,
       'plancha': `${FP_BASE}/2021/02/plank.gif`,
-      'crunch': `${FP_BASE}/2021/02/Crunch.gif`,
-      'abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
+      'crunch': `${FP_BASE}/2015/11/Crunch.gif`,
+      'abdominal': `${FP_BASE}/2015/11/Crunch.gif`,
       'extensión tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
       'extensión cuádriceps': `${FP_BASE}/2021/02/LEG-EXTENSION.gif`,
       'curl pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
@@ -874,11 +874,11 @@ const forceUpdateAllGifs = async () => {
       'Isquiotibiales': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Glúteos': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
       'Pantorrillas': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
-      'Abdominales': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Abdominales': `${FP_BASE}/2015/11/Crunch.gif`,
       'Core': `${FP_BASE}/2021/02/plank.gif`,
       'Piernas': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
       'Trapecios': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
-      'Oblicuos': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Oblicuos': `${FP_BASE}/2015/11/Crunch.gif`,
       'Aductores': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`
     };
 
