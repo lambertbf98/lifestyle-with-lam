@@ -362,9 +362,22 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
       exercisesByMuscle[ex.muscle_group].push(ex.name);
     });
 
+    // Shuffle exercises within each muscle group for variety
+    const shuffleArray = (array) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+
     const exerciseListText = Object.entries(exercisesByMuscle)
-      .map(([muscle, exercises]) => `${muscle}: ${exercises.join(', ')}`)
+      .map(([muscle, exercises]) => `${muscle}: ${shuffleArray(exercises).join(', ')}`)
       .join('\n');
+
+    // Random seed for variety
+    const varietySeed = Math.floor(Math.random() * 1000);
 
     const daysCount = days_per_week || profile.workout_days_per_week || 3;
     const userGoal = focus || profile.fitness_goal || 'general';
@@ -407,7 +420,31 @@ ENFOQUE PARA HOMBRE:
 - Priorizar fuerza y volumen muscular`;
     }
 
+    // Get recent workout plans to avoid repetition
+    const recentPlansResult = await pool.query(
+      `SELECT wd.name, wd.focus_area,
+              (SELECT array_agg(e.name) FROM workout_exercises we
+               JOIN exercises e ON we.exercise_id = e.id
+               WHERE we.workout_day_id = wd.id) as exercises
+       FROM workout_plans wp
+       JOIN workout_days wd ON wp.id = wd.plan_id
+       WHERE wp.user_id = $1
+       ORDER BY wp.created_at DESC
+       LIMIT 10`,
+      [req.user.id]
+    );
+
+    const recentExercises = recentPlansResult.rows
+      .flatMap(r => r.exercises || [])
+      .filter(Boolean);
+
+    const avoidExercisesText = recentExercises.length > 0
+      ? `\n⚠️ VARIEDAD OBLIGATORIA: El usuario ha hecho recientemente estos ejercicios, intenta usar ALTERNATIVAS diferentes: ${[...new Set(recentExercises)].slice(0, 15).join(', ')}`
+      : '';
+
     const prompt = `Genera un plan de entrenamiento PROFESIONAL de ~45 minutos por sesión:
+
+🎲 SEMILLA DE VARIEDAD: ${varietySeed} (usa esto para seleccionar ejercicios DIFERENTES cada vez)
 
 DATOS DEL USUARIO:
 - Género: ${userGender} ${isFemale ? '(MUJER - énfasis en glúteos)' : '(HOMBRE)'}
@@ -415,10 +452,11 @@ DATOS DEL USUARIO:
 - Objetivo: ${userGoal}
 - Equipamiento: ${equipment_available || 'gimnasio completo'}
 ${progressionContext}
+${avoidExercisesText}
 
 ${trainingFocus}
 
-EJERCICIOS DISPONIBLES (usa nombres EXACTOS):
+EJERCICIOS DISPONIBLES (usa nombres EXACTOS, VARÍA la selección):
 ${exerciseListText}
 
 REGLAS OBLIGATORIAS:
@@ -430,6 +468,7 @@ REGLAS OBLIGATORIAS:
    - Hipertrofia: 8-12 reps, descanso 60-90s
    - Resistencia: 15-20 reps, descanso 30-45s
 5. ${isFemale ? 'MÍNIMO 2 días enfocados en pierna/glúteo' : 'Distribución equilibrada'}
+6. 🔄 VARIEDAD: Selecciona ejercicios DIFERENTES a planes anteriores cuando sea posible
 
 Responde SOLO con JSON válido:
 {
