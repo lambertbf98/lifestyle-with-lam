@@ -459,8 +459,8 @@ ${trainingFocus}
 EJERCICIOS DISPONIBLES (usa nombres EXACTOS, VARÍA la selección):
 ${exerciseListText}
 
-REGLAS OBLIGATORIAS:
-1. MÍNIMO 6-7 ejercicios por día (para ~45 min de entreno)
+⚠️ REGLAS OBLIGATORIAS - NO IGNORAR:
+1. ⚠️ EXACTAMENTE 6-7 EJERCICIOS POR DÍA (esto es OBLIGATORIO para ~45 min)
 2. Ejercicios compuestos primero, aislamiento después
 3. Series: 3-4 por ejercicio
 4. Repeticiones según objetivo:
@@ -468,19 +468,23 @@ REGLAS OBLIGATORIAS:
    - Hipertrofia: 8-12 reps, descanso 60-90s
    - Resistencia: 15-20 reps, descanso 30-45s
 5. ${isFemale ? 'MÍNIMO 2 días enfocados en pierna/glúteo' : 'Distribución equilibrada'}
-6. 🔄 VARIEDAD: Selecciona ejercicios DIFERENTES a planes anteriores cuando sea posible
 
-Responde SOLO con JSON válido:
+Responde SOLO con JSON válido (MÍNIMO 6 ejercicios por día):
 {
-  "name": "Plan ${isFemale ? 'Glúteos y Piernas' : 'Hipertrofia'} ${daysCount} Días",
-  "description": "Plan de ${daysCount} días enfocado en ${isFemale ? 'desarrollo de glúteos y piernas' : userGoal}",
+  "name": "Plan Personalizado ${daysCount} Días",
+  "description": "Descripción del plan",
   "days": [
     {
       "day_of_week": 1,
-      "name": "Día 1 - ${isFemale ? 'Glúteos y Piernas' : 'Pecho y Tríceps'}",
-      "focus_area": "${isFemale ? 'Glúteos' : 'Pecho'}",
+      "name": "Día 1 - Grupo muscular",
+      "focus_area": "Grupo principal",
       "exercises": [
-        {"name": "Nombre exacto del ejercicio", "sets": 4, "reps": "10-12", "rest_seconds": 90, "notes": "Técnica o tips"}
+        {"name": "Ejercicio 1", "sets": 4, "reps": "8-10", "rest_seconds": 90, "notes": ""},
+        {"name": "Ejercicio 2", "sets": 4, "reps": "10-12", "rest_seconds": 90, "notes": ""},
+        {"name": "Ejercicio 3", "sets": 3, "reps": "10-12", "rest_seconds": 60, "notes": ""},
+        {"name": "Ejercicio 4", "sets": 3, "reps": "12-15", "rest_seconds": 60, "notes": ""},
+        {"name": "Ejercicio 5", "sets": 3, "reps": "12-15", "rest_seconds": 60, "notes": ""},
+        {"name": "Ejercicio 6", "sets": 3, "reps": "15-20", "rest_seconds": 45, "notes": ""}
       ]
     }
   ]
@@ -489,14 +493,16 @@ Responde SOLO con JSON válido:
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 4000,
-      temperature: 0.9, // Higher temperature for more variety
-      system: `Eres un entrenador personal certificado NSCA. IMPORTANTE: Genera entrenamientos VARIADOS.
+      temperature: 1.0, // Maximum variety
+      system: `Eres un entrenador personal. REGLAS CRÍTICAS:
 
-Semilla de variación: ${varietySeed} - usa esto para seleccionar ejercicios DIFERENTES en cada generación.
+1. OBLIGATORIO: Genera EXACTAMENTE 6-7 ejercicios por día (NO menos de 6)
+2. Semilla aleatoria: ${varietySeed} - VARÍA los ejercicios según este número
+3. NO repitas siempre los mismos ejercicios - usa ALTERNATIVAS
+4. Responde SOLO con JSON válido
 
-Responde ÚNICAMENTE con JSON válido. Genera entrenamientos COMPLETOS de 45 minutos con 6-7 ejercicios por día.
-
-REGLA DE VARIEDAD: Para cada grupo muscular, elige ejercicios DISTINTOS a los que normalmente elegirías. Si hay 5 ejercicios para pecho, NO siempre elijas Press de Banca primero - varía el orden y la selección.`,
+Si el número ${varietySeed} es par, empieza con ejercicios de aislamiento. Si es impar, empieza con compuestos.
+Si ${varietySeed} > 500, prioriza ejercicios con mancuernas. Si < 500, prioriza barras y máquinas.`,
       messages: [{ role: 'user', content: prompt }]
     });
 

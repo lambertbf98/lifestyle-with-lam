@@ -17,10 +17,29 @@ export default function WorkoutSession() {
   const [isResting, setIsResting] = useState(false);
   const [exerciseLogs, setExerciseLogs] = useState([]);
   const [expandedExercise, setExpandedExercise] = useState(null);
+  const [customRestTimes, setCustomRestTimes] = useState({});
 
   useEffect(() => {
     loadWorkout();
   }, [dayId]);
+
+  // Initialize custom rest times when workout loads
+  useEffect(() => {
+    if (workout?.exercises) {
+      const initialRestTimes = {};
+      workout.exercises.forEach((ex, idx) => {
+        initialRestTimes[idx] = ex.rest_seconds || 60;
+      });
+      setCustomRestTimes(initialRestTimes);
+    }
+  }, [workout]);
+
+  const updateRestTime = (index, delta) => {
+    setCustomRestTimes(prev => ({
+      ...prev,
+      [index]: Math.max(15, Math.min(300, (prev[index] || 60) + delta))
+    }));
+  };
 
   useEffect(() => {
     let interval;
@@ -122,8 +141,8 @@ export default function WorkoutSession() {
       }
     }
 
-    // Start rest timer
-    setRestTimer(exercise.rest_seconds || 60);
+    // Start rest timer with custom rest time
+    setRestTimer(customRestTimes[exerciseIndex] || exercise.rest_seconds || 60);
     setIsResting(true);
   };
 
@@ -303,11 +322,27 @@ export default function WorkoutSession() {
                   </h3>
                   <div className="flex items-center gap-3 text-sm text-gray-400">
                     <span>{exercise.sets} series × {exercise.reps}</span>
-                    {exercise.rest_seconds && (
-                      <>
-                        <span>•</span>
-                        <span>{exercise.rest_seconds}s descanso</span>
-                      </>
+                    <span>•</span>
+                    {!isActive ? (
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateRestTime(index, -15); }}
+                          className="w-6 h-6 bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-dark-500"
+                        >
+                          -
+                        </button>
+                        <span className="text-accent-primary font-medium min-w-[40px] text-center">
+                          {customRestTimes[index] || exercise.rest_seconds || 60}s
+                        </span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateRestTime(index, 15); }}
+                          className="w-6 h-6 bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-dark-500"
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <span>{customRestTimes[index] || exercise.rest_seconds || 60}s descanso</span>
                     )}
                   </div>
                   {/* Sets progress */}
