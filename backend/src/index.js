@@ -20,6 +20,9 @@ const { forceUpdateAllGifs } = require('./db/seed');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy for Railway (fixes express-rate-limit warning)
+app.set('trust proxy', 1);
+
 // Frontend dist path
 const frontendPath = path.resolve(__dirname, '../../frontend/dist');
 console.log('Frontend path:', frontendPath);
