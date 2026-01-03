@@ -24,10 +24,10 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Dark mode - Subtle purple/pink pastel gradient */
+  /* Dark mode - Warm orange-tinted gradient */
   .dark body {
     @apply text-white;
-    background: linear-gradient(135deg, #0d0b10 0%, #1a1520 50%, #15101a 100%) !important;
+    background: linear-gradient(145deg, #0a0705 0%, #1a0f08 35%, #12080a 70%, #0d0604 100%) !important;
     background-attachment: fixed;
   }
 
