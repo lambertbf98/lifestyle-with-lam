@@ -188,7 +188,7 @@ export default function WorkoutSession() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="skeleton w-16 h-16 rounded-full"></div>
       </div>
     );
@@ -196,8 +196,8 @@ export default function WorkoutSession() {
 
   if (!workout) {
     return (
-      <div className="min-h-screen bg-gradient-dark flex flex-col items-center justify-center p-4">
-        <p className="text-gray-400 mb-4">Entrenamiento no encontrado</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <p className="text-gray-500 dark:text-gray-400 mb-4">Entrenamiento no encontrado</p>
         <button onClick={() => navigate('/workouts')} className="btn-primary">
           Volver a Entrenamientos
         </button>
@@ -206,13 +206,13 @@ export default function WorkoutSession() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-dark">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-dark-800/95 backdrop-blur-lg border-b border-dark-700 p-4">
+      <div className="sticky top-0 z-10 bg-white/95 dark:bg-dark-800/95 backdrop-blur-lg border-b border-gray-200 dark:border-dark-700 p-4">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/workouts')}
-            className="w-10 h-10 bg-dark-700 rounded-xl flex items-center justify-center"
+            className="w-10 h-10 bg-gray-200 dark:bg-dark-700 rounded-xl flex items-center justify-center"
           >
             <ArrowLeft size={20} />
           </button>
@@ -230,11 +230,11 @@ export default function WorkoutSession() {
         {isActive && (
           <div className="mt-4 space-y-3">
             <div>
-              <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                 <span>Progreso</span>
                 <span>{Math.round(getTotalProgress())}%</span>
               </div>
-              <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-dark-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-accent-primary to-neon-purple rounded-full transition-all duration-300"
                   style={{ width: `${getTotalProgress()}%` }}
@@ -254,7 +254,7 @@ export default function WorkoutSession() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setRestTimer(t => Math.max(0, t - 15))}
-                    className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white"
+                    className="w-8 h-8 bg-gray-200 dark:bg-dark-600 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                   >
                     <Minus size={16} />
                   </button>
@@ -264,11 +264,11 @@ export default function WorkoutSession() {
                   </div>
                   <button
                     onClick={() => setRestTimer(t => t + 15)}
-                    className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center text-gray-400 hover:text-white"
+                    className="w-8 h-8 bg-gray-200 dark:bg-dark-600 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                   >
                     <Plus size={16} />
                   </button>
-                  <button onClick={skipRest} className="text-xs text-gray-400 hover:text-white ml-1">
+                  <button onClick={skipRest} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white ml-1">
                     Saltar
                   </button>
                 </div>
@@ -296,7 +296,7 @@ export default function WorkoutSession() {
                   ? 'border-accent-success/50 bg-accent-success/5'
                   : isCurrent
                   ? 'border-accent-primary/50 bg-accent-primary/5'
-                  : 'border-dark-600 bg-dark-800'
+                  : 'border-gray-200 dark:border-dark-600 bg-white dark:bg-dark-800'
               }`}
             >
               {/* Exercise Header */}
@@ -305,12 +305,12 @@ export default function WorkoutSession() {
                 className="w-full p-4 flex items-center gap-4"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  isComplete ? 'bg-accent-success' : isCurrent ? 'bg-accent-primary' : 'bg-dark-700'
+                  isComplete ? 'bg-accent-success' : isCurrent ? 'bg-accent-primary' : 'bg-gray-200 dark:bg-dark-700'
                 }`}>
                   {isComplete ? (
-                    <Check size={20} className="text-dark-900" />
+                    <Check size={20} className="text-white dark:text-dark-900" />
                   ) : (
-                    <span className={`font-bold ${isCurrent ? 'text-dark-900' : 'text-gray-400'}`}>
+                    <span className={`font-bold ${isCurrent ? 'text-white dark:text-dark-900' : 'text-gray-500 dark:text-gray-400'}`}>
                       {index + 1}
                     </span>
                   )}
@@ -327,7 +327,7 @@ export default function WorkoutSession() {
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={(e) => { e.stopPropagation(); updateRestTime(index, -15); }}
-                          className="w-6 h-6 bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-dark-500"
+                          className="w-6 h-6 bg-gray-300 dark:bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-gray-400 dark:hover:bg-dark-500"
                         >
                           -
                         </button>
@@ -336,7 +336,7 @@ export default function WorkoutSession() {
                         </span>
                         <button
                           onClick={(e) => { e.stopPropagation(); updateRestTime(index, 15); }}
-                          className="w-6 h-6 bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-dark-500"
+                          className="w-6 h-6 bg-gray-300 dark:bg-dark-600 rounded flex items-center justify-center text-xs hover:bg-gray-400 dark:hover:bg-dark-500"
                         >
                           +
                         </button>
@@ -351,7 +351,7 @@ export default function WorkoutSession() {
                       <div
                         key={i}
                         className={`h-1.5 flex-1 rounded-full transition-all ${
-                          i < completedSets ? 'bg-accent-primary' : 'bg-dark-600'
+                          i < completedSets ? 'bg-accent-primary' : 'bg-gray-300 dark:bg-dark-600'
                         }`}
                       />
                     ))}
@@ -359,18 +359,18 @@ export default function WorkoutSession() {
                 </div>
 
                 {isExpanded ? (
-                  <ChevronUp size={20} className="text-gray-400" />
+                  <ChevronUp size={20} className="text-gray-500 dark:text-gray-400" />
                 ) : (
-                  <ChevronDown size={20} className="text-gray-400" />
+                  <ChevronDown size={20} className="text-gray-500 dark:text-gray-400" />
                 )}
               </button>
 
               {/* Expanded Content */}
               {isExpanded && (
-                <div className="border-t border-dark-600 animate-fade-in">
+                <div className="border-t border-gray-200 dark:border-dark-600 animate-fade-in">
                   {/* GIF Display - Exercise GIF from database */}
                   {exercise.exercise?.gif_url && (
-                    <div className="relative bg-dark-900">
+                    <div className="relative bg-gray-100 dark:bg-dark-900">
                       <img
                         src={exercise.exercise.gif_url}
                         alt={exercise.exercise?.name_es || exercise.exercise?.name || 'Ejercicio'}
@@ -397,12 +397,12 @@ export default function WorkoutSession() {
 
                     {/* Instructions */}
                     {exercise.exercise?.instructions && (
-                      <div className="bg-dark-700/50 rounded-xl p-3">
+                      <div className="bg-gray-100 dark:bg-dark-700/50 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-2">
                           <Info size={16} className="text-accent-primary" />
-                          <span className="text-sm font-medium text-gray-300">Instrucciones</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Instrucciones</span>
                         </div>
-                        <p className="text-sm text-gray-400 leading-relaxed">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                           {exercise.exercise.instructions}
                         </p>
                       </div>
@@ -410,7 +410,7 @@ export default function WorkoutSession() {
 
                     {/* Completed Sets Log */}
                     {log?.sets?.length > 0 && (
-                      <div className="bg-dark-700/30 rounded-xl p-3">
+                      <div className="bg-gray-100 dark:bg-dark-700/30 rounded-xl p-3">
                         <p className="text-xs text-gray-400 mb-2">Series completadas:</p>
                         <div className="flex flex-wrap gap-2">
                           {log.sets.map((set, i) => (
@@ -426,18 +426,18 @@ export default function WorkoutSession() {
 
                     {/* Weight and Reps Input */}
                     {isActive && !isComplete && (
-                      <div className="bg-dark-700 rounded-xl p-4 space-y-4">
-                        <p className="text-sm font-medium text-center text-gray-300">
+                      <div className="bg-gray-100 dark:bg-dark-700 rounded-xl p-4 space-y-4">
+                        <p className="text-sm font-medium text-center text-gray-700 dark:text-gray-300">
                           Serie {completedSets + 1} de {exercise.sets}
                         </p>
 
                         {/* Weight Input */}
                         <div>
-                          <label className="text-xs text-gray-400 block mb-2 text-center">Peso (kg)</label>
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-2 text-center">Peso (kg)</label>
                           <div className="flex items-center justify-center gap-3">
                             <button
                               onClick={() => updateSetData(index, 'weight_kg', Math.max(0, currentSetData.weight_kg - 2.5))}
-                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                              className="w-12 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl flex items-center justify-center hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors"
                             >
                               <Minus size={20} />
                             </button>
@@ -445,11 +445,11 @@ export default function WorkoutSession() {
                               type="number"
                               value={currentSetData.weight_kg}
                               onChange={(e) => updateSetData(index, 'weight_kg', parseFloat(e.target.value) || 0)}
-                              className="w-24 h-12 bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                              className="w-24 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
                             />
                             <button
                               onClick={() => updateSetData(index, 'weight_kg', currentSetData.weight_kg + 2.5)}
-                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                              className="w-12 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl flex items-center justify-center hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors"
                             >
                               <Plus size={20} />
                             </button>
@@ -458,11 +458,11 @@ export default function WorkoutSession() {
 
                         {/* Reps Input */}
                         <div>
-                          <label className="text-xs text-gray-400 block mb-2 text-center">Repeticiones</label>
+                          <label className="text-xs text-gray-500 dark:text-gray-400 block mb-2 text-center">Repeticiones</label>
                           <div className="flex items-center justify-center gap-3">
                             <button
                               onClick={() => updateSetData(index, 'reps', Math.max(1, currentSetData.reps - 1))}
-                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                              className="w-12 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl flex items-center justify-center hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors"
                             >
                               <Minus size={20} />
                             </button>
@@ -470,11 +470,11 @@ export default function WorkoutSession() {
                               type="number"
                               value={currentSetData.reps}
                               onChange={(e) => updateSetData(index, 'reps', parseInt(e.target.value) || 1)}
-                              className="w-24 h-12 bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                              className="w-24 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-accent-primary"
                             />
                             <button
                               onClick={() => updateSetData(index, 'reps', currentSetData.reps + 1)}
-                              className="w-12 h-12 bg-dark-600 rounded-xl flex items-center justify-center hover:bg-dark-500 transition-colors"
+                              className="w-12 h-12 bg-gray-200 dark:bg-dark-600 rounded-xl flex items-center justify-center hover:bg-gray-300 dark:hover:bg-dark-500 transition-colors"
                             >
                               <Plus size={20} />
                             </button>
@@ -487,8 +487,8 @@ export default function WorkoutSession() {
                           disabled={isResting}
                           className={`w-full py-4 rounded-xl font-semibold text-lg transition-all ${
                             isResting
-                              ? 'bg-dark-600 text-gray-500 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-accent-primary to-neon-purple text-dark-900 hover:scale-[1.02] active:scale-[0.98]'
+                              ? 'bg-gray-300 dark:bg-dark-600 text-gray-500 cursor-not-allowed'
+                              : 'bg-gradient-to-r from-accent-primary to-neon-purple text-white hover:scale-[1.02] active:scale-[0.98]'
                           }`}
                         >
                           {isResting
@@ -519,7 +519,7 @@ export default function WorkoutSession() {
       </div>
 
       {/* Bottom Action */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-dark-800/95 backdrop-blur-lg border-t border-dark-700">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-dark-800/95 backdrop-blur-lg border-t border-gray-200 dark:border-dark-700">
         {!isActive ? (
           <button
             onClick={startWorkout}

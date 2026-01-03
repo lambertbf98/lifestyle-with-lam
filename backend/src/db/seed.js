@@ -296,7 +296,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Acostado boca abajo, flexiona las rodillas llevando los talones hacia los glúteos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/08/Seated-Leg-Curl.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Curl.gif'
   },
   {
     name: 'Peso Muerto Rumano',
@@ -402,7 +402,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Intermedio',
     instructions: 'En posición de plancha alta, alterna llevando las rodillas al pecho rápidamente.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2022/07/Cross-Body-Mountain-Climber.gif'
   },
 
   // EJERCICIOS ADICIONALES - Variaciones comunes
@@ -618,7 +618,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Sentado en la máquina, flexiona las rodillas llevando talones hacia atrás.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Leg-Curl.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/08/Seated-Leg-Curl.gif'
   },
 
   // Más abdominales
@@ -795,7 +795,7 @@ const forceUpdateAllGifs = async () => {
       'Zancada': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
 
       // PIERNAS - ISQUIOTIBIALES
-      'Curl de Pierna Acostado': `${FP_BASE}/2021/02/Lying-Leg-Curl.gif`,
+      'Curl de Pierna Acostado': `${FP_BASE}/2021/02/Leg-Curl.gif`,
       'Curl de Pierna Sentado': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Curl de Pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Peso Muerto Rumano': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
@@ -819,11 +819,11 @@ const forceUpdateAllGifs = async () => {
       'Crunch en Polea': `${FP_BASE}/2015/11/Crunch.gif`,
       'Plancha': `${FP_BASE}/2021/02/plank.gif`,
       'Plancha Lateral': `${FP_BASE}/2021/02/plank.gif`,
-      'Elevación de Piernas': `${FP_BASE}/2021/02/Leg-Raise.gif`,
-      'Russian Twist': `${FP_BASE}/2015/11/Crunch.gif`,
-      'Giro Ruso': `${FP_BASE}/2015/11/Crunch.gif`,
-      'Mountain Climbers': `${FP_BASE}/2021/02/Push-Up.gif`,
-      'Escaladores': `${FP_BASE}/2021/02/Push-Up.gif`
+      'Elevación de Piernas': `${FP_BASE}/2021/02/Lying-Leg-Raise.gif`,
+      'Russian Twist': `${FP_BASE}/2021/02/Russian-Twist.gif`,
+      'Giro Ruso': `${FP_BASE}/2021/02/Russian-Twist.gif`,
+      'Mountain Climbers': `${FP_BASE}/2022/07/Cross-Body-Mountain-Climber.gif`,
+      'Escaladores': `${FP_BASE}/2022/07/Cross-Body-Mountain-Climber.gif`
     };
 
     // Keyword-based GIF mapping for partial matches
@@ -860,7 +860,12 @@ const forceUpdateAllGifs = async () => {
       'pantorrilla': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
       'gemelo': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
       'apertura': `${FP_BASE}/2021/02/Dumbbell-Fly.gif`,
-      'face pull': `${FP_BASE}/2021/02/Face-Pull.gif`
+      'face pull': `${FP_BASE}/2021/02/Face-Pull.gif`,
+      'escalador': `${FP_BASE}/2022/07/Cross-Body-Mountain-Climber.gif`,
+      'mountain': `${FP_BASE}/2022/07/Cross-Body-Mountain-Climber.gif`,
+      'giro ruso': `${FP_BASE}/2021/02/Russian-Twist.gif`,
+      'russian': `${FP_BASE}/2021/02/Russian-Twist.gif`,
+      'elevación pierna': `${FP_BASE}/2021/02/Lying-Leg-Raise.gif`
     };
 
     // Map of muscle groups to default GIFs (fallback)

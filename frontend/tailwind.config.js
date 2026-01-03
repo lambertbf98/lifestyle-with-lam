@@ -58,18 +58,12 @@ export default {
         'gradient-vibrant': 'linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%)',
       },
       animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'gradient': 'gradient 8s ease infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
       },
       keyframes: {
         gradient: {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
-        },
-        glow: {
-          '0%': { boxShadow: '0 0 5px rgba(249, 115, 22, 0.5)' },
-          '100%': { boxShadow: '0 0 20px rgba(236, 72, 153, 0.8)' },
         }
       }
     },

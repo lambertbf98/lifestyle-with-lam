@@ -102,21 +102,17 @@
     backdrop-filter: blur(10px);
   }
 
-  /* Card with glow effect */
+  /* Card with subtle effect - NO animations */
   .card-glow {
-    @apply rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300;
+    @apply rounded-2xl p-4 shadow-md;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(200, 200, 200, 0.3);
   }
   .dark .card-glow {
     background: linear-gradient(145deg, rgba(21, 21, 24, 0.95) 0%, rgba(15, 15, 18, 0.98) 100%);
-    border: 1px solid rgba(139, 92, 246, 0.2);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
-  }
-  .dark .card-glow:hover {
-    border-color: rgba(236, 72, 153, 0.3);
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.15);
+    border: 1px solid rgba(63, 63, 70, 0.3);
+    box-shadow: none;
   }
 
   /* Light mode: input - Glassmorphism */
