@@ -66,7 +66,7 @@ const exercises = [
     equipment: 'Barra de Dominadas',
     difficulty: 'Avanzado',
     instructions: 'Agarra la barra con las palmas hacia afuera, tira del cuerpo hasta que la barbilla supere la barra.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-Up.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-up.gif'
   },
   {
     name: 'Remo con Barra',
@@ -118,7 +118,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'De pie o sentado, presiona la barra desde los hombros hasta arriba de la cabeza.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Overhead-Press.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/07/Barbell-Standing-Military-Press.gif'
   },
   {
     name: 'Elevaciones Laterales',
@@ -148,7 +148,7 @@ const exercises = [
     equipment: 'Mancuernas',
     difficulty: 'Intermedio',
     instructions: 'Inclinado hacia adelante, eleva las mancuernas hacia los lados apretando los omóplatos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Rear-Delt-Fly.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/cable-rear-delt-fly.gif'
   },
 
   // BÍCEPS
@@ -232,7 +232,7 @@ const exercises = [
     equipment: 'Barra EZ',
     difficulty: 'Intermedio',
     instructions: 'Acostado, baja la barra hacia la frente flexionando solo los codos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Skull-Crusher.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Triceps-Extension.gif'
   },
 
   // PIERNAS - CUÁDRICEPS
@@ -254,7 +254,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Pies al ancho de hombros en la plataforma, baja el peso flexionando las rodillas 90°.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Leg-Press.gif'
   },
   {
     name: 'Extensión de Cuádriceps',
@@ -274,7 +274,7 @@ const exercises = [
     equipment: 'Mancuernas',
     difficulty: 'Intermedio',
     instructions: 'Da un paso adelante y baja hasta que ambas rodillas formen 90°.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunges.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
   },
   {
     name: 'Sentadilla Búlgara',
@@ -284,7 +284,7 @@ const exercises = [
     equipment: 'Mancuernas',
     difficulty: 'Avanzado',
     instructions: 'Pie trasero elevado en banco, baja la rodilla trasera hacia el suelo.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Bulgarian-Split-Squat.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
   },
 
   // PIERNAS - ISQUIOTIBIALES
@@ -296,7 +296,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Acostado boca abajo, flexiona las rodillas llevando los talones hacia los glúteos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lying-Leg-Curl.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/08/Seated-Leg-Curl.gif'
   },
   {
     name: 'Peso Muerto Rumano',
@@ -306,7 +306,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Piernas casi rectas, baja la barra deslizándola por las piernas manteniendo espalda recta.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Romanian-Deadlift.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif'
   },
 
   // GLÚTEOS
@@ -328,7 +328,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'En cuadrupedia o máquina, extiende la pierna hacia atrás apretando el glúteo.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Kickback.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif'
   },
 
   // PANTORRILLAS
@@ -340,7 +340,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'De pie en la máquina, eleva los talones lo más alto posible.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Standing-Calf-Raise.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
   },
   {
     name: 'Elevación de Talones Sentado',
@@ -350,7 +350,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Sentado con peso sobre las rodillas, eleva los talones.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Calf-Raise.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
   },
 
   // ABDOMINALES
@@ -372,7 +372,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Principiante',
     instructions: 'Apoyado en antebrazos y puntas de pies, mantén el cuerpo recto.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Plank.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
   },
   {
     name: 'Elevación de Piernas',
@@ -402,7 +402,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Intermedio',
     instructions: 'En posición de plancha alta, alterna llevando las rodillas al pecho rápidamente.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Mountain-Climber.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-up.gif'
   },
 
   // EJERCICIOS ADICIONALES - Variaciones comunes
@@ -416,7 +416,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Principiante',
     instructions: 'Pies al ancho de hombros, baja flexionando rodillas manteniendo espalda recta.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Squat.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif'
   },
   {
     name: 'Sentadilla Goblet',
@@ -426,7 +426,7 @@ const exercises = [
     equipment: 'Mancuerna',
     difficulty: 'Principiante',
     instructions: 'Sostén una mancuerna contra el pecho y realiza una sentadilla profunda.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Goblet-Squat.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif'
   },
   {
     name: 'Sentadilla Sumo',
@@ -436,7 +436,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Piernas muy separadas, puntas hacia afuera, baja manteniendo rodillas alineadas.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Sumo-Squat.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif'
   },
   {
     name: 'Sentadilla Hack',
@@ -446,7 +446,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Intermedio',
     instructions: 'En máquina hack, baja controladamente y empuja con los talones.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hack-Squat.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif'
   },
 
   // Variaciones de Prensa
@@ -458,7 +458,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Pies al ancho de hombros en la plataforma, baja y empuja.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Leg-Press.gif'
   },
   {
     name: 'Prensa Inclinada',
@@ -468,7 +468,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'En prensa a 45°, empuja la plataforma controlando el descenso.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Press.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Leg-Press.gif'
   },
 
   // Más ejercicios de Glúteos
@@ -480,7 +480,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Principiante',
     instructions: 'Acostado, pies apoyados, eleva las caderas apretando glúteos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Glute-Bridge.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif'
   },
   {
     name: 'Peso Muerto Sumo',
@@ -490,7 +490,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Piernas muy separadas, agarre estrecho, levanta manteniendo espalda recta.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Sumo-Deadlift.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Deadlift.gif'
   },
   {
     name: 'Abducción de Cadera',
@@ -500,7 +500,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Sentado en la máquina, separa las piernas contra la resistencia.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hip-Abduction-Machine.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
   },
   {
     name: 'Aducción de Cadera',
@@ -510,7 +510,7 @@ const exercises = [
     equipment: 'Máquina',
     difficulty: 'Principiante',
     instructions: 'Sentado en la máquina, junta las piernas contra la resistencia.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Hip-Adduction-Machine.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
   },
 
   // Más ejercicios de Espalda
@@ -606,7 +606,7 @@ const exercises = [
     equipment: 'Mancuernas',
     difficulty: 'Principiante',
     instructions: 'De pie con mancuernas, eleva los hombros hacia las orejas.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shrug.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif'
   },
 
   // Curl de pierna sentado
@@ -630,7 +630,7 @@ const exercises = [
     equipment: 'Polea',
     difficulty: 'Intermedio',
     instructions: 'De rodillas, flexiona el torso hacia abajo contra la resistencia.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Cable-Crunch.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Crunch.gif'
   },
   {
     name: 'Plancha Lateral',
@@ -640,7 +640,7 @@ const exercises = [
     equipment: 'Peso Corporal',
     difficulty: 'Intermedio',
     instructions: 'Apoyado en un antebrazo, mantén el cuerpo recto de lado.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Side-Plank.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
   }
 ];
 
@@ -774,9 +774,9 @@ const forceUpdateAllGifs = async () => {
 
       // TRÍCEPS
       'Fondos en Banco': `${FP_BASE}/2021/02/Bench-Dips.gif`,
-      'Extensión de Tríceps con Polea': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Extensión de Tríceps con Polea': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Extensión de Tríceps sobre Cabeza': `${FP_BASE}/2021/02/Dumbbell-Triceps-Extension.gif`,
-      'Extensión de Tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Extensión de Tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Press Francés': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
 
       // PIERNAS - CUÁDRICEPS
@@ -816,8 +816,8 @@ const forceUpdateAllGifs = async () => {
       'Crunch': `${FP_BASE}/2021/02/Crunch.gif`,
       'Crunch Abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
       'Crunch en Polea': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Plancha': `${FP_BASE}/2021/02/Front-Plank.gif`,
-      'Plancha Lateral': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'Plancha': `${FP_BASE}/2021/02/plank.gif`,
+      'Plancha Lateral': `${FP_BASE}/2021/02/plank.gif`,
       'Elevación de Piernas': `${FP_BASE}/2021/02/Leg-Raise.gif`,
       'Russian Twist': `${FP_BASE}/2021/02/Crunch.gif`,
       'Giro Ruso': `${FP_BASE}/2021/02/Crunch.gif`,
@@ -850,10 +850,10 @@ const forceUpdateAllGifs = async () => {
       'dips': `${FP_BASE}/2021/06/Chest-Dips.gif`,
       'flexión': `${FP_BASE}/2021/02/Push-up.gif`,
       'flexiones': `${FP_BASE}/2021/02/Push-up.gif`,
-      'plancha': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'plancha': `${FP_BASE}/2021/02/plank.gif`,
       'crunch': `${FP_BASE}/2021/02/Crunch.gif`,
       'abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
-      'extensión tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'extensión tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
       'extensión cuádriceps': `${FP_BASE}/2021/02/LEG-EXTENSION.gif`,
       'curl pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'pantorrilla': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
@@ -868,15 +868,15 @@ const forceUpdateAllGifs = async () => {
       'Espalda': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
       'Hombros': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
       'Bíceps': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
-      'Tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Cuádriceps': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
       'Isquiotibiales': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Glúteos': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
       'Pantorrillas': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
       'Abdominales': `${FP_BASE}/2021/02/Crunch.gif`,
-      'Core': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'Core': `${FP_BASE}/2021/02/plank.gif`,
       'Piernas': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
-      'Trapecios': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
+      'Trapecios': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
       'Oblicuos': `${FP_BASE}/2021/02/Crunch.gif`,
       'Aductores': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`
     };

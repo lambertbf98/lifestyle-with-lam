@@ -24,10 +24,10 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Dark mode - Orange gradient like tab color */
+  /* Dark mode - Visible orange like buttons (#f97316) */
   .dark body {
     @apply text-white;
-    background: linear-gradient(145deg, #1a0800 0%, #2a1000 30%, #1f0a00 60%, #150600 100%) !important;
+    background: linear-gradient(145deg, #261206 0%, #3d1c08 30%, #2a1305 60%, #1a0c03 100%) !important;
     background-attachment: fixed;
   }
 
