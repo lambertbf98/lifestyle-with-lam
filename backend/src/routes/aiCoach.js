@@ -579,23 +579,59 @@ router.post('/generate-diet', authenticateToken, async (req, res) => {
     const expandedDisliked = expandFoodCategories(profile.disliked_foods);
     const dislikedFoods = expandedDisliked.join(', ') || '';
 
-    // Define meal structure based on number of meals
-    let mealStructure = '';
-    let mealDistribution = '';
+    // Calculate EXACT calories per meal (AI is bad at math)
+    const totalCal = macros.calories;
+    const totalPro = macros.protein;
+    const totalCarbs = macros.carbs;
+    const totalFat = macros.fat;
+
+    let mealBreakdown = [];
 
     if (mealsPerDay === 3) {
-      mealStructure = `breakfast, lunch, dinner`;
-      mealDistribution = `Desayuno: 30%, Almuerzo: 40%, Cena: 30%`;
+      mealBreakdown = [
+        { type: 'breakfast', name: 'Desayuno', pct: 0.30 },
+        { type: 'lunch', name: 'Almuerzo', pct: 0.40 },
+        { type: 'dinner', name: 'Cena', pct: 0.30 }
+      ];
     } else if (mealsPerDay === 4) {
-      mealStructure = `breakfast, lunch, snack, dinner`;
-      mealDistribution = `Desayuno: 25%, Almuerzo: 35%, Merienda: 15%, Cena: 25%`;
+      mealBreakdown = [
+        { type: 'breakfast', name: 'Desayuno', pct: 0.25 },
+        { type: 'lunch', name: 'Almuerzo', pct: 0.35 },
+        { type: 'snack', name: 'Merienda', pct: 0.15 },
+        { type: 'dinner', name: 'Cena', pct: 0.25 }
+      ];
     } else if (mealsPerDay === 5) {
-      mealStructure = `breakfast, mid_morning, lunch, snack, dinner`;
-      mealDistribution = `Desayuno: 25%, Media mañana: 10%, Almuerzo: 30%, Merienda: 15%, Cena: 20%`;
+      mealBreakdown = [
+        { type: 'breakfast', name: 'Desayuno', pct: 0.25 },
+        { type: 'mid_morning', name: 'Media Mañana', pct: 0.10 },
+        { type: 'lunch', name: 'Almuerzo', pct: 0.30 },
+        { type: 'snack', name: 'Merienda', pct: 0.15 },
+        { type: 'dinner', name: 'Cena', pct: 0.20 }
+      ];
     } else {
-      mealStructure = `breakfast, mid_morning, lunch, snack, dinner, late_snack`;
-      mealDistribution = `Desayuno: 20%, Media mañana: 10%, Almuerzo: 30%, Merienda: 15%, Cena: 20%, Snack nocturno: 5%`;
+      mealBreakdown = [
+        { type: 'breakfast', name: 'Desayuno', pct: 0.20 },
+        { type: 'mid_morning', name: 'Media Mañana', pct: 0.10 },
+        { type: 'lunch', name: 'Almuerzo', pct: 0.30 },
+        { type: 'snack', name: 'Merienda', pct: 0.15 },
+        { type: 'dinner', name: 'Cena', pct: 0.20 },
+        { type: 'late_snack', name: 'Snack Nocturno', pct: 0.05 }
+      ];
     }
+
+    // Pre-calculate exact values for each meal
+    const mealsWithMacros = mealBreakdown.map(meal => ({
+      ...meal,
+      calories: Math.round(totalCal * meal.pct),
+      protein: Math.round(totalPro * meal.pct),
+      carbs: Math.round(totalCarbs * meal.pct),
+      fat: Math.round(totalFat * meal.pct)
+    }));
+
+    // Build the exact meal requirements string
+    const mealRequirements = mealsWithMacros.map(m =>
+      `- ${m.name} (${m.type}): ${m.calories} kcal, ${m.protein}g prot, ${m.carbs}g carbs, ${m.fat}g grasa`
+    ).join('\n');
 
     // Build forbidden foods warning - make it VERY clear
     const forbiddenWarning = dislikedFoods
@@ -610,31 +646,35 @@ Verifica CADA ingrediente antes de incluirlo.
 `
       : '';
 
-    const prompt = `Genera un plan de dieta PROFESIONAL para deportistas.
+    // Build JSON template with EXACT values per meal
+    const mealsJsonTemplate = mealsWithMacros.map(m => `    {
+      "meal_type": "${m.type}",
+      "name": "${m.name} - [nombre del plato]",
+      "description": "Descripción breve",
+      "calories": ${m.calories},
+      "protein_grams": ${m.protein},
+      "carbs_grams": ${m.carbs},
+      "fat_grams": ${m.fat},
+      "ingredients": [{"name": "Producto", "amount": "100g", "calories": XX, "protein": XX}],
+      "recipe": "Preparación"
+    }`).join(',\n');
+
+    const prompt = `Genera un plan de dieta con EXACTAMENTE estas calorías:
 ${forbiddenWarning}
-⚠️ SUPERMERCADO MERCADONA (ESPAÑA):
-Usa productos de MERCADONA. NO usar marca "Hacendado":
-- Proteínas: Pechuga de pollo, Huevos, Ternera picada, Lomo de cerdo, Pavo
-- Lácteos: Yogur griego, Queso fresco batido 0%, Leche
-- Carbohidratos: Arroz, Pasta, Pan integral, Patatas, Boniato
-- Grasas: Aceite de oliva virgen extra, Aguacate, Frutos secos
+📊 OBJETIVO CALÓRICO TOTAL: ${macros.calories} kcal/día
+(TDEE: ${Math.round(tdee)} - Déficit aplicado = ${macros.calories} kcal)
 
-DATOS NUTRICIONALES (Mifflin-St Jeor):
-- TMB: ${Math.round(bmr)} kcal | TDEE: ${Math.round(tdee)} kcal
-- Calorías objetivo: ${macros.calories} kcal/día
-- Proteínas: ${macros.protein}g | Carbos: ${macros.carbs}g | Grasas: ${macros.fat}g
+🎯 CALORÍAS EXACTAS POR COMIDA (NO CAMBIAR):
+${mealRequirements}
 
-DATOS DEL USUARIO:
-- Peso: ${weight}kg | Objetivo: ${profile.fitness_goal || 'mantener'}
-- Proteínas preferidas: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'}
-- Carbohidratos preferidos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+TOTAL: ${macros.calories} kcal | ${macros.protein}g prot | ${macros.carbs}g carbs | ${macros.fat}g grasa
 
-PROTOCOLO:
-1. ${mealsPerDay} COMIDAS: ${mealStructure}
-2. DISTRIBUCIÓN: ${mealDistribution}
-3. ~${Math.round(macros.protein/mealsPerDay)}g proteína por comida
+⚠️ MERCADONA ESPAÑA - Productos:
+Pollo, Huevos, Ternera, Cerdo, Pavo, Arroz, Pasta, Pan integral, Patatas, Boniato, Yogur griego, Queso fresco 0%
 
-Responde SOLO con JSON válido:
+Preferencias: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos'} | ${profile.preferred_carbs?.join(', ') || 'arroz, patata'}
+
+Responde SOLO con JSON. USA LAS CALORÍAS EXACTAS indicadas arriba:
 {
   "name": "Plan Nutricional ${macros.calories} kcal",
   "daily_calories": ${macros.calories},
@@ -642,22 +682,12 @@ Responde SOLO con JSON válido:
   "carbs_grams": ${macros.carbs},
   "fat_grams": ${macros.fat},
   "meals": [
-    {
-      "meal_type": "breakfast",
-      "name": "Nombre del plato",
-      "description": "Descripción breve",
-      "calories": ${Math.round(macros.calories/mealsPerDay)},
-      "protein_grams": ${Math.round(macros.protein/mealsPerDay)},
-      "carbs_grams": ${Math.round(macros.carbs/mealsPerDay)},
-      "fat_grams": ${Math.round(macros.fat/mealsPerDay)},
-      "ingredients": [{"name": "Producto", "amount": "100g", "calories": 100, "protein": 20}],
-      "recipe": "Preparación"
-    }
+${mealsJsonTemplate}
   ]
 }
 
-⚠️ RECUERDA: Las ${mealsPerDay} comidas deben sumar ~${macros.calories} kcal y ~${macros.protein}g proteína.
-${dislikedFoods ? `🚫 VERIFICACIÓN FINAL: NO incluir: ${dislikedFoods}` : ''}`;
+🚨 VERIFICACIÓN: La suma de calorías de todas las comidas DEBE ser ${macros.calories} kcal (±20).
+${dislikedFoods ? `🚫 NO incluir: ${dislikedFoods}` : ''}`;
 
     const systemPrompt = dislikedFoods
       ? `Eres un nutricionista deportivo certificado. REGLA CRÍTICA: El usuario ha especificado alimentos que ODIA y NO PUEDE COMER: ${dislikedFoods}. NUNCA incluyas estos alimentos ni sus derivados. Verifica CADA ingrediente. Si dudas, usa una alternativa. Responde ÚNICAMENTE con JSON válido.`
@@ -683,6 +713,36 @@ ${dislikedFoods ? `🚫 VERIFICACIÓN FINAL: NO incluir: ${dislikedFoods}` : ''}
         throw new Error('Invalid JSON response from AI');
       }
     }
+
+    // FORCE correct calories - AI is bad at math, so we override with our calculations
+    console.log('=== CALORIE VALIDATION ===');
+    const aiTotalCal = dietPlan.meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+    console.log('AI generated total calories:', aiTotalCal);
+    console.log('Target calories:', macros.calories);
+
+    // Override each meal with our pre-calculated values
+    if (dietPlan.meals && dietPlan.meals.length === mealsWithMacros.length) {
+      dietPlan.meals = dietPlan.meals.map((meal, index) => {
+        const target = mealsWithMacros[index];
+        return {
+          ...meal,
+          meal_type: target.type,
+          calories: target.calories,
+          protein_grams: target.protein,
+          carbs_grams: target.carbs,
+          fat_grams: target.fat
+        };
+      });
+      console.log('Calories FORCED to correct values');
+    }
+
+    // Also force the plan totals
+    dietPlan.daily_calories = macros.calories;
+    dietPlan.protein_grams = macros.protein;
+    dietPlan.carbs_grams = macros.carbs;
+    dietPlan.fat_grams = macros.fat;
+    console.log('Plan totals FORCED to:', macros.calories, 'kcal');
+    console.log('=========================');
 
     await client.query('BEGIN');
 
