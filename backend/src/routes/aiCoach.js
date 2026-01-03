@@ -646,30 +646,51 @@ Verifica CADA ingrediente antes de incluirlo.
 `
       : '';
 
-    // HUGE list of Mercadona products for variety
-    const mercadonaProducts = `
-PROTEÍNAS (elige variedad):
-- Carnes: Pechuga de pollo, Contramuslos de pollo, Pechuga de pavo, Filetes de pavo, Solomillo de cerdo, Lomo de cerdo, Chuletas de cerdo, Ternera picada, Filetes de ternera, Hamburguesas de pollo, Albóndigas
-- Pescados: Salmón fresco, Lomos de salmón, Merluza, Bacalao, Lubina, Dorada, Atún fresco, Gambas peladas, Langostinos, Mejillones, Calamares, Sepia
-- Huevos: Huevos enteros, Claras de huevo líquidas, Huevos cocidos
-- Lácteos proteicos: Yogur griego natural, Skyr, Queso fresco batido 0%, Requesón, Queso cottage, Queso fresco en tacos, Mozzarella fresca
-- Legumbres: Lentejas cocidas, Garbanzos cocidos, Alubias blancas, Edamame, Tofu firme
+    // Build product list EXCLUDING forbidden foods
+    const allProducts = {
+      carnes: ['Pechuga de pollo', 'Contramuslos de pollo', 'Pechuga de pavo', 'Filetes de pavo', 'Solomillo de cerdo', 'Lomo de cerdo', 'Ternera picada', 'Filetes de ternera'],
+      pescados: ['Salmón', 'Merluza', 'Bacalao', 'Lubina', 'Dorada', 'Atún fresco', 'Gambas', 'Langostinos'],
+      huevos: ['Huevos enteros', 'Claras de huevo', 'Huevos cocidos'],
+      lacteos: ['Yogur griego natural', 'Skyr', 'Queso fresco batido 0%', 'Requesón', 'Queso cottage', 'Mozzarella'],
+      legumbres: ['Lentejas', 'Garbanzos', 'Alubias', 'Tofu'],
+      cereales: ['Arroz basmati', 'Arroz integral', 'Quinoa', 'Cuscús', 'Copos de avena', 'Avena'],
+      tuberculos: ['Patatas', 'Boniato'],
+      pan_pasta: ['Pan integral', 'Tortillas de trigo', 'Pasta integral', 'Macarrones', 'Espaguetis'],
+      frutas: ['Plátano', 'Manzana', 'Naranja', 'Kiwi', 'Fresas', 'Arándanos', 'Mango'],
+      verduras: ['Brócoli', 'Espinacas', 'Calabacín', 'Pimientos', 'Tomate', 'Lechuga', 'Zanahoria', 'Pepino', 'Cebolla', 'Champiñones', 'Aguacate'],
+      grasas: ['Aceite de oliva', 'Aguacate', 'Almendras', 'Nueces', 'Mantequilla de cacahuete']
+    };
 
-CARBOHIDRATOS (elige variedad):
-- Cereales: Arroz basmati, Arroz integral, Quinoa, Cuscús, Bulgur, Copos de avena, Avena instantánea
-- Tubérculos: Patatas, Boniato, Yuca
-- Pan/Pasta: Pan integral de molde, Pan de centeno, Tortitas de arroz, Tortitas de maíz, Tortillas de trigo, Pasta integral, Macarrones, Espaguetis, Fideos de arroz
-- Frutas: Plátano, Manzana, Pera, Naranja, Mandarina, Kiwi, Fresas, Arándanos, Frambuesas, Mango, Piña, Uvas, Melocotón, Dátiles, Pasas
+    // Filter out forbidden foods from product list
+    const forbiddenLower = expandedDisliked.map(f => f.toLowerCase());
 
-VERDURAS Y HORTALIZAS:
-Brócoli, Espinacas frescas, Espinacas baby, Judías verdes, Calabacín, Berenjena, Pimientos rojos, Pimientos verdes, Tomate, Tomate cherry, Lechuga, Rúcula, Canónigos, Zanahoria, Pepino, Cebolla, Champiñones, Setas, Espárragos, Alcachofas, Aguacate, Maíz dulce, Guisantes
+    const filterProducts = (products) => {
+      return products.filter(p => {
+        const pLower = p.toLowerCase();
+        return !forbiddenLower.some(f => pLower.includes(f) || f.includes(pLower));
+      });
+    };
 
-GRASAS SALUDABLES:
-Aceite de oliva virgen extra, Aceite de coco, Aguacate, Almendras, Nueces, Cacahuetes, Anacardos, Pistachos, Mantequilla de cacahuete, Mantequilla de almendras, Semillas de chía, Semillas de lino, Aceitunas
+    // Check if entire categories are forbidden
+    const hasFish = forbiddenLower.some(f => f === 'pescado' || f.includes('pescado'));
+    const hasVeggies = forbiddenLower.some(f => f === 'verduras' || f.includes('verdura'));
+    const hasDairy = forbiddenLower.some(f => f === 'lácteos' || f.includes('lacteo') || f.includes('lácteo'));
+    const hasEggs = forbiddenLower.some(f => f === 'huevos' || f.includes('huevo') || f.includes('clara'));
+    const hasOats = forbiddenLower.some(f => f === 'avena' || f.includes('avena'));
 
-CONDIMENTOS Y EXTRAS:
-Ajo, Limón, Lima, Especias (pimentón, comino, curry, orégano, albahaca), Salsa de soja, Vinagre balsámico, Mostaza, Miel, Cacao puro
-`;
+    // Build filtered product list
+    let mercadonaProducts = `\nPRODUCTOS PERMITIDOS (usa SOLO estos):`;
+    mercadonaProducts += `\n- Carnes: ${filterProducts(allProducts.carnes).join(', ') || 'N/A'}`;
+    if (!hasFish) mercadonaProducts += `\n- Pescados: ${filterProducts(allProducts.pescados).join(', ')}`;
+    if (!hasEggs) mercadonaProducts += `\n- Huevos: ${filterProducts(allProducts.huevos).join(', ')}`;
+    if (!hasDairy) mercadonaProducts += `\n- Lácteos: ${filterProducts(allProducts.lacteos).join(', ')}`;
+    mercadonaProducts += `\n- Legumbres: ${filterProducts(allProducts.legumbres).join(', ')}`;
+    mercadonaProducts += `\n- Cereales: ${filterProducts(hasOats ? allProducts.cereales.filter(c => !c.toLowerCase().includes('avena')) : allProducts.cereales).join(', ')}`;
+    mercadonaProducts += `\n- Tubérculos: ${filterProducts(allProducts.tuberculos).join(', ')}`;
+    mercadonaProducts += `\n- Pan/Pasta: ${filterProducts(allProducts.pan_pasta).join(', ')}`;
+    mercadonaProducts += `\n- Frutas: ${filterProducts(allProducts.frutas).join(', ')}`;
+    if (!hasVeggies) mercadonaProducts += `\n- Verduras: ${filterProducts(allProducts.verduras).join(', ')}`;
+    mercadonaProducts += `\n- Grasas: ${filterProducts(allProducts.grasas).join(', ')}`;
 
     // Build JSON template with EXACT values per meal - 2-5 ingredients depending on meal complexity
     const mealsJsonTemplate = mealsWithMacros.map(m => `    {
@@ -687,26 +708,27 @@ Ajo, Limón, Lima, Especias (pimentón, comino, curry, orégano, albahaca), Sals
       "recipe": "Preparación sencilla"
     }`).join(',\n');
 
-    const prompt = `Genera un plan de dieta VARIADO y DELICIOSO:
+    const prompt = `Genera un plan de dieta:
 ${forbiddenWarning}
 📊 OBJETIVO: ${macros.calories} kcal/día
 
-🎯 CALORÍAS EXACTAS POR COMIDA:
+🎯 CALORÍAS POR COMIDA:
 ${mealRequirements}
 
-🛒 PRODUCTOS MERCADONA DISPONIBLES:
+🛒 USA SOLO ESTOS PRODUCTOS:
 ${mercadonaProducts}
 
+⚠️ IMPORTANTE: Si un producto NO está en la lista de arriba, NO LO USES.
+
 👤 PREFERENCIAS:
-- Proteínas favoritas: ${profile.preferred_proteins?.join(', ') || 'pollo, huevos, ternera'}
-- Carbos favoritos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
+- Proteínas: ${profile.preferred_proteins?.join(', ') || 'pollo, ternera'}
+- Carbos: ${profile.preferred_carbs?.join(', ') || 'arroz, patata, pasta'}
 
 📝 REGLAS:
-1. Entre 2-5 ingredientes por comida (comidas simples o elaboradas según el tipo)
-2. Usa ingredientes DIFERENTES en cada comida (no repetir la misma proteína)
-3. Varía métodos: plancha, horno, salteado, crudo, hervido
-4. Snacks/media mañana pueden ser simples (2-3 ingredientes)
-5. Comidas principales pueden ser más elaboradas (3-5 ingredientes)
+1. 2-5 ingredientes por comida
+2. Ingredientes DIFERENTES en cada comida
+3. Varía métodos: plancha, horno, salteado
+4. Snacks simples (2-3 ing), comidas principales más elaboradas (3-5 ing)
 
 Responde SOLO con JSON válido:
 {
@@ -1077,12 +1099,37 @@ router.post('/regenerate-meal', authenticateToken, async (req, res) => {
 ❌ ${dislikedFoods.split(', ').join(', ')}`
       : '';
 
-    // Huge variety of options
-    const foodOptions = `
-PROTEÍNAS: Pechuga de pollo, Contramuslos, Pavo, Solomillo de cerdo, Lomo de cerdo, Ternera picada, Filetes de ternera, Salmón, Atún fresco, Gambas, Langostinos, Huevos, Yogur griego, Skyr, Queso fresco 0%, Lentejas, Garbanzos, Tofu
-CARBOS: Arroz basmati, Arroz integral, Quinoa, Cuscús, Avena, Patatas, Boniato, Pan integral, Tortillas de trigo, Pasta integral, Plátano, Manzana, Fresas, Arándanos, Mango
-VERDURAS: Brócoli, Espinacas, Calabacín, Pimientos, Tomate, Champiñones, Zanahoria, Pepino, Cebolla, Aguacate, Lechuga, Rúcula
-GRASAS: Aceite de oliva, Aguacate, Almendras, Nueces, Mantequilla de cacahuete, Semillas de chía`;
+    // Build filtered food options based on user preferences
+    const allFoodOptions = {
+      proteinas: ['Pechuga de pollo', 'Pavo', 'Lomo de cerdo', 'Ternera', 'Salmón', 'Atún', 'Gambas', 'Huevos', 'Yogur griego', 'Queso fresco 0%', 'Lentejas', 'Garbanzos', 'Tofu'],
+      carbos: ['Arroz basmati', 'Arroz integral', 'Quinoa', 'Avena', 'Patatas', 'Boniato', 'Pan integral', 'Tortillas', 'Pasta', 'Plátano', 'Manzana', 'Fresas'],
+      verduras: ['Brócoli', 'Espinacas', 'Calabacín', 'Pimientos', 'Tomate', 'Champiñones', 'Zanahoria', 'Pepino', 'Cebolla', 'Aguacate'],
+      grasas: ['Aceite de oliva', 'Aguacate', 'Almendras', 'Nueces', 'Mantequilla de cacahuete']
+    };
+
+    // Filter based on disliked foods
+    const forbiddenLowerRegen = expandedDisliked.map(f => f.toLowerCase());
+    const filterFoods = (foods) => foods.filter(f => !forbiddenLowerRegen.some(d => f.toLowerCase().includes(d) || d.includes(f.toLowerCase())));
+
+    const hasFishRegen = forbiddenLowerRegen.some(f => f.includes('pescado') || f.includes('salmón') || f.includes('atún'));
+    const hasVeggiesRegen = forbiddenLowerRegen.some(f => f.includes('verdura'));
+    const hasEggsRegen = forbiddenLowerRegen.some(f => f.includes('huevo') || f.includes('clara'));
+    const hasOatsRegen = forbiddenLowerRegen.some(f => f.includes('avena'));
+
+    let foodOptions = `PRODUCTOS PERMITIDOS:`;
+    let proteinOptions = filterFoods(allFoodOptions.proteinas);
+    if (hasFishRegen) proteinOptions = proteinOptions.filter(p => !['Salmón', 'Atún', 'Gambas'].includes(p));
+    if (hasEggsRegen) proteinOptions = proteinOptions.filter(p => p !== 'Huevos');
+    foodOptions += `\nPROTEÍNAS: ${proteinOptions.join(', ')}`;
+
+    let carbOptions = filterFoods(allFoodOptions.carbos);
+    if (hasOatsRegen) carbOptions = carbOptions.filter(c => c !== 'Avena');
+    foodOptions += `\nCARBOS: ${carbOptions.join(', ')}`;
+
+    if (!hasVeggiesRegen) {
+      foodOptions += `\nVERDURAS: ${filterFoods(allFoodOptions.verduras).join(', ')}`;
+    }
+    foodOptions += `\nGRASAS: ${filterFoods(allFoodOptions.grasas).join(', ')}`;
 
     const prompt = `Genera UNA comida COMPLETAMENTE DIFERENTE:
 
