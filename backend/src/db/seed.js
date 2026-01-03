@@ -1,9 +1,9 @@
 const pool = require('./pool');
 
-// Cloudinary base URL for exercise GIFs
-const CLOUDINARY_GIF_BASE = 'https://res.cloudinary.com/dhehg2av2/image/upload/exercises';
+// Base URL for exercise GIFs from fitnessprogramer.com
+const GIF_BASE = 'https://fitnessprogramer.com/wp-content/uploads';
 
-// Ejercicios con GIFs almacenados en Cloudinary
+// Ejercicios con GIFs de fitnessprogramer.com
 const exercises = [
   // PECHO
   {
@@ -14,7 +14,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Acuéstate en el banco, agarra la barra con las manos separadas al ancho de los hombros. Baja la barra hasta el pecho y empuja hacia arriba.',
-    gif_url: `${CLOUDINARY_GIF_BASE}/press_banca.gif`
+    gif_url: `${GIF_BASE}/2021/02/Barbell-Bench-Press.gif`
   },
   {
     name: 'Press Inclinado con Mancuernas',
@@ -244,7 +244,7 @@ const exercises = [
     equipment: 'Barra',
     difficulty: 'Intermedio',
     instructions: 'Barra sobre los trapecios, baja hasta que los muslos estén paralelos al suelo.',
-    gif_url: `${CLOUDINARY_GIF_BASE}/sentadilla.gif`
+    gif_url: `${GIF_BASE}/2021/02/BARBELL-SQUAT.gif`
   },
   {
     name: 'Prensa de Piernas',
@@ -720,165 +720,165 @@ const updateExerciseGifs = async (client) => {
   }
 };
 
-// Force update all exercises with GIFs - using Cloudinary (permanent storage)
+// Force update all exercises with GIFs - using fitnessprogramer.com (verified working URLs)
 const forceUpdateAllGifs = async () => {
   const client = await pool.connect();
   try {
-    // GIFs hosted on Cloudinary - permanent and reliable
-    const CLOUDINARY_BASE = 'https://res.cloudinary.com/dhehg2av2/image/upload/exercises';
+    // GIFs from fitnessprogramer.com - verified working URLs
+    const FP_BASE = 'https://fitnessprogramer.com/wp-content/uploads';
 
     const exactNameGifs = {
       // PECHO
-      'Press de Banca': `${CLOUDINARY_BASE}/press_banca.gif`,
-      'Press Inclinado con Mancuernas': `${CLOUDINARY_BASE}/press_inclinado.gif`,
-      'Press Inclinado': `${CLOUDINARY_BASE}/press_inclinado.gif`,
-      'Aperturas con Mancuernas': `${CLOUDINARY_BASE}/aperturas.gif`,
-      'Aperturas': `${CLOUDINARY_BASE}/aperturas.gif`,
-      'Fondos en Paralelas': `${CLOUDINARY_BASE}/fondos_banco.gif`,
-      'Fondos': `${CLOUDINARY_BASE}/fondos_banco.gif`,
-      'Flexiones': `${CLOUDINARY_BASE}/flexiones.gif`,
-      'Press de Pecho en Máquina': `${CLOUDINARY_BASE}/press_banca.gif`,
-      'Cruces en Polea': `${CLOUDINARY_BASE}/aperturas.gif`,
+      'Press de Banca': `${FP_BASE}/2021/02/Barbell-Bench-Press.gif`,
+      'Press Inclinado con Mancuernas': `${FP_BASE}/2021/02/Incline-Dumbbell-Press.gif`,
+      'Press Inclinado': `${FP_BASE}/2021/02/Incline-Dumbbell-Press.gif`,
+      'Aperturas con Mancuernas': `${FP_BASE}/2021/02/Dumbbell-Fly.gif`,
+      'Aperturas': `${FP_BASE}/2021/02/Dumbbell-Fly.gif`,
+      'Fondos en Paralelas': `${FP_BASE}/2021/06/Chest-Dips.gif`,
+      'Fondos': `${FP_BASE}/2021/06/Chest-Dips.gif`,
+      'Flexiones': `${FP_BASE}/2021/02/Push-up.gif`,
+      'Press de Pecho en Máquina': `${FP_BASE}/2021/02/Barbell-Bench-Press.gif`,
+      'Cruces en Polea': `${FP_BASE}/2021/02/Cable-Crossover.gif`,
 
       // ESPALDA
-      'Dominadas': `${CLOUDINARY_BASE}/dominadas.gif`,
-      'Pull-Up': `${CLOUDINARY_BASE}/dominadas.gif`,
-      'Remo con Barra': `${CLOUDINARY_BASE}/remo_barra.gif`,
-      'Remo con Mancuerna': `${CLOUDINARY_BASE}/remo_mancuerna.gif`,
-      'Remo': `${CLOUDINARY_BASE}/remo_barra.gif`,
-      'Jalón al Pecho': `${CLOUDINARY_BASE}/jalon_pecho.gif`,
-      'Jalón': `${CLOUDINARY_BASE}/jalon_pecho.gif`,
-      'Peso Muerto': `${CLOUDINARY_BASE}/peso_muerto.gif`,
-      'Remo en Máquina': `${CLOUDINARY_BASE}/remo_barra.gif`,
-      'Remo en Polea Baja': `${CLOUDINARY_BASE}/remo_barra.gif`,
-      'Pull Over': `${CLOUDINARY_BASE}/jalon_pecho.gif`,
+      'Dominadas': `${FP_BASE}/2021/02/Pull-up.gif`,
+      'Pull-Up': `${FP_BASE}/2021/02/Pull-up.gif`,
+      'Remo con Barra': `${FP_BASE}/2021/02/Barbell-Bent-Over-Row.gif`,
+      'Remo con Mancuerna': `${FP_BASE}/2021/02/Dumbbell-Row.gif`,
+      'Remo': `${FP_BASE}/2021/02/Barbell-Bent-Over-Row.gif`,
+      'Jalón al Pecho': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
+      'Jalón': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
+      'Peso Muerto': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
+      'Remo en Máquina': `${FP_BASE}/2021/02/Barbell-Bent-Over-Row.gif`,
+      'Remo en Polea Baja': `${FP_BASE}/2021/02/Seated-Cable-Row.gif`,
+      'Pull Over': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
 
       // HOMBROS
-      'Press Militar': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Press con Mancuernas': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Elevaciones Laterales': `${CLOUDINARY_BASE}/elevacion_lateral.gif`,
-      'Elevaciones Frontales': `${CLOUDINARY_BASE}/elevacion_frontal.gif`,
-      'Pájaros': `${CLOUDINARY_BASE}/elevacion_lateral.gif`,
-      'Elevaciones Posteriores': `${CLOUDINARY_BASE}/elevacion_lateral.gif`,
-      'Press Arnold': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Face Pull': `${CLOUDINARY_BASE}/face_pull.gif`,
-      'Encogimientos de Hombros': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Encogimientos': `${CLOUDINARY_BASE}/press_hombro.gif`,
+      'Press Militar': `${FP_BASE}/2021/07/Barbell-Standing-Military-Press.gif`,
+      'Press con Mancuernas': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
+      'Elevaciones Laterales': `${FP_BASE}/2021/02/Dumbbell-Lateral-Raise.gif`,
+      'Elevaciones Frontales': `${FP_BASE}/2021/02/Dumbbell-Front-Raise.gif`,
+      'Pájaros': `${FP_BASE}/2021/02/Dumbbell-Lateral-Raise.gif`,
+      'Elevaciones Posteriores': `${FP_BASE}/2021/02/Dumbbell-Lateral-Raise.gif`,
+      'Press Arnold': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
+      'Face Pull': `${FP_BASE}/2021/02/Face-Pull.gif`,
+      'Encogimientos de Hombros': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
+      'Encogimientos': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
 
       // BÍCEPS
-      'Curl con Barra': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'Curl con Mancuernas': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'Curl Martillo': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'Curl Concentrado': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'Curl': `${CLOUDINARY_BASE}/curl_biceps.gif`,
+      'Curl con Barra': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
+      'Curl con Mancuernas': `${FP_BASE}/2021/02/Dumbbell-Curl.gif`,
+      'Curl Martillo': `${FP_BASE}/2021/02/Hammer-Curl.gif`,
+      'Curl Concentrado': `${FP_BASE}/2021/02/Concentration-Curl.gif`,
+      'Curl': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
 
       // TRÍCEPS
-      'Fondos en Banco': `${CLOUDINARY_BASE}/fondos_banco.gif`,
-      'Extensión de Tríceps con Polea': `${CLOUDINARY_BASE}/extension_triceps.gif`,
-      'Extensión de Tríceps sobre Cabeza': `${CLOUDINARY_BASE}/extension_triceps.gif`,
-      'Extensión de Tríceps': `${CLOUDINARY_BASE}/extension_triceps.gif`,
-      'Press Francés': `${CLOUDINARY_BASE}/extension_triceps.gif`,
+      'Fondos en Banco': `${FP_BASE}/2021/02/Bench-Dips.gif`,
+      'Extensión de Tríceps con Polea': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Extensión de Tríceps sobre Cabeza': `${FP_BASE}/2021/02/Dumbbell-Triceps-Extension.gif`,
+      'Extensión de Tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Press Francés': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
 
       // PIERNAS - CUÁDRICEPS
-      'Sentadilla con Barra': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Sentadilla': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Sentadilla Goblet': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Sentadilla Sumo': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Sentadilla Hack': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Sentadilla Búlgara': `${CLOUDINARY_BASE}/zancadas.gif`,
-      'Prensa de Piernas': `${CLOUDINARY_BASE}/prensa_piernas.gif`,
-      'Prensa': `${CLOUDINARY_BASE}/prensa_piernas.gif`,
-      'Prensa Inclinada': `${CLOUDINARY_BASE}/prensa_piernas.gif`,
-      'Extensión de Cuádriceps': `${CLOUDINARY_BASE}/extension_cuadriceps.gif`,
-      'Zancadas': `${CLOUDINARY_BASE}/zancadas.gif`,
-      'Zancada': `${CLOUDINARY_BASE}/zancadas.gif`,
+      'Sentadilla con Barra': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'Sentadilla': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'Sentadilla Goblet': `${FP_BASE}/2021/02/Goblet-Squat.gif`,
+      'Sentadilla Sumo': `${FP_BASE}/2021/02/Sumo-Squat.gif`,
+      'Sentadilla Hack': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'Sentadilla Búlgara': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
+      'Prensa de Piernas': `${FP_BASE}/2015/11/Leg-Press.gif`,
+      'Prensa': `${FP_BASE}/2015/11/Leg-Press.gif`,
+      'Prensa Inclinada': `${FP_BASE}/2015/11/Leg-Press.gif`,
+      'Extensión de Cuádriceps': `${FP_BASE}/2021/02/LEG-EXTENSION.gif`,
+      'Zancadas': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
+      'Zancada': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
 
       // PIERNAS - ISQUIOTIBIALES
-      'Curl de Pierna Acostado': `${CLOUDINARY_BASE}/curl_pierna.gif`,
-      'Curl de Pierna Sentado': `${CLOUDINARY_BASE}/curl_pierna.gif`,
-      'Curl de Pierna': `${CLOUDINARY_BASE}/curl_pierna.gif`,
-      'Peso Muerto Rumano': `${CLOUDINARY_BASE}/peso_muerto.gif`,
+      'Curl de Pierna Acostado': `${FP_BASE}/2021/02/Lying-Leg-Curl.gif`,
+      'Curl de Pierna Sentado': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
+      'Curl de Pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
+      'Peso Muerto Rumano': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
 
       // GLÚTEOS
-      'Hip Thrust': `${CLOUDINARY_BASE}/hip_thrust.gif`,
-      'Patada de Glúteo': `${CLOUDINARY_BASE}/hip_thrust.gif`,
-      'Puente de Glúteos': `${CLOUDINARY_BASE}/hip_thrust.gif`,
-      'Peso Muerto Sumo': `${CLOUDINARY_BASE}/peso_muerto.gif`,
-      'Abducción de Cadera': `${CLOUDINARY_BASE}/zancadas.gif`,
-      'Aducción de Cadera': `${CLOUDINARY_BASE}/zancadas.gif`,
+      'Hip Thrust': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
+      'Patada de Glúteo': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
+      'Puente de Glúteos': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
+      'Peso Muerto Sumo': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
+      'Abducción de Cadera': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
+      'Aducción de Cadera': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
 
       // PANTORRILLAS
-      'Elevación de Talones de Pie': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
-      'Elevación de Talones Sentado': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
-      'Elevación de Talones': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
+      'Elevación de Talones de Pie': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Elevación de Talones Sentado': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Elevación de Talones': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
 
       // ABDOMINALES
-      'Crunch': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Crunch Abdominal': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Crunch en Polea': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Plancha': `${CLOUDINARY_BASE}/plancha.gif`,
-      'Plancha Lateral': `${CLOUDINARY_BASE}/plancha.gif`,
-      'Elevación de Piernas': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Russian Twist': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Giro Ruso': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Mountain Climbers': `${CLOUDINARY_BASE}/flexiones.gif`,
-      'Escaladores': `${CLOUDINARY_BASE}/flexiones.gif`
+      'Crunch': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Crunch Abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Crunch en Polea': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Plancha': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'Plancha Lateral': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'Elevación de Piernas': `${FP_BASE}/2021/02/Leg-Raise.gif`,
+      'Russian Twist': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Giro Ruso': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Mountain Climbers': `${FP_BASE}/2021/02/Push-up.gif`,
+      'Escaladores': `${FP_BASE}/2021/02/Push-up.gif`
     };
 
     // Keyword-based GIF mapping for partial matches
     const keywordGifs = {
-      'dominada': `${CLOUDINARY_BASE}/dominadas.gif`,
-      'pull up': `${CLOUDINARY_BASE}/dominadas.gif`,
-      'pull-up': `${CLOUDINARY_BASE}/dominadas.gif`,
-      'press banca': `${CLOUDINARY_BASE}/press_banca.gif`,
-      'press inclinado': `${CLOUDINARY_BASE}/press_inclinado.gif`,
-      'press militar': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'press hombro': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'remo': `${CLOUDINARY_BASE}/remo_barra.gif`,
-      'jalón': `${CLOUDINARY_BASE}/jalon_pecho.gif`,
-      'curl': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'sentadilla': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'squat': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'prensa': `${CLOUDINARY_BASE}/prensa_piernas.gif`,
-      'zancada': `${CLOUDINARY_BASE}/zancadas.gif`,
-      'peso muerto': `${CLOUDINARY_BASE}/peso_muerto.gif`,
-      'deadlift': `${CLOUDINARY_BASE}/peso_muerto.gif`,
-      'hip thrust': `${CLOUDINARY_BASE}/hip_thrust.gif`,
-      'elevación lateral': `${CLOUDINARY_BASE}/elevacion_lateral.gif`,
-      'elevación frontal': `${CLOUDINARY_BASE}/elevacion_frontal.gif`,
-      'fondo': `${CLOUDINARY_BASE}/fondos_banco.gif`,
-      'dips': `${CLOUDINARY_BASE}/fondos_banco.gif`,
-      'flexión': `${CLOUDINARY_BASE}/flexiones.gif`,
-      'flexiones': `${CLOUDINARY_BASE}/flexiones.gif`,
-      'plancha': `${CLOUDINARY_BASE}/plancha.gif`,
-      'crunch': `${CLOUDINARY_BASE}/crunch.gif`,
-      'abdominal': `${CLOUDINARY_BASE}/crunch.gif`,
-      'extensión tríceps': `${CLOUDINARY_BASE}/extension_triceps.gif`,
-      'extensión cuádriceps': `${CLOUDINARY_BASE}/extension_cuadriceps.gif`,
-      'curl pierna': `${CLOUDINARY_BASE}/curl_pierna.gif`,
-      'pantorrilla': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
-      'gemelo': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
-      'apertura': `${CLOUDINARY_BASE}/aperturas.gif`,
-      'face pull': `${CLOUDINARY_BASE}/face_pull.gif`
+      'dominada': `${FP_BASE}/2021/02/Pull-up.gif`,
+      'pull up': `${FP_BASE}/2021/02/Pull-up.gif`,
+      'pull-up': `${FP_BASE}/2021/02/Pull-up.gif`,
+      'press banca': `${FP_BASE}/2021/02/Barbell-Bench-Press.gif`,
+      'press inclinado': `${FP_BASE}/2021/02/Incline-Dumbbell-Press.gif`,
+      'press militar': `${FP_BASE}/2021/07/Barbell-Standing-Military-Press.gif`,
+      'press hombro': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
+      'remo': `${FP_BASE}/2021/02/Barbell-Bent-Over-Row.gif`,
+      'jalón': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
+      'curl': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
+      'sentadilla': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'squat': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'prensa': `${FP_BASE}/2015/11/Leg-Press.gif`,
+      'zancada': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
+      'peso muerto': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
+      'deadlift': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
+      'hip thrust': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
+      'elevación lateral': `${FP_BASE}/2021/02/Dumbbell-Lateral-Raise.gif`,
+      'elevación frontal': `${FP_BASE}/2021/02/Dumbbell-Front-Raise.gif`,
+      'fondo': `${FP_BASE}/2021/06/Chest-Dips.gif`,
+      'dips': `${FP_BASE}/2021/06/Chest-Dips.gif`,
+      'flexión': `${FP_BASE}/2021/02/Push-up.gif`,
+      'flexiones': `${FP_BASE}/2021/02/Push-up.gif`,
+      'plancha': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'crunch': `${FP_BASE}/2021/02/Crunch.gif`,
+      'abdominal': `${FP_BASE}/2021/02/Crunch.gif`,
+      'extensión tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'extensión cuádriceps': `${FP_BASE}/2021/02/LEG-EXTENSION.gif`,
+      'curl pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
+      'pantorrilla': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'gemelo': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'apertura': `${FP_BASE}/2021/02/Dumbbell-Fly.gif`,
+      'face pull': `${FP_BASE}/2021/02/Face-Pull.gif`
     };
 
     // Map of muscle groups to default GIFs (fallback)
     const muscleGroupGifs = {
-      'Pecho': `${CLOUDINARY_BASE}/press_banca.gif`,
-      'Espalda': `${CLOUDINARY_BASE}/jalon_pecho.gif`,
-      'Hombros': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Bíceps': `${CLOUDINARY_BASE}/curl_biceps.gif`,
-      'Tríceps': `${CLOUDINARY_BASE}/extension_triceps.gif`,
-      'Cuádriceps': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Isquiotibiales': `${CLOUDINARY_BASE}/curl_pierna.gif`,
-      'Glúteos': `${CLOUDINARY_BASE}/hip_thrust.gif`,
-      'Pantorrillas': `${CLOUDINARY_BASE}/elevacion_talones.gif`,
-      'Abdominales': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Core': `${CLOUDINARY_BASE}/plancha.gif`,
-      'Piernas': `${CLOUDINARY_BASE}/sentadilla.gif`,
-      'Trapecios': `${CLOUDINARY_BASE}/press_hombro.gif`,
-      'Oblicuos': `${CLOUDINARY_BASE}/crunch.gif`,
-      'Aductores': `${CLOUDINARY_BASE}/zancadas.gif`
+      'Pecho': `${FP_BASE}/2021/02/Barbell-Bench-Press.gif`,
+      'Espalda': `${FP_BASE}/2021/02/Lat-Pulldown.gif`,
+      'Hombros': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
+      'Bíceps': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
+      'Tríceps': `${FP_BASE}/2021/02/Triceps-Pushdown.gif`,
+      'Cuádriceps': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'Isquiotibiales': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
+      'Glúteos': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
+      'Pantorrillas': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Abdominales': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Core': `${FP_BASE}/2021/02/Front-Plank.gif`,
+      'Piernas': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
+      'Trapecios': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
+      'Oblicuos': `${FP_BASE}/2021/02/Crunch.gif`,
+      'Aductores': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`
     };
 
     let totalUpdated = 0;
