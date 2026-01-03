@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { diet as dietApi, coach as coachApi } from '../api';
+import { useTheme } from '../contexts/ThemeContext';
 import { UtensilsCrossed, Plus, Sparkles, Flame, Drumstick, Wheat, Droplets, Check, Loader2, ChevronDown, ChevronUp, Scale, RefreshCw, X, RotateCcw } from 'lucide-react';
 
 const mealTypeLabels = {
@@ -19,6 +20,7 @@ const mealTypeIcons = {
 };
 
 export default function Diet() {
+  const { isDark } = useTheme();
   const [todayData, setTodayData] = useState({ meals: [], logged: [] });
   const [activePlan, setActivePlan] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -292,10 +294,12 @@ export default function Diet() {
           {todayData.logged.length > 0 && (
             <button
               onClick={clearTodayLogs}
-              className="w-8 h-8 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition-colors"
+              className={`w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition-colors ${
+                isDark ? 'bg-dark-600' : 'bg-gray-200'
+              }`}
               title="Reiniciar día"
             >
-              <RotateCcw size={16} className="text-gray-400 hover:text-red-400" />
+              <RotateCcw size={16} className={`hover:text-red-400 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
             </button>
           )}
         </div>
@@ -308,11 +312,11 @@ export default function Diet() {
               <span className="font-medium">Calorías</span>
             </div>
             <span className="text-sm">
-              <span className="font-bold text-white">{totals.calories}</span>
-              <span className="text-gray-400"> / {targets.daily_calories} kcal</span>
+              <span className={`font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>{totals.calories}</span>
+              <span className={isDark ? 'text-gray-400' : 'text-gray-500'}> / {targets.daily_calories} kcal</span>
             </span>
           </div>
-          <div className="h-3 bg-dark-700 rounded-full overflow-hidden">
+          <div className={`h-3 rounded-full overflow-hidden ${isDark ? 'bg-dark-700' : 'bg-gray-200'}`}>
             <div
               className="h-full bg-gradient-to-r from-accent-warning to-accent-danger rounded-full transition-all duration-500"
               style={{ width: `${Math.min((totals.calories / targets.daily_calories) * 100, 100)}%` }}
@@ -333,7 +337,7 @@ export default function Diet() {
             </div>
             <p className="text-xl font-bold">{Math.round(totals.protein)}g</p>
             <p className="text-xs text-gray-400">Proteína</p>
-            <div className="w-full h-1 bg-dark-700 rounded-full mt-2">
+            <div className={`w-full h-1 rounded-full mt-2 ${isDark ? 'bg-dark-700' : 'bg-gray-200'}`}>
               <div
                 className="h-full bg-accent-danger rounded-full"
                 style={{ width: `${Math.min((totals.protein / targets.protein_grams) * 100, 100)}%` }}
@@ -347,8 +351,8 @@ export default function Diet() {
               <Wheat size={28} className="text-accent-warning" />
             </div>
             <p className="text-xl font-bold">{Math.round(totals.carbs)}g</p>
-            <p className="text-xs text-gray-400">Carbos</p>
-            <div className="w-full h-1 bg-dark-700 rounded-full mt-2">
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Carbos</p>
+            <div className={`w-full h-1 rounded-full mt-2 ${isDark ? 'bg-dark-700' : 'bg-gray-200'}`}>
               <div
                 className="h-full bg-accent-warning rounded-full"
                 style={{ width: `${Math.min((totals.carbs / targets.carbs_grams) * 100, 100)}%` }}
@@ -362,8 +366,8 @@ export default function Diet() {
               <Droplets size={28} className="text-accent-primary" />
             </div>
             <p className="text-xl font-bold">{Math.round(totals.fat)}g</p>
-            <p className="text-xs text-gray-400">Grasas</p>
-            <div className="w-full h-1 bg-dark-700 rounded-full mt-2">
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Grasas</p>
+            <div className={`w-full h-1 rounded-full mt-2 ${isDark ? 'bg-dark-700' : 'bg-gray-200'}`}>
               <div
                 className="h-full bg-accent-primary rounded-full"
                 style={{ width: `${Math.min((totals.fat / targets.fat_grams) * 100, 100)}%` }}
@@ -391,7 +395,9 @@ export default function Diet() {
                   className={`rounded-2xl overflow-hidden border transition-all ${
                     logged
                       ? 'border-accent-success/30 bg-accent-success/5'
-                      : 'border-dark-600 bg-dark-800'
+                      : isDark
+                        ? 'border-dark-600 bg-dark-800'
+                        : 'border-gray-200 bg-white/70 backdrop-blur-sm'
                   }`}
                 >
                   {/* Meal Image */}
@@ -405,9 +411,11 @@ export default function Diet() {
                           e.target.style.display = 'none';
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent" />
+                      {isDark && <div className="absolute inset-0 bg-gradient-to-t from-dark-900 to-transparent" />}
                       <div className="absolute bottom-2 left-3">
-                        <span className="text-xs bg-dark-900/80 backdrop-blur px-2 py-1 rounded-full">
+                        <span className={`text-xs backdrop-blur px-2 py-1 rounded-full ${
+                          isDark ? 'bg-dark-900/80 text-white' : 'bg-white/90 text-gray-800'
+                        }`}>
                           {mealTypeIcons[meal.meal_type]} {mealTypeLabels[meal.meal_type]}
                         </span>
                       </div>
@@ -437,13 +445,15 @@ export default function Diet() {
                         <button
                           onClick={() => regenerateMeal(meal)}
                           disabled={regeneratingMeal === meal.id}
-                          className="w-10 h-10 bg-dark-600 rounded-full flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 ${
+                            isDark ? 'bg-dark-600 hover:bg-dark-500' : 'bg-gray-200 hover:bg-gray-300'
+                          }`}
                           title="Cambiar por otra opción"
                         >
                           {regeneratingMeal === meal.id ? (
                             <Loader2 size={18} className="animate-spin text-accent-primary" />
                           ) : (
-                            <RefreshCw size={18} className="text-gray-400" />
+                            <RefreshCw size={18} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
                           )}
                         </button>
 
@@ -498,24 +508,26 @@ export default function Diet() {
                         {/* Ingredients */}
                         {ingredients.main && ingredients.main.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-300 mb-2">Ingredientes:</h4>
-                            <div className="bg-dark-700/50 rounded-xl p-3 space-y-2">
+                            <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Ingredientes:</h4>
+                            <div className={`rounded-xl p-3 space-y-2 ${isDark ? 'bg-dark-700/50' : 'bg-gray-100/80'}`}>
                               {ingredients.main.map((ing, i) => {
                                 const isRegenerating = regeneratingIngredient === `${meal.id}-${ing.name}`;
                                 return (
                                   <div key={i} className="flex items-center justify-between text-sm">
-                                    <span className="text-white flex-1">{ing.name}</span>
+                                    <span className={`flex-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>{ing.name}</span>
                                     <span className="text-accent-primary font-medium mr-2">{ing.amount}</span>
                                     <button
                                       onClick={() => regenerateIngredient(meal.id, ing)}
                                       disabled={isRegenerating}
-                                      className="w-7 h-7 bg-dark-600 rounded-lg flex items-center justify-center hover:bg-dark-500 transition-colors disabled:opacity-50"
+                                      className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 ${
+                                        isDark ? 'bg-dark-600 hover:bg-dark-500' : 'bg-gray-200 hover:bg-gray-300'
+                                      }`}
                                       title="Cambiar ingrediente"
                                     >
                                       {isRegenerating ? (
                                         <Loader2 size={14} className="animate-spin text-accent-primary" />
                                       ) : (
-                                        <RefreshCw size={14} className="text-gray-400" />
+                                        <RefreshCw size={14} className={isDark ? 'text-gray-400' : 'text-gray-500'} />
                                       )}
                                     </button>
                                   </div>
@@ -528,9 +540,9 @@ export default function Diet() {
                         {/* Recipe */}
                         {meal.recipe && (
                           <div>
-                            <h4 className="text-sm font-semibold text-gray-300 mb-2">Preparación:</h4>
-                            <div className="bg-dark-700/50 rounded-xl p-3">
-                              <p className="text-sm text-gray-300 whitespace-pre-line">{meal.recipe}</p>
+                            <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Preparación:</h4>
+                            <div className={`rounded-xl p-3 ${isDark ? 'bg-dark-700/50' : 'bg-gray-100/80'}`}>
+                              <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{meal.recipe}</p>
                             </div>
                           </div>
                         )}
@@ -568,11 +580,13 @@ export default function Diet() {
           </div>
         ) : (
           <div className="card text-center py-10">
-            <div className="w-20 h-20 bg-gradient-to-br from-dark-700 to-dark-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+              isDark ? 'bg-gradient-to-br from-dark-700 to-dark-800' : 'bg-gradient-to-br from-gray-100 to-gray-200'
+            }`}>
               <UtensilsCrossed size={40} className="text-gray-500" />
             </div>
             <h3 className="text-lg font-semibold mb-2">Sin plan de comidas</h3>
-            <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">
+            <p className={`text-sm mb-6 max-w-xs mx-auto ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
               Genera un plan nutricional personalizado basado en tus datos y objetivos
             </p>
             <button
