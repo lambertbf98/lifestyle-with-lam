@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Lifestyle With Lam</string>
+    <string name="title_activity_main">Lifestyle With Lam</string>
+    <string name="package_name">com.lifestylewithlam.app</string>
+    <string name="custom_url_scheme">com.lifestylewithlam.app</string>
+</resources>

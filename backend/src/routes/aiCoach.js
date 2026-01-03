@@ -414,26 +414,22 @@ ENFOQUE ESPECIAL PARA MUJER:
 - Cada día de pierna debe tener mínimo 3 ejercicios de glúteo`;
     } else {
       trainingFocus = `
-ENFOQUE PARA HOMBRE - RUTINA PUSH/PULL/LEGS:
-⚠️ OBLIGATORIO seguir esta estructura exacta:
+ESTRUCTURA OBLIGATORIA PARA HOMBRE:
 
-DÍA 1 - EMPUJE (Push):
+DÍA 1 - EMPUJE:
 - Pecho: Press de Banca, Press Inclinado, Aperturas, Flexiones
 - Tríceps: Fondos, Extensión de Tríceps, Press Francés
-- Hombros (opcional): Press Militar, Elevaciones Laterales
 
-DÍA 2 - TIRÓN (Pull):
+DÍA 2 - TIRÓN:
 - Espalda: Dominadas, Jalón al Pecho, Remo con Barra, Remo con Mancuerna
 - Bíceps: Curl con Barra, Curl con Mancuernas, Curl Martillo
-- Trapecios (opcional): Encogimientos de Hombros
 
-DÍA 3 - PIERNA (Legs):
+DÍA 3 - PIERNA:
 - Cuádriceps: Sentadilla, Prensa de Piernas, Extensión de Cuádriceps, Zancadas
 - Isquiotibiales: Peso Muerto Rumano, Curl de Pierna
-- Glúteos: Hip Thrust
 - Pantorrillas: Elevación de Talones
 
-Si son 4+ días, repite el ciclo o añade día de hombros/brazos.
+Si son 4+ días, repite el ciclo.
 Priorizar ejercicios compuestos pesados primero.`;
     }
 
