@@ -335,11 +335,16 @@ router.post('/generate-workout', authenticateToken, async (req, res) => {
     );
     const previousPerformance = previousPerformanceResult.rows;
 
+    // IMPORTANT: ONLY select exercises that have a valid gif_url
+    // This ensures the user can always see how to do the exercise
     const exercisesResult = await pool.query(
       `SELECT id, name, name_es, muscle_group, equipment, difficulty, gif_url, instructions
-       FROM exercises ORDER BY muscle_group, name`
+       FROM exercises
+       WHERE gif_url IS NOT NULL AND gif_url != ''
+       ORDER BY muscle_group, name`
     );
     const availableExercises = exercisesResult.rows;
+    console.log(`Loaded ${availableExercises.length} exercises WITH GIFs for workout generation`);
 
     const exerciseMap = {};
     availableExercises.forEach(ex => {
@@ -1044,11 +1049,13 @@ router.post('/regenerate-exercise', authenticateToken, async (req, res) => {
   const { workout_exercise_id, current_exercise_name, muscle_group, sets, reps } = req.body;
 
   try {
-    // Get available exercises for the same muscle group
+    // Get available exercises for the same muscle group - ONLY with GIFs
+    // This ensures the user can always see how to do the exercise
     const exercisesResult = await pool.query(
       `SELECT id, name, name_es, muscle_group, equipment, gif_url, instructions
        FROM exercises
        WHERE muscle_group = $1 AND name_es != $2
+       AND gif_url IS NOT NULL AND gif_url != ''
        ORDER BY RANDOM()
        LIMIT 5`,
       [muscle_group, current_exercise_name]

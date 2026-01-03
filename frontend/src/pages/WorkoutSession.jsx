@@ -333,14 +333,14 @@ export default function WorkoutSession() {
               {/* Expanded Content */}
               {isExpanded && (
                 <div className="border-t border-dark-600 animate-fade-in">
-                  {/* GIF Display */}
+                  {/* GIF Display - Exercise GIF from database */}
                   {exercise.exercise?.gif_url && (
                     <div className="relative bg-dark-900">
                       <img
                         src={exercise.exercise.gif_url}
-                        alt={exercise.exercise.name}
+                        alt={exercise.exercise?.name_es || exercise.exercise?.name || 'Ejercicio'}
                         className="w-full h-48 object-contain"
-                        onError={(e) => { e.target.style.display = 'none'; }}
+                        loading="lazy"
                       />
                     </div>
                   )}

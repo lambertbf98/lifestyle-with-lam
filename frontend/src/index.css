@@ -24,10 +24,10 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Dark mode - NEW vibrant gradient */
+  /* Dark mode - Warm gradient (brown/orange tones) */
   .dark body {
     @apply text-white;
-    background: linear-gradient(135deg, #0c0c10 0%, #1a1a2e 50%, #16213e 100%) !important;
+    background: linear-gradient(135deg, #0f0a08 0%, #1a120e 50%, #1c1410 100%) !important;
     background-attachment: fixed;
   }
 
