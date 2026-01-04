@@ -47,10 +47,17 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authApi.login({ email, password });
+
+      // Handle error responses that come with 200 status
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
       const { token, user: userData } = response.data || {};
 
       if (!token || !userData) {
-        throw new Error('Respuesta inválida del servidor');
+        console.error('Invalid response:', response.data);
+        throw new Error('Error de conexión. Intenta de nuevo.');
       }
 
       localStorage.setItem('token', token);
@@ -58,6 +65,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return userData;
     } catch (err) {
+      // Get the most specific error message available
       const message = err.response?.data?.error || err.message || 'Error al iniciar sesión';
       setError(message);
       throw new Error(message);
