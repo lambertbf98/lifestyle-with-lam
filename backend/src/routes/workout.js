@@ -305,6 +305,51 @@ router.get('/history', authenticateToken, async (req, res) => {
   }
 });
 
+// Replace exercise in workout (manual selection)
+router.put('/exercise/:workoutExerciseId', authenticateToken, async (req, res) => {
+  const { workoutExerciseId } = req.params;
+  const { exercise_id } = req.body;
+
+  if (!exercise_id) {
+    return res.status(400).json({ error: 'Exercise ID is required' });
+  }
+
+  try {
+    // Verify the workout exercise belongs to the user
+    const verifyResult = await pool.query(
+      `SELECT we.id FROM workout_exercises we
+       JOIN workout_days wd ON we.workout_day_id = wd.id
+       JOIN workout_plans wp ON wd.plan_id = wp.id
+       WHERE we.id = $1 AND wp.user_id = $2`,
+      [workoutExerciseId, req.user.id]
+    );
+
+    if (verifyResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Workout exercise not found' });
+    }
+
+    // Update the exercise
+    await pool.query(
+      'UPDATE workout_exercises SET exercise_id = $1 WHERE id = $2',
+      [exercise_id, workoutExerciseId]
+    );
+
+    // Get the new exercise data
+    const exerciseResult = await pool.query(
+      'SELECT * FROM exercises WHERE id = $1',
+      [exercise_id]
+    );
+
+    res.json({
+      success: true,
+      exercise: exerciseResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Replace exercise error:', error);
+    res.status(500).json({ error: 'Failed to replace exercise' });
+  }
+});
+
 // Force update all exercise GIFs
 router.post('/update-gifs', authenticateToken, async (req, res) => {
   try {

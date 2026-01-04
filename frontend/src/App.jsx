@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Workouts from './pages/Workouts';
 import WorkoutSession from './pages/WorkoutSession';
 import Diet from './pages/Diet';
+import DietHistory from './pages/DietHistory';
 import Progress from './pages/Progress';
 import Coach from './pages/Coach';
 import Profile from './pages/Profile';
@@ -106,6 +107,16 @@ function App() {
         element={
           <AppRoute>
             <WorkoutSession />
+          </AppRoute>
+        }
+      />
+
+      {/* Diet history (full screen) */}
+      <Route
+        path="/diet-history"
+        element={
+          <AppRoute>
+            <DietHistory />
           </AppRoute>
         }
       />

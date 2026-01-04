@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { user as userApi, progress as progressApi, workouts as workoutsApi } from '../api';
-import { Dumbbell, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles, CheckCircle } from 'lucide-react';
+import { Dumbbell, TrendingDown, TrendingUp, Trophy, ChevronRight, Sparkles, CheckCircle, UtensilsCrossed } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -222,24 +222,44 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Quick Action */}
-      <Link
-        to="/progress"
-        className="block bg-gradient-to-br from-neon-purple/10 to-gray-100 dark:to-dark-800 rounded-2xl p-4 border border-neon-purple/30 hover:border-neon-purple/50 transition-all shadow-lg"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-neon-purple/20 rounded-2xl flex items-center justify-center">
-            <TrendingUp size={28} className="text-neon-purple" />
+      {/* Quick Actions */}
+      <div className="space-y-3">
+        <Link
+          to="/progress"
+          className="block bg-gradient-to-br from-neon-purple/10 to-gray-100 dark:to-dark-800 rounded-2xl p-4 border border-neon-purple/30 hover:border-neon-purple/50 transition-all shadow-lg"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-neon-purple/20 rounded-2xl flex items-center justify-center">
+              <TrendingUp size={28} className="text-neon-purple" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-xl">Ver Progreso</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Gráficas, estadísticas y logros</p>
+            </div>
+            <div className="w-10 h-10 bg-neon-purple/20 rounded-full flex items-center justify-center">
+              <ChevronRight size={22} className="text-neon-purple" />
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-xl">Ver Progreso</p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Gráficas, estadísticas y logros</p>
+        </Link>
+
+        <Link
+          to="/diet-history"
+          className="block bg-gradient-to-br from-accent-success/10 to-gray-100 dark:to-dark-800 rounded-2xl p-4 border border-accent-success/30 hover:border-accent-success/50 transition-all shadow-lg"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-accent-success/20 rounded-2xl flex items-center justify-center">
+              <UtensilsCrossed size={28} className="text-accent-success" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-xl">Ver Alimentación</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Historial de comidas por día</p>
+            </div>
+            <div className="w-10 h-10 bg-accent-success/20 rounded-full flex items-center justify-center">
+              <ChevronRight size={22} className="text-accent-success" />
+            </div>
           </div>
-          <div className="w-10 h-10 bg-neon-purple/20 rounded-full flex items-center justify-center">
-            <ChevronRight size={22} className="text-neon-purple" />
-          </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
 
     </div>
   );

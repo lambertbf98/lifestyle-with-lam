@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { workouts as workoutsApi, coach as coachApi } from '../api';
 import { useTheme } from '../contexts/ThemeContext';
-import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Dumbbell, ChevronRight, Sparkles, Clock, Target, Loader2, Calendar, Trophy, ChevronDown, ChevronUp, RefreshCw, Search, X, Check } from 'lucide-react';
 
 export default function Workouts() {
   const { isDark } = useTheme();
@@ -13,6 +13,14 @@ export default function Workouts() {
   const [history, setHistory] = useState([]);
   const [expandedDay, setExpandedDay] = useState(null);
   const [regeneratingExercise, setRegeneratingExercise] = useState(null);
+  // Exercise selector modal state
+  const [showExerciseSelector, setShowExerciseSelector] = useState(false);
+  const [selectedExerciseToReplace, setSelectedExerciseToReplace] = useState(null);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [exerciseResults, setExerciseResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [replacingExercise, setReplacingExercise] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -91,6 +99,76 @@ export default function Workouts() {
       alert('Error al cambiar el ejercicio. Intenta de nuevo.');
     } finally {
       setRegeneratingExercise(null);
+    }
+  };
+
+  // Open exercise selector modal
+  const openExerciseSelector = (exercise, dayIndex) => {
+    setSelectedExerciseToReplace(exercise);
+    setSelectedDayIndex(dayIndex);
+    setSearchQuery('');
+    setExerciseResults([]);
+    setShowExerciseSelector(true);
+  };
+
+  // Search exercises
+  const searchExercises = async (query) => {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setExerciseResults([]);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await workoutsApi.getExercises({ search: query });
+      setExerciseResults(response.data);
+    } catch (error) {
+      console.error('Error searching exercises:', error);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  // Replace exercise with selected one
+  const selectExercise = async (newExercise) => {
+    if (!selectedExerciseToReplace) return;
+
+    setReplacingExercise(true);
+    try {
+      const response = await workoutsApi.replaceExercise(
+        selectedExerciseToReplace.id,
+        newExercise.id
+      );
+
+      if (response.data.success) {
+        // Update local state
+        setActivePlan(prev => ({
+          ...prev,
+          days: prev.days.map((day, idx) =>
+            idx === selectedDayIndex
+              ? {
+                  ...day,
+                  exercises: day.exercises.map(ex =>
+                    ex.id === selectedExerciseToReplace.id
+                      ? { ...ex, exercise: response.data.exercise }
+                      : ex
+                  )
+                }
+              : day
+          )
+        }));
+
+        // Close modal
+        setShowExerciseSelector(false);
+        setSelectedExerciseToReplace(null);
+        setSelectedDayIndex(null);
+      }
+    } catch (error) {
+      console.error('Error replacing exercise:', error);
+      alert('Error al cambiar el ejercicio. Intenta de nuevo.');
+    } finally {
+      setReplacingExercise(false);
     }
   };
 
@@ -227,9 +305,21 @@ export default function Workouts() {
                       {day.exercises?.map((exercise) => (
                         <div
                           key={exercise.id}
-                          className="flex items-center gap-3 p-3 rounded-xl"
+                          className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:opacity-80 transition-opacity"
                           style={exerciseStyle}
+                          onClick={() => openExerciseSelector(exercise, dayIndex)}
                         >
+                          {/* Exercise GIF thumbnail */}
+                          {exercise.exercise?.gif_url && (
+                            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-dark-700">
+                              <img
+                                src={exercise.exercise.gif_url}
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => e.target.style.display = 'none'}
+                              />
+                            </div>
+                          )}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-sm truncate">
                               {exercise.exercise?.name_es || exercise.exercise?.name || 'Ejercicio'}
@@ -237,6 +327,7 @@ export default function Workouts() {
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               {exercise.sets} series × {exercise.reps} • {exercise.rest_seconds}s descanso
                             </p>
+                            <p className="text-xs text-accent-primary mt-0.5">Toca para cambiar</p>
                           </div>
                           <button
                             onClick={(e) => {
@@ -246,7 +337,7 @@ export default function Workouts() {
                             disabled={regeneratingExercise === exercise.id}
                             className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
                             style={buttonStyle}
-                            title="Cambiar ejercicio"
+                            title="Cambiar aleatorio"
                           >
                             {regeneratingExercise === exercise.id ? (
                               <Loader2 size={16} className="animate-spin text-accent-primary" />
@@ -324,6 +415,114 @@ export default function Workouts() {
           </p>
         </div>
       </div>
+
+      {/* Exercise Selector Modal */}
+      {showExerciseSelector && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowExerciseSelector(false)}
+          />
+
+          {/* Modal */}
+          <div
+            className={`relative w-full max-w-lg max-h-[85vh] rounded-t-3xl overflow-hidden animate-slide-up ${
+              isDark ? 'bg-dark-800' : 'bg-white'
+            }`}
+          >
+            {/* Header */}
+            <div className={`sticky top-0 z-10 p-4 border-b ${isDark ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold">Buscar Ejercicio</h3>
+                <button
+                  onClick={() => setShowExerciseSelector(false)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? 'bg-dark-600 hover:bg-dark-500' : 'bg-gray-200 hover:bg-gray-300'}`}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Current exercise info */}
+              {selectedExerciseToReplace && (
+                <p className="text-sm text-gray-500 mb-3">
+                  Reemplazando: <span className="text-accent-primary font-medium">{selectedExerciseToReplace.exercise?.name_es || selectedExerciseToReplace.exercise?.name}</span>
+                </p>
+              )}
+
+              {/* Search input */}
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar ejercicio..."
+                  value={searchQuery}
+                  onChange={(e) => searchExercises(e.target.value)}
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl ${
+                    isDark
+                      ? 'bg-dark-700 text-white placeholder-gray-500 border-dark-600'
+                      : 'bg-gray-100 text-gray-800 placeholder-gray-400 border-gray-200'
+                  } border focus:border-accent-primary focus:outline-none`}
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="overflow-y-auto p-4 space-y-2" style={{ maxHeight: 'calc(85vh - 180px)' }}>
+              {searchLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 size={24} className="animate-spin text-accent-primary" />
+                </div>
+              ) : searchQuery.length < 2 ? (
+                <p className="text-center text-gray-500 py-8">
+                  Escribe al menos 2 letras para buscar
+                </p>
+              ) : exerciseResults.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">
+                  No se encontraron ejercicios
+                </p>
+              ) : (
+                exerciseResults.map((ex) => (
+                  <button
+                    key={ex.id}
+                    onClick={() => selectExercise(ex)}
+                    disabled={replacingExercise}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
+                      isDark
+                        ? 'bg-dark-700 hover:bg-dark-600 border border-dark-600'
+                        : 'bg-gray-100 hover:bg-gray-200 border border-gray-200'
+                    } ${replacingExercise ? 'opacity-50' : ''}`}
+                  >
+                    {/* GIF thumbnail */}
+                    {ex.gif_url && (
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-dark-600">
+                        <img
+                          src={ex.gif_url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => e.target.style.display = 'none'}
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{ex.name_es || ex.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {ex.muscle_group} • {ex.equipment}
+                      </p>
+                    </div>
+                    {replacingExercise ? (
+                      <Loader2 size={18} className="animate-spin text-accent-primary" />
+                    ) : (
+                      <Check size={18} className="text-accent-success opacity-0 group-hover:opacity-100" />
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

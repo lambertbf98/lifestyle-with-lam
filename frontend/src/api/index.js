@@ -9,12 +9,14 @@ const api = axios.create({
   }
 });
 
-// Add token to requests
+// Add token and timezone to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Add client timezone
+  config.headers['X-Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return config;
 });
 
@@ -64,7 +66,8 @@ export const workouts = {
   completeWorkout: (data) => api.post('/workouts/complete', data),
   getHistory: (limit = 20, offset = 0) => api.get(`/workouts/history?limit=${limit}&offset=${offset}`),
   clearHistory: () => api.delete('/workouts/clear-history'),
-  updateGifs: () => api.post('/workouts/update-gifs')
+  updateGifs: () => api.post('/workouts/update-gifs'),
+  replaceExercise: (workoutExerciseId, exerciseId) => api.put(`/workouts/exercise/${workoutExerciseId}`, { exercise_id: exerciseId })
 };
 
 // Diet
@@ -76,7 +79,9 @@ export const diet = {
   logMeal: (data) => api.post('/diet/log', data),
   getSummary: (startDate, endDate) => api.get('/diet/summary', { params: { start_date: startDate, end_date: endDate } }),
   deleteMealLog: (id) => api.delete(`/diet/log/${id}`),
-  clearToday: () => api.delete('/diet/clear-today')
+  clearToday: () => api.delete('/diet/clear-today'),
+  getHistory: (date) => api.get(`/diet/history/${date}`),
+  getHistoryDates: (month, year) => api.get('/diet/history-dates', { params: { month, year } })
 };
 
 // Progress

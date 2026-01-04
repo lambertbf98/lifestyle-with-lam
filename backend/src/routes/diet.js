@@ -61,7 +61,13 @@ router.get('/plans/active', authenticateToken, async (req, res) => {
 
 // Get today's meals
 router.get('/today', authenticateToken, async (req, res) => {
-  const dayOfWeek = new Date().getDay();
+  // Get client timezone from header or default to UTC
+  const clientTimezone = req.headers['x-timezone'] || 'UTC';
+
+  // Calculate day of week in client's timezone
+  const clientDate = new Date(new Date().toLocaleString('en-US', { timeZone: clientTimezone }));
+  const dayOfWeek = clientDate.getDay();
+  const clientDateStr = clientDate.toISOString().split('T')[0];
 
   try {
     const planResult = await pool.query(
@@ -86,12 +92,12 @@ router.get('/today', authenticateToken, async (req, res) => {
       [planResult.rows[0].id, dayOfWeek]
     );
 
-    // Get logged meals for today
+    // Get logged meals for today using client's date
     const loggedResult = await pool.query(
       `SELECT * FROM meal_logs WHERE user_id = $1
-       AND DATE(logged_at) = CURRENT_DATE
+       AND DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) = $3::date
        ORDER BY logged_at`,
-      [req.user.id]
+      [req.user.id, clientTimezone, clientDateStr]
     );
 
     res.json({
@@ -261,6 +267,86 @@ router.delete('/clear-today', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Clear today meals error:', error);
     res.status(500).json({ error: 'Failed to clear today\'s meals' });
+  }
+});
+
+// Get diet history for a specific date
+router.get('/history/:date', authenticateToken, async (req, res) => {
+  const { date } = req.params;
+  const clientTimezone = req.headers['x-timezone'] || 'UTC';
+
+  try {
+    // Get logged meals for that date
+    const loggedResult = await pool.query(
+      `SELECT ml.*, m.name as meal_name, m.meal_type, m.ingredients, m.recipe
+       FROM meal_logs ml
+       LEFT JOIN meals m ON ml.meal_id = m.id
+       WHERE ml.user_id = $1
+       AND DATE(ml.logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) = $3::date
+       ORDER BY ml.logged_at`,
+      [req.user.id, clientTimezone, date]
+    );
+
+    // Calculate totals
+    const totals = loggedResult.rows.reduce((acc, log) => ({
+      calories: acc.calories + (log.calories || 0),
+      protein: acc.protein + (parseFloat(log.protein_grams) || 0),
+      carbs: acc.carbs + (parseFloat(log.carbs_grams) || 0),
+      fat: acc.fat + (parseFloat(log.fat_grams) || 0)
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+    res.json({
+      date,
+      meals: loggedResult.rows,
+      totals
+    });
+  } catch (error) {
+    console.error('Get diet history error:', error);
+    res.status(500).json({ error: 'Failed to get diet history' });
+  }
+});
+
+// Get dates with logged meals (for calendar)
+router.get('/history-dates', authenticateToken, async (req, res) => {
+  const { month, year } = req.query;
+  const clientTimezone = req.headers['x-timezone'] || 'UTC';
+
+  try {
+    let query;
+    const params = [req.user.id, clientTimezone];
+
+    if (month && year) {
+      query = `
+        SELECT DISTINCT DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) as date,
+               SUM(calories) as total_calories,
+               COUNT(*) as meals_count
+        FROM meal_logs
+        WHERE user_id = $1
+        AND EXTRACT(MONTH FROM logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) = $3
+        AND EXTRACT(YEAR FROM logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) = $4
+        GROUP BY DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2)
+        ORDER BY date DESC
+      `;
+      params.push(parseInt(month), parseInt(year));
+    } else {
+      // Last 30 days by default
+      query = `
+        SELECT DISTINCT DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2) as date,
+               SUM(calories) as total_calories,
+               COUNT(*) as meals_count
+        FROM meal_logs
+        WHERE user_id = $1
+        AND logged_at >= NOW() - INTERVAL '30 days'
+        GROUP BY DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $2)
+        ORDER BY date DESC
+      `;
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Get history dates error:', error);
+    res.status(500).json({ error: 'Failed to get history dates' });
   }
 });
 
