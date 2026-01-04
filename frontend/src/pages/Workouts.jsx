@@ -109,6 +109,17 @@ export default function Workouts() {
     setSearchQuery('');
     setExerciseResults([]);
     setShowExerciseSelector(true);
+    // Block body scroll
+    document.body.style.overflow = 'hidden';
+  };
+
+  // Close exercise selector modal
+  const closeExerciseSelector = () => {
+    setShowExerciseSelector(false);
+    setSelectedExerciseToReplace(null);
+    setSelectedDayIndex(null);
+    // Restore body scroll
+    document.body.style.overflow = '';
   };
 
   // Search exercises
@@ -160,9 +171,7 @@ export default function Workouts() {
         }));
 
         // Close modal
-        setShowExerciseSelector(false);
-        setSelectedExerciseToReplace(null);
-        setSelectedDayIndex(null);
+        closeExerciseSelector();
       }
     } catch (error) {
       console.error('Error replacing exercise:', error);
@@ -425,7 +434,7 @@ export default function Workouts() {
             <div className={`sticky top-0 z-10 p-4 border-b ${isDark ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center gap-3 mb-3">
                 <button
-                  onClick={() => setShowExerciseSelector(false)}
+                  onClick={closeExerciseSelector}
                   className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-dark-700 hover:bg-dark-600' : 'bg-gray-200 hover:bg-gray-300'}`}
                 >
                   <X size={20} />

@@ -27,6 +27,17 @@ export default function Progress() {
   });
   const [measurementsHistory, setMeasurementsHistory] = useState([]);
 
+  // Modal open/close with scroll lock
+  const openMeasurementsModal = () => {
+    setShowMeasurementsModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeMeasurementsModal = () => {
+    setShowMeasurementsModal(false);
+    document.body.style.overflow = '';
+  };
+
   useEffect(() => {
     loadData();
   }, [period]);
@@ -82,7 +93,7 @@ export default function Progress() {
         bicep_cm: '',
         thigh_cm: ''
       });
-      setShowMeasurementsModal(false);
+      closeMeasurementsModal();
       await loadData();
     } catch (error) {
       console.error('Error adding measurements:', error);
@@ -317,7 +328,7 @@ export default function Progress() {
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Seguimiento en cm</p>
           </div>
           <button
-            onClick={() => setShowMeasurementsModal(true)}
+            onClick={openMeasurementsModal}
             className="w-10 h-10 bg-neon-purple/20 rounded-xl flex items-center justify-center hover:bg-neon-purple/30 transition-colors"
           >
             <Plus size={20} className="text-neon-purple" />
@@ -370,7 +381,7 @@ export default function Progress() {
             <Ruler size={32} className="text-gray-600 mx-auto mb-2" />
             <p className="text-gray-500">Sin medidas registradas</p>
             <button
-              onClick={() => setShowMeasurementsModal(true)}
+              onClick={openMeasurementsModal}
               className="text-neon-purple text-sm mt-2"
             >
               Registrar medidas
@@ -562,7 +573,7 @@ export default function Progress() {
             <p className={`text-xs mt-3 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>Solo rellena las medidas que quieras registrar</p>
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => setShowMeasurementsModal(false)}
+                onClick={closeMeasurementsModal}
                 className="btn-secondary flex-1"
               >
                 Cancelar
