@@ -20,13 +20,13 @@ export default function Login() {
 
     try {
       const user = await login(email, password);
-      if (user.onboardingCompleted) {
+      if (user?.onboardingCompleted) {
         navigate('/');
       } else {
         navigate('/onboarding');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }

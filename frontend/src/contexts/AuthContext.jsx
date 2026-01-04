@@ -47,13 +47,18 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authApi.login({ email, password });
-      const { token, user: userData } = response.data;
+      const { token, user: userData } = response.data || {};
+
+      if (!token || !userData) {
+        throw new Error('Respuesta inválida del servidor');
+      }
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       return userData;
     } catch (err) {
-      const message = err.response?.data?.error || 'Error al iniciar sesión';
+      const message = err.response?.data?.error || err.message || 'Error al iniciar sesión';
       setError(message);
       throw new Error(message);
     }
