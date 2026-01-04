@@ -416,39 +416,29 @@ export default function Workouts() {
         </div>
       </div>
 
-      {/* Exercise Selector Modal */}
+      {/* Exercise Selector Modal - Full Screen */}
       {showExerciseSelector && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowExerciseSelector(false)}
-          />
-
-          {/* Modal */}
-          <div
-            className={`relative w-full max-w-lg max-h-[85vh] rounded-t-3xl overflow-hidden animate-slide-up ${
-              isDark ? 'bg-dark-800' : 'bg-white'
-            }`}
-          >
+        <div className="fixed inset-0 z-50 flex flex-col">
+          {/* Full screen modal */}
+          <div className={`flex-1 flex flex-col ${isDark ? 'bg-dark-900' : 'bg-gray-50'}`}>
             {/* Header */}
             <div className={`sticky top-0 z-10 p-4 border-b ${isDark ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'}`}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold">Buscar Ejercicio</h3>
+              <div className="flex items-center gap-3 mb-3">
                 <button
                   onClick={() => setShowExerciseSelector(false)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? 'bg-dark-600 hover:bg-dark-500' : 'bg-gray-200 hover:bg-gray-300'}`}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? 'bg-dark-700 hover:bg-dark-600' : 'bg-gray-200 hover:bg-gray-300'}`}
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold">Buscar Ejercicio</h3>
+                  {selectedExerciseToReplace && (
+                    <p className="text-xs text-gray-500">
+                      Reemplazando: <span className="text-accent-primary font-medium">{selectedExerciseToReplace.exercise?.name_es || selectedExerciseToReplace.exercise?.name}</span>
+                    </p>
+                  )}
+                </div>
               </div>
-
-              {/* Current exercise info */}
-              {selectedExerciseToReplace && (
-                <p className="text-sm text-gray-500 mb-3">
-                  Reemplazando: <span className="text-accent-primary font-medium">{selectedExerciseToReplace.exercise?.name_es || selectedExerciseToReplace.exercise?.name}</span>
-                </p>
-              )}
 
               {/* Search input */}
               <div className="relative">
@@ -468,56 +458,69 @@ export default function Workouts() {
               </div>
             </div>
 
-            {/* Results */}
-            <div className="overflow-y-auto p-4 space-y-2" style={{ maxHeight: 'calc(85vh - 180px)' }}>
+            {/* Results - Full height scroll */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 pb-20">
               {searchLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 size={24} className="animate-spin text-accent-primary" />
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 size={32} className="animate-spin text-accent-primary" />
                 </div>
               ) : searchQuery.length < 2 ? (
-                <p className="text-center text-gray-500 py-8">
-                  Escribe al menos 2 letras para buscar
-                </p>
+                <div className="text-center py-12">
+                  <Search size={48} className="mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-500">Escribe al menos 2 letras para buscar</p>
+                  <p className="text-xs text-gray-400 mt-1">Ejemplo: "press", "curl", "sentadilla"</p>
+                </div>
               ) : exerciseResults.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">
-                  No se encontraron ejercicios
-                </p>
+                <div className="text-center py-12">
+                  <Dumbbell size={48} className="mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-500">No se encontraron ejercicios</p>
+                  <p className="text-xs text-gray-400 mt-1">Prueba con otro nombre</p>
+                </div>
               ) : (
-                exerciseResults.map((ex) => (
-                  <button
-                    key={ex.id}
-                    onClick={() => selectExercise(ex)}
-                    disabled={replacingExercise}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
-                      isDark
-                        ? 'bg-dark-700 hover:bg-dark-600 border border-dark-600'
-                        : 'bg-gray-100 hover:bg-gray-200 border border-gray-200'
-                    } ${replacingExercise ? 'opacity-50' : ''}`}
-                  >
-                    {/* GIF thumbnail */}
-                    {ex.gif_url && (
-                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-dark-600">
-                        <img
-                          src={ex.gif_url}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={(e) => e.target.style.display = 'none'}
-                        />
+                <>
+                  <p className="text-xs text-gray-500 mb-2">{exerciseResults.length} resultados</p>
+                  {exerciseResults.map((ex) => (
+                    <button
+                      key={ex.id}
+                      onClick={() => selectExercise(ex)}
+                      disabled={replacingExercise}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all active:scale-98 ${
+                        isDark
+                          ? 'bg-dark-800 hover:bg-dark-700 border border-dark-600'
+                          : 'bg-white hover:bg-gray-100 border border-gray-200'
+                      } ${replacingExercise ? 'opacity-50' : ''}`}
+                    >
+                      {/* GIF thumbnail */}
+                      <div className={`w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 ${isDark ? 'bg-dark-700' : 'bg-gray-100'}`}>
+                        {ex.gif_url ? (
+                          <img
+                            src={ex.gif_url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M6.5 6.5h11v11h-11z"/><path d="M21 21l-6-6m-3 3l-6-6"/></svg></div>';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Dumbbell size={24} className="text-gray-400" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{ex.name_es || ex.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {ex.muscle_group} • {ex.equipment}
-                      </p>
-                    </div>
-                    {replacingExercise ? (
-                      <Loader2 size={18} className="animate-spin text-accent-primary" />
-                    ) : (
-                      <Check size={18} className="text-accent-success opacity-0 group-hover:opacity-100" />
-                    )}
-                  </button>
-                ))
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold">{ex.name_es || ex.name}</p>
+                        <p className="text-sm text-accent-primary">{ex.muscle_group}</p>
+                        <p className="text-xs text-gray-500">{ex.equipment}</p>
+                      </div>
+                      {replacingExercise ? (
+                        <Loader2 size={20} className="animate-spin text-accent-primary" />
+                      ) : (
+                        <ChevronRight size={20} className="text-gray-400" />
+                      )}
+                    </button>
+                  ))}
+                </>
               )}
             </div>
           </div>
