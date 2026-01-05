@@ -28,7 +28,7 @@ router.get('/exercises', authenticateToken, async (req, res) => {
 
     if (search) {
       paramCount++;
-      query += ` AND (name ILIKE $${paramCount} OR name_es ILIKE $${paramCount})`;
+      query += ` AND (name ILIKE $${paramCount} OR name_es ILIKE $${paramCount} OR muscle_group ILIKE $${paramCount})`;
       params.push(`%${search}%`);
     }
 

@@ -454,7 +454,7 @@ export default function Workouts() {
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar ejercicio..."
+                  placeholder="Buscar por nombre o músculo..."
                   value={searchQuery}
                   onChange={(e) => searchExercises(e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl ${
@@ -477,7 +477,8 @@ export default function Workouts() {
                 <div className="text-center py-12">
                   <Search size={48} className="mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-500">Escribe al menos 2 letras para buscar</p>
-                  <p className="text-xs text-gray-400 mt-1">Ejemplo: "press", "curl", "sentadilla"</p>
+                  <p className="text-xs text-gray-400 mt-1">Por nombre: "press", "curl", "sentadilla"</p>
+                  <p className="text-xs text-accent-primary mt-1">Por músculo: "pecho", "espalda", "pierna", "bíceps"</p>
                 </div>
               ) : exerciseResults.length === 0 ? (
                 <div className="text-center py-12">
