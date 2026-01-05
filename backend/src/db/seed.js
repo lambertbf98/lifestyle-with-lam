@@ -778,7 +778,7 @@ const exercises = [
     equipment: 'Mancuernas',
     difficulty: 'Intermedio',
     instructions: 'Acostado, baja mancuernas hacia la frente flexionando codos.',
-    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Skull-Crusher.gif'
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Dumbbell-Skull-Crusher.gif'
   },
   {
     name: 'Extensión Overhead con Polea',
@@ -1327,8 +1327,8 @@ const forceUpdateAllGifs = async () => {
       'Elevaciones Posteriores': `${FP_BASE}/2021/02/Dumbbell-Lateral-Raise.gif`,
       'Press Arnold': `${FP_BASE}/2021/02/Dumbbell-Shoulder-Press.gif`,
       'Face Pull': `${FP_BASE}/2021/02/Face-Pull.gif`,
-      'Encogimientos de Hombros': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
-      'Encogimientos': `${FP_BASE}/2021/02/Dumbbell-Shrug.gif`,
+      'Encogimientos de Hombros': `${FP_BASE}/2021/04/Dumbbell-Shrug.gif`,
+      'Encogimientos': `${FP_BASE}/2021/04/Dumbbell-Shrug.gif`,
 
       // BÍCEPS
       'Curl con Barra': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
@@ -1350,18 +1350,18 @@ const forceUpdateAllGifs = async () => {
       'Extensión de Tríceps con Polea': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Extensión de Tríceps sobre Cabeza': `${FP_BASE}/2021/02/Dumbbell-Triceps-Extension.gif`,
       'Extensión de Tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
-      'Press Francés': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
+      'Press Francés': `${FP_BASE}/2021/06/Dumbbell-Skull-Crusher.gif`,
       'Extensión de Tríceps con Cuerda': `${FP_BASE}/2021/06/Rope-Pushdown.gif`,
       'Patada de Tríceps': `${FP_BASE}/2021/02/Dumbbell-Kickback.gif`,
       'Press de Banca Cerrado': `${FP_BASE}/2021/02/Close-Grip-Bench-Press.gif`,
-      'Press Francés con Mancuernas': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
+      'Press Francés con Mancuernas': `${FP_BASE}/2021/06/Dumbbell-Skull-Crusher.gif`,
       'Extensión Overhead con Polea': `${FP_BASE}/2021/04/Cable-Rope-Overhead-Triceps-Extension.gif`,
 
       // PIERNAS - CUÁDRICEPS
       'Sentadilla con Barra': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
       'Sentadilla': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
-      'Sentadilla Goblet': `${FP_BASE}/2021/02/Goblet-Squat.gif`,
-      'Sentadilla Sumo': `${FP_BASE}/2021/02/Sumo-Squat.gif`,
+      'Sentadilla Goblet': `${FP_BASE}/2023/01/Dumbbell-Goblet-Squat.gif`,
+      'Sentadilla Sumo': `${FP_BASE}/2021/02/dumbbell-sumo-squat.gif`,
       'Sentadilla Hack': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
       'Sentadilla Búlgara': `${FP_BASE}/2021/02/Dumbbell-Lunge.gif`,
       'Prensa de Piernas': `${FP_BASE}/2015/11/Leg-Press.gif`,
