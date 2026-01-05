@@ -641,6 +641,570 @@ const exercises = [
     difficulty: 'Intermedio',
     instructions: 'Apoyado en un antebrazo, mantén el cuerpo recto de lado.',
     gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
+  },
+
+  // =====================================================
+  // EJERCICIOS ADICIONALES PARA MAYOR VARIEDAD
+  // =====================================================
+
+  // BÍCEPS - Más variaciones
+  {
+    name: 'Curl con Barra EZ',
+    name_es: 'Curl con Barra EZ',
+    muscle_group: 'Bíceps',
+    secondary_muscles: ['Antebrazos'],
+    equipment: 'Barra EZ',
+    difficulty: 'Principiante',
+    instructions: 'Agarre en la parte curvada de la barra, flexiona los codos controladamente.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Z-Bar-Preacher-Curl.gif'
+  },
+  {
+    name: 'Curl Predicador',
+    name_es: 'Curl Predicador',
+    muscle_group: 'Bíceps',
+    secondary_muscles: [],
+    equipment: 'Barra EZ',
+    difficulty: 'Intermedio',
+    instructions: 'Apoya los brazos en el banco predicador y flexiona los codos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Preacher-Curl.gif'
+  },
+  {
+    name: 'Curl Inclinado',
+    name_es: 'Curl Inclinado con Mancuernas',
+    muscle_group: 'Bíceps',
+    secondary_muscles: ['Antebrazos'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'En banco inclinado a 45°, deja colgar los brazos y realiza curl.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Incline-Dumbbell-Curl.gif'
+  },
+  {
+    name: 'Curl en Polea Baja',
+    name_es: 'Curl en Polea Baja',
+    muscle_group: 'Bíceps',
+    secondary_muscles: ['Antebrazos'],
+    equipment: 'Polea',
+    difficulty: 'Principiante',
+    instructions: 'De pie frente a la polea baja, realiza curl con tensión constante.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/cable-curl.gif'
+  },
+  {
+    name: 'Curl Spider',
+    name_es: 'Curl Spider',
+    muscle_group: 'Bíceps',
+    secondary_muscles: [],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Apoyado boca abajo en banco inclinado, realiza curl con brazos colgando.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Seated-Incline-Dumbbell-Curl.gif'
+  },
+  {
+    name: 'Curl 21s',
+    name_es: 'Curl 21s',
+    muscle_group: 'Bíceps',
+    secondary_muscles: ['Antebrazos'],
+    equipment: 'Barra',
+    difficulty: 'Avanzado',
+    instructions: '7 reps parciales abajo, 7 arriba, 7 completas. Total 21 reps.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Curl.gif'
+  },
+  {
+    name: 'Curl Alternado',
+    name_es: 'Curl Alternado con Mancuernas',
+    muscle_group: 'Bíceps',
+    secondary_muscles: ['Antebrazos'],
+    equipment: 'Mancuernas',
+    difficulty: 'Principiante',
+    instructions: 'Alterna brazos en cada repetición, girando la muñeca al subir.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Curl.gif'
+  },
+
+  // TRÍCEPS - Más variaciones
+  {
+    name: 'Extensión de Tríceps con Cuerda',
+    name_es: 'Extensión de Tríceps con Cuerda',
+    muscle_group: 'Tríceps',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Principiante',
+    instructions: 'Agarra la cuerda y extiende separando las manos al final del movimiento.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Rope-Pushdown.gif'
+  },
+  {
+    name: 'Patada de Tríceps',
+    name_es: 'Patada de Tríceps',
+    muscle_group: 'Tríceps',
+    secondary_muscles: [],
+    equipment: 'Mancuerna',
+    difficulty: 'Intermedio',
+    instructions: 'Inclinado, codo fijo al costado, extiende el brazo hacia atrás.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Kickback.gif'
+  },
+  {
+    name: 'Press Cerrado',
+    name_es: 'Press de Banca Cerrado',
+    muscle_group: 'Tríceps',
+    secondary_muscles: ['Pecho', 'Hombros'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Press de banca con agarre estrecho, codos cerca del cuerpo.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Close-Grip-Bench-Press.gif'
+  },
+  {
+    name: 'Fondos para Tríceps',
+    name_es: 'Fondos para Tríceps',
+    muscle_group: 'Tríceps',
+    secondary_muscles: ['Pecho', 'Hombros'],
+    equipment: 'Paralelas',
+    difficulty: 'Intermedio',
+    instructions: 'En paralelas, mantén el torso recto y baja flexionando codos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Chest-Dips.gif'
+  },
+  {
+    name: 'Extensión de Tríceps Acostado',
+    name_es: 'Extensión de Tríceps Acostado',
+    muscle_group: 'Tríceps',
+    secondary_muscles: [],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, baja las mancuernas a los lados de la cabeza y extiende.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Triceps-Extension.gif'
+  },
+  {
+    name: 'Press Francés con Mancuernas',
+    name_es: 'Press Francés con Mancuernas',
+    muscle_group: 'Tríceps',
+    secondary_muscles: [],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, baja mancuernas hacia la frente flexionando codos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Skull-Crusher.gif'
+  },
+  {
+    name: 'Extensión Overhead con Polea',
+    name_es: 'Extensión Overhead con Polea',
+    muscle_group: 'Tríceps',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'De espaldas a la polea baja, extiende los brazos sobre la cabeza.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/04/Cable-Rope-Overhead-Triceps-Extension.gif'
+  },
+
+  // ISQUIOTIBIALES - Más ejercicios
+  {
+    name: 'Curl de Pierna de Pie',
+    name_es: 'Curl de Pierna de Pie',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'De pie en la máquina, flexiona una pierna hacia el glúteo.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/08/Seated-Leg-Curl.gif'
+  },
+  {
+    name: 'Buenos Días',
+    name_es: 'Buenos Días',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: ['Glúteos', 'Espalda Baja'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Barra en espalda, inclínate hacia adelante con piernas casi rectas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Good-Morning.gif'
+  },
+  {
+    name: 'Peso Muerto con Piernas Rígidas',
+    name_es: 'Peso Muerto con Piernas Rígidas',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: ['Glúteos', 'Espalda'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Piernas rectas, baja la barra manteniendo espalda plana.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif'
+  },
+  {
+    name: 'Peso Muerto Rumano con Mancuernas',
+    name_es: 'Peso Muerto Rumano con Mancuernas',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Con mancuernas, inclínate manteniendo espalda recta.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif'
+  },
+  {
+    name: 'Curl Nórdico',
+    name_es: 'Curl Nórdico',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: [],
+    equipment: 'Peso Corporal',
+    difficulty: 'Avanzado',
+    instructions: 'De rodillas, baja el torso controladamente usando los isquios.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Nordic-Hamstring-Curl.gif'
+  },
+  {
+    name: 'Curl de Pierna con Pelota',
+    name_es: 'Curl de Pierna con Pelota Suiza',
+    muscle_group: 'Isquiotibiales',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Pelota Suiza',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, pies en pelota, eleva caderas y arrastra la pelota.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Leg-Curl.gif'
+  },
+
+  // PANTORRILLAS - Más ejercicios
+  {
+    name: 'Elevación de Talones en Prensa',
+    name_es: 'Elevación de Talones en Prensa',
+    muscle_group: 'Pantorrillas',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'En la prensa de piernas, empuja solo con las puntas de los pies.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
+  },
+  {
+    name: 'Elevación de Talones a Una Pierna',
+    name_es: 'Elevación de Talones a Una Pierna',
+    muscle_group: 'Pantorrillas',
+    secondary_muscles: [],
+    equipment: 'Mancuerna',
+    difficulty: 'Intermedio',
+    instructions: 'De pie en una pierna, eleva el talón lo más alto posible.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
+  },
+  {
+    name: 'Elevación de Talones con Mancuernas',
+    name_es: 'Elevación de Talones con Mancuernas',
+    muscle_group: 'Pantorrillas',
+    secondary_muscles: [],
+    equipment: 'Mancuernas',
+    difficulty: 'Principiante',
+    instructions: 'De pie con mancuernas, eleva los talones y mantén arriba.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
+  },
+  {
+    name: 'Gemelos en Máquina Donkey',
+    name_es: 'Gemelos en Máquina Donkey',
+    muscle_group: 'Pantorrillas',
+    secondary_muscles: [],
+    equipment: 'Máquina',
+    difficulty: 'Intermedio',
+    instructions: 'Inclinado en la máquina, eleva los talones contra la resistencia.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/09/Donkey-Calf-Raise.gif'
+  },
+  {
+    name: 'Saltos de Pantorrilla',
+    name_es: 'Saltos de Pantorrilla',
+    muscle_group: 'Pantorrillas',
+    secondary_muscles: [],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Pequeños saltos usando solo la flexión de tobillos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/06/Standing-Calf-Raise.gif'
+  },
+
+  // PECHO - Más variaciones
+  {
+    name: 'Press Declinado',
+    name_es: 'Press Declinado con Barra',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps', 'Hombros'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'En banco declinado, baja la barra al pecho inferior y empuja.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bench-Press.gif'
+  },
+  {
+    name: 'Press con Mancuernas',
+    name_es: 'Press de Pecho con Mancuernas',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps', 'Hombros'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, presiona las mancuernas hacia arriba juntándolas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Press.gif'
+  },
+  {
+    name: 'Aperturas Inclinadas',
+    name_es: 'Aperturas Inclinadas con Mancuernas',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Hombros'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'En banco inclinado, abre los brazos en arco amplio.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Fly.gif'
+  },
+  {
+    name: 'Cruces en Polea',
+    name_es: 'Cruces en Polea',
+    muscle_group: 'Pecho',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'Entre dos poleas altas, junta las manos frente al pecho.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Fly.gif'
+  },
+  {
+    name: 'Flexiones Diamante',
+    name_es: 'Flexiones Diamante',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Intermedio',
+    instructions: 'Flexiones con manos juntas formando un diamante.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif'
+  },
+  {
+    name: 'Flexiones Inclinadas',
+    name_es: 'Flexiones Inclinadas',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps', 'Hombros'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Manos elevadas en banco, realiza flexiones.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif'
+  },
+  {
+    name: 'Flexiones Declinadas',
+    name_es: 'Flexiones Declinadas',
+    muscle_group: 'Pecho',
+    secondary_muscles: ['Tríceps', 'Hombros'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Intermedio',
+    instructions: 'Pies elevados en banco, realiza flexiones.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Push-Up.gif'
+  },
+
+  // ESPALDA - Más variaciones
+  {
+    name: 'Remo en Polea Baja',
+    name_es: 'Remo en Polea Baja',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps'],
+    equipment: 'Polea',
+    difficulty: 'Principiante',
+    instructions: 'Sentado, tira del cable hacia el abdomen apretando omóplatos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bent-Over-Row.gif'
+  },
+  {
+    name: 'Remo con Agarre Cerrado',
+    name_es: 'Remo con Agarre Cerrado',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps'],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'Remo sentado con agarre en V o estrecho.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bent-Over-Row.gif'
+  },
+  {
+    name: 'Dominadas Agarre Cerrado',
+    name_es: 'Dominadas con Agarre Cerrado',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps'],
+    equipment: 'Barra',
+    difficulty: 'Avanzado',
+    instructions: 'Dominadas con manos juntas, palmas hacia ti.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Pull-up.gif'
+  },
+  {
+    name: 'Pullover',
+    name_es: 'Pullover con Mancuerna',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Pecho', 'Tríceps'],
+    equipment: 'Mancuerna',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, baja la mancuerna detrás de la cabeza y sube.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Lat-Pulldown.gif'
+  },
+  {
+    name: 'Remo Pendlay',
+    name_es: 'Remo Pendlay',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Bíceps', 'Core'],
+    equipment: 'Barra',
+    difficulty: 'Avanzado',
+    instructions: 'Remo explosivo desde el suelo, torso paralelo al piso.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Bent-Over-Row.gif'
+  },
+  {
+    name: 'Face Pull',
+    name_es: 'Face Pull',
+    muscle_group: 'Espalda',
+    secondary_muscles: ['Hombros'],
+    equipment: 'Polea',
+    difficulty: 'Principiante',
+    instructions: 'Tira de la cuerda hacia la cara separando las manos.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Face-Pull.gif'
+  },
+
+  // HOMBROS - Más variaciones
+  {
+    name: 'Press Arnold',
+    name_es: 'Press Arnold',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Tríceps'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Inicia con mancuernas frente a ti, gira mientras presionas arriba.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif'
+  },
+  {
+    name: 'Elevaciones en Y',
+    name_es: 'Elevaciones en Y',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Espalda'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Inclinado, eleva los brazos formando una Y.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lateral-Raise.gif'
+  },
+  {
+    name: 'Press de Hombros con Mancuernas',
+    name_es: 'Press de Hombros con Mancuernas',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Tríceps'],
+    equipment: 'Mancuernas',
+    difficulty: 'Principiante',
+    instructions: 'Sentado o de pie, presiona las mancuernas hacia arriba.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif'
+  },
+  {
+    name: 'Remo al Mentón',
+    name_es: 'Remo al Mentón',
+    muscle_group: 'Hombros',
+    secondary_muscles: ['Trapecios', 'Bíceps'],
+    equipment: 'Barra',
+    difficulty: 'Intermedio',
+    instructions: 'Tira de la barra hacia el mentón, codos hacia arriba.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Shoulder-Press.gif'
+  },
+  {
+    name: 'Elevaciones Laterales en Polea',
+    name_es: 'Elevaciones Laterales en Polea',
+    muscle_group: 'Hombros',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Intermedio',
+    instructions: 'De lado a la polea baja, eleva el brazo lateralmente.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lateral-Raise.gif'
+  },
+
+  // CUÁDRICEPS - Más variaciones
+  {
+    name: 'Sissy Squat',
+    name_es: 'Sissy Squat',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: [],
+    equipment: 'Peso Corporal',
+    difficulty: 'Avanzado',
+    instructions: 'Inclínate hacia atrás mientras flexionas rodillas, talones elevados.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/BARBELL-SQUAT.gif'
+  },
+  {
+    name: 'Zancadas Caminando',
+    name_es: 'Zancadas Caminando',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Realiza zancadas continuas avanzando con cada paso.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
+  },
+  {
+    name: 'Step Up',
+    name_es: 'Step Up con Mancuernas',
+    muscle_group: 'Cuádriceps',
+    secondary_muscles: ['Glúteos'],
+    equipment: 'Mancuernas',
+    difficulty: 'Intermedio',
+    instructions: 'Sube a un banco alternando piernas con mancuernas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Dumbbell-Lunge.gif'
+  },
+
+  // GLÚTEOS - Más variaciones
+  {
+    name: 'Hip Thrust con Mancuerna',
+    name_es: 'Hip Thrust con Mancuerna',
+    muscle_group: 'Glúteos',
+    secondary_muscles: ['Isquiotibiales'],
+    equipment: 'Mancuerna',
+    difficulty: 'Principiante',
+    instructions: 'Hip thrust con mancuerna sobre las caderas.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif'
+  },
+  {
+    name: 'Patada de Glúteo en Polea',
+    name_es: 'Patada de Glúteo en Polea',
+    muscle_group: 'Glúteos',
+    secondary_muscles: [],
+    equipment: 'Polea',
+    difficulty: 'Principiante',
+    instructions: 'Con tobillera en polea baja, extiende la pierna hacia atrás.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif'
+  },
+  {
+    name: 'Abducción de Cadera',
+    name_es: 'Abducción de Cadera en Máquina',
+    muscle_group: 'Glúteos',
+    secondary_muscles: ['Aductores'],
+    equipment: 'Máquina',
+    difficulty: 'Principiante',
+    instructions: 'Sentado en la máquina, abre las piernas contra la resistencia.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Hip-Thrust.gif'
+  },
+
+  // ABDOMINALES - Más variaciones
+  {
+    name: 'Crunch Inverso',
+    name_es: 'Crunch Inverso',
+    muscle_group: 'Abdominales',
+    secondary_muscles: [],
+    equipment: 'Peso Corporal',
+    difficulty: 'Intermedio',
+    instructions: 'Acostado, eleva las caderas del suelo llevando rodillas al pecho.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Crunch.gif'
+  },
+  {
+    name: 'Bicicleta',
+    name_es: 'Bicicleta Abdominal',
+    muscle_group: 'Abdominales',
+    secondary_muscles: ['Oblicuos'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Alterna llevando codo a rodilla opuesta en movimiento de pedaleo.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2015/11/Crunch.gif'
+  },
+  {
+    name: 'Dead Bug',
+    name_es: 'Dead Bug',
+    muscle_group: 'Abdominales',
+    secondary_muscles: ['Core'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Principiante',
+    instructions: 'Acostado, extiende brazo y pierna opuestos alternadamente.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
+  },
+  {
+    name: 'Ab Wheel',
+    name_es: 'Rueda Abdominal',
+    muscle_group: 'Abdominales',
+    secondary_muscles: ['Core', 'Hombros'],
+    equipment: 'Rueda Abdominal',
+    difficulty: 'Avanzado',
+    instructions: 'De rodillas, rueda hacia adelante y regresa controladamente.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
+  },
+  {
+    name: 'Plancha con Toque de Hombro',
+    name_es: 'Plancha con Toque de Hombro',
+    muscle_group: 'Abdominales',
+    secondary_muscles: ['Core', 'Hombros'],
+    equipment: 'Peso Corporal',
+    difficulty: 'Intermedio',
+    instructions: 'En plancha alta, alterna tocando el hombro opuesto.',
+    gif_url: 'https://fitnessprogramer.com/wp-content/uploads/2021/02/plank.gif'
   }
 ];
 
@@ -773,12 +1337,25 @@ const forceUpdateAllGifs = async () => {
       'Curl Concentrado': `${FP_BASE}/2021/02/Concentration-Curl.gif`,
       'Curl': `${FP_BASE}/2021/02/Barbell-Curl.gif`,
 
+      // BÍCEPS - Nuevos
+      'Curl con Barra EZ': `${FP_BASE}/2021/02/Z-Bar-Preacher-Curl.gif`,
+      'Curl Predicador': `${FP_BASE}/2021/02/Dumbbell-Preacher-Curl.gif`,
+      'Curl Inclinado con Mancuernas': `${FP_BASE}/2021/02/Seated-Incline-Dumbbell-Curl.gif`,
+      'Curl en Polea Baja': `${FP_BASE}/2021/02/cable-curl.gif`,
+      'Curl Spider': `${FP_BASE}/2021/02/Seated-Incline-Dumbbell-Curl.gif`,
+      'Curl Alternado con Mancuernas': `${FP_BASE}/2021/02/Dumbbell-Curl.gif`,
+
       // TRÍCEPS
       'Fondos en Banco': `${FP_BASE}/2021/02/Bench-Dips.gif`,
       'Extensión de Tríceps con Polea': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Extensión de Tríceps sobre Cabeza': `${FP_BASE}/2021/02/Dumbbell-Triceps-Extension.gif`,
       'Extensión de Tríceps': `${FP_BASE}/2021/02/Pushdown.gif`,
       'Press Francés': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
+      'Extensión de Tríceps con Cuerda': `${FP_BASE}/2021/06/Rope-Pushdown.gif`,
+      'Patada de Tríceps': `${FP_BASE}/2021/02/Dumbbell-Kickback.gif`,
+      'Press de Banca Cerrado': `${FP_BASE}/2021/02/Close-Grip-Bench-Press.gif`,
+      'Press Francés con Mancuernas': `${FP_BASE}/2021/02/Skull-Crusher.gif`,
+      'Extensión Overhead con Polea': `${FP_BASE}/2021/04/Cable-Rope-Overhead-Triceps-Extension.gif`,
 
       // PIERNAS - CUÁDRICEPS
       'Sentadilla con Barra': `${FP_BASE}/2021/02/BARBELL-SQUAT.gif`,
@@ -798,7 +1375,13 @@ const forceUpdateAllGifs = async () => {
       'Curl de Pierna Acostado': `${FP_BASE}/2021/02/Leg-Curl.gif`,
       'Curl de Pierna Sentado': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Curl de Pierna': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
+      'Curl de Pierna de Pie': `${FP_BASE}/2021/08/Seated-Leg-Curl.gif`,
       'Peso Muerto Rumano': `${FP_BASE}/2021/02/Barbell-Deadlift.gif`,
+      'Buenos Días': `${FP_BASE}/2021/02/Barbell-Good-Morning.gif`,
+      'Peso Muerto con Piernas Rígidas': `${FP_BASE}/2021/02/Barbell-Romanian-Deadlift.gif`,
+      'Peso Muerto Rumano con Mancuernas': `${FP_BASE}/2021/02/Barbell-Romanian-Deadlift.gif`,
+      'Curl Nórdico': `${FP_BASE}/2021/06/Nordic-Hamstring-Curl.gif`,
+      'Curl de Pierna con Pelota Suiza': `${FP_BASE}/2021/02/Leg-Curl.gif`,
 
       // GLÚTEOS
       'Hip Thrust': `${FP_BASE}/2021/02/Barbell-Hip-Thrust.gif`,
@@ -812,6 +1395,11 @@ const forceUpdateAllGifs = async () => {
       'Elevación de Talones de Pie': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
       'Elevación de Talones Sentado': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
       'Elevación de Talones': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Elevación de Talones en Prensa': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Elevación de Talones a Una Pierna': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Elevación de Talones con Mancuernas': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
+      'Gemelos en Máquina Donkey': `${FP_BASE}/2021/09/Donkey-Calf-Raise.gif`,
+      'Saltos de Pantorrilla': `${FP_BASE}/2021/06/Standing-Calf-Raise.gif`,
 
       // ABDOMINALES
       'Crunch': `${FP_BASE}/2015/11/Crunch.gif`,
