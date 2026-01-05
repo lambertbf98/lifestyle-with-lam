@@ -198,20 +198,18 @@ export default function Workouts() {
     }).length
   };
 
-  // Dynamic styles for light/dark mode
+  // Dynamic styles for light/dark mode - warm dark colors
   const dayCardStyle = {
-    background: isDark ? 'rgba(30, 41, 59, 1)' : 'rgba(255, 255, 255, 0.6)',
-    backdropFilter: isDark ? 'none' : 'blur(10px)',
-    border: isDark ? '1px solid rgba(51, 65, 85, 1)' : '1px solid rgba(255, 255, 255, 0.5)'
+    background: isDark ? 'rgba(21, 21, 24, 0.95)' : 'rgba(255, 255, 255, 0.6)',
+    border: isDark ? '1px solid rgba(42, 42, 48, 1)' : '1px solid rgba(255, 255, 255, 0.5)'
   };
 
   const exerciseStyle = {
-    background: isDark ? 'rgba(51, 65, 85, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-    backdropFilter: isDark ? 'none' : 'blur(8px)'
+    background: isDark ? 'rgba(31, 31, 35, 0.7)' : 'rgba(255, 255, 255, 0.5)'
   };
 
   const buttonStyle = {
-    background: isDark ? 'rgba(51, 65, 85, 1)' : 'rgba(255, 255, 255, 0.6)'
+    background: isDark ? 'rgba(42, 42, 48, 1)' : 'rgba(255, 255, 255, 0.6)'
   };
 
   if (loading) {
