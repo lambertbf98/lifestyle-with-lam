@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { user as userApi, workouts as workoutsApi } from '../api';
-import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check, Plus, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, LogOut, User, Target, Activity, Scale, Ruler, Calendar, Settings, ChevronRight, Save, Trash2, Edit3, X, Check, Plus, Sun, Moon, AlertTriangle } from 'lucide-react';
 
 const activityLabels = {
   sedentary: 'Sedentario',
@@ -51,6 +51,9 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [newDislikedFood, setNewDislikedFood] = useState('');
 
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
+
   useEffect(() => {
     loadProfile();
     loadWorkoutHistory();
@@ -95,18 +98,21 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const clearWorkoutHistory = async () => {
-    if (!confirm('¿Seguro que quieres borrar todo el historial de entrenos? Esta acción no se puede deshacer.')) {
-      return;
-    }
-    try {
-      await workoutsApi.clearHistory();
-      setWorkoutHistory([]);
-      alert('Historial borrado correctamente');
-    } catch (error) {
-      console.error('Error clearing history:', error);
-      alert('Error al borrar el historial');
-    }
+  const clearWorkoutHistory = () => {
+    setConfirmModal({
+      show: true,
+      title: 'Borrar historial de entrenos',
+      message: '¿Seguro que quieres borrar todo el historial de entrenos? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        try {
+          await workoutsApi.clearHistory();
+          setWorkoutHistory([]);
+        } catch (error) {
+          console.error('Error clearing history:', error);
+        }
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+      }
+    });
   };
 
   const addDislikedFood = () => {
@@ -606,6 +612,37 @@ export default function Profile() {
         <LogOut size={20} />
         Cerrar Sesión
       </button>
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className={`rounded-2xl w-full max-w-sm p-6 animate-slide-up ${isDark ? 'bg-dark-800' : 'bg-white'}`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                <AlertTriangle size={24} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold">{confirmModal.title}</h3>
+            </div>
+            <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
+                className="btn-secondary flex-1"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="flex-1 px-6 py-3 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

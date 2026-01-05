@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { progress as progressApi, user as userApi } from '../api';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts';
-import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw } from 'lucide-react';
+import { TrendingDown, TrendingUp, Scale, Trophy, Target, Calendar, Plus, Ruler, Trash2, RotateCcw, AlertTriangle, X } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTheme } from '../contexts/ThemeContext';
@@ -26,6 +26,9 @@ export default function Progress() {
     thigh_cm: ''
   });
   const [measurementsHistory, setMeasurementsHistory] = useState([]);
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
 
   // Modal open/close with scroll lock
   const openMeasurementsModal = () => {
@@ -101,23 +104,37 @@ export default function Progress() {
   };
 
   const deleteMeasurement = async (id) => {
-    if (!window.confirm('¿Eliminar esta medida?')) return;
-    try {
-      await userApi.deleteMeasurement(id);
-      await loadData();
-    } catch (error) {
-      console.error('Error deleting measurement:', error);
-    }
+    setConfirmModal({
+      show: true,
+      title: 'Eliminar medida',
+      message: '¿Estás seguro de que quieres eliminar esta medida?',
+      onConfirm: async () => {
+        try {
+          await userApi.deleteMeasurement(id);
+          await loadData();
+        } catch (error) {
+          console.error('Error deleting measurement:', error);
+        }
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+      }
+    });
   };
 
   const clearWeightHistory = async () => {
-    if (!window.confirm('¿Eliminar todo el historial de peso? Esta acción no se puede deshacer.')) return;
-    try {
-      await userApi.clearWeightHistory();
-      await loadData();
-    } catch (error) {
-      console.error('Error clearing weight history:', error);
-    }
+    setConfirmModal({
+      show: true,
+      title: 'Reiniciar historial de peso',
+      message: '¿Estás seguro de que quieres eliminar todo el historial de peso? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        try {
+          await userApi.clearWeightHistory();
+          await loadData();
+        } catch (error) {
+          console.error('Error clearing weight history:', error);
+        }
+        setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+      }
+    });
   };
 
   const setInitialWeight = async () => {
@@ -584,6 +601,37 @@ export default function Progress() {
                 className="btn-primary flex-1 disabled:opacity-50"
               >
                 Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className={`rounded-2xl w-full max-w-sm p-6 animate-slide-up ${isDark ? 'bg-dark-800' : 'bg-white'}`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                <AlertTriangle size={24} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold">{confirmModal.title}</h3>
+            </div>
+            <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
+                className="btn-secondary flex-1"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="flex-1 px-6 py-3 rounded-xl font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+              >
+                Eliminar
               </button>
             </div>
           </div>
