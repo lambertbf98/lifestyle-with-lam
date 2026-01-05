@@ -206,9 +206,9 @@ router.post('/weight', authenticateToken, async (req, res) => {
         [weight_kg, notes, existing.rows[0].id]
       );
     } else {
-      // Insert new entry
+      // Insert new entry with explicit timezone-aware timestamp
       result = await pool.query(
-        'INSERT INTO weight_history (user_id, weight_kg, notes) VALUES ($1, $2, $3) RETURNING *',
+        'INSERT INTO weight_history (user_id, weight_kg, notes, recorded_at) VALUES ($1, $2, $3, NOW()) RETURNING *',
         [req.user.id, weight_kg, notes]
       );
     }
@@ -314,10 +314,10 @@ router.post('/measurements', authenticateToken, async (req, res) => {
   }
 
   try {
-    // Add to history
+    // Add to history with explicit timezone-aware timestamp
     const result = await pool.query(
-      `INSERT INTO body_measurements (user_id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      `INSERT INTO body_measurements (user_id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes, recorded_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW()) RETURNING *`,
       [req.user.id, chest_cm, waist_cm, hips_cm, bicep_cm, thigh_cm, calf_cm, notes]
     );
 
