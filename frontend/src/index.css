@@ -17,7 +17,7 @@
     @apply text-gray-800 min-h-screen;
     font-family: 'Inter', system-ui, sans-serif;
     background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
-    background-attachment: fixed;
+    min-height: 100vh;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
@@ -28,7 +28,6 @@
   .dark body {
     @apply text-white;
     background: linear-gradient(145deg, #1a1209 0%, #1c1012 40%, #15101a 70%, #0d0c14 100%) !important;
-    background-attachment: fixed;
   }
 
   /* Hide scrollbar but keep functionality */
