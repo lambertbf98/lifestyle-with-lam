@@ -10,25 +10,45 @@
 
   html {
     @apply antialiased;
+    height: 100%;
+  }
+
+  /* Fixed background layer - prevents iOS flickering */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
+    /* Disable on iOS to prevent flickering */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  .dark body::before {
+    background: linear-gradient(145deg, #1a1209 0%, #1c1012 40%, #15101a 70%, #0d0c14 100%);
   }
 
   /* Light mode - Soft pastel gradient */
   body {
     @apply text-gray-800 min-h-screen;
     font-family: 'Inter', system-ui, sans-serif;
-    background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
-    background-attachment: fixed;
+    /* NO background-attachment: fixed - causes flickering on iOS */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+    /* Force GPU acceleration to reduce flickering */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   /* Dark mode - Subtle orange to purple gradient like accent colors */
   .dark body {
     @apply text-white;
-    background: linear-gradient(145deg, #1a1209 0%, #1c1012 40%, #15101a 70%, #0d0c14 100%) !important;
-    background-attachment: fixed;
   }
 
   /* Hide scrollbar but keep functionality */
@@ -91,14 +111,19 @@
   .card {
     @apply rounded-2xl p-4 shadow-sm;
     background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(200, 200, 200, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   /* Dark mode: card - NEW gradient border effect */
   .dark .card {
     @apply shadow-none;
     background: linear-gradient(145deg, rgba(21, 21, 24, 0.95) 0%, rgba(15, 15, 18, 0.98) 100%);
     border: 1px solid rgba(249, 115, 22, 0.15);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
   }
 
@@ -106,8 +131,12 @@
   .card-glow {
     @apply rounded-2xl p-4 shadow-md;
     background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(200, 200, 200, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .dark .card-glow {
     background: linear-gradient(145deg, rgba(21, 21, 24, 0.95) 0%, rgba(15, 15, 18, 0.98) 100%);
@@ -121,6 +150,9 @@
            placeholder-gray-400 focus:outline-none transition-all duration-200;
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(168, 237, 234, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .input:focus {
     border-color: #f97316;
@@ -188,8 +220,12 @@
   .stat-card {
     @apply rounded-2xl p-4;
     background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(200, 200, 200, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .dark .stat-card {
     background: linear-gradient(145deg, rgba(31, 31, 35, 0.9) 0%, rgba(21, 21, 24, 0.95) 100%);
@@ -219,11 +255,19 @@
     @apply rounded-xl p-3 flex items-center gap-3
            transition-all duration-200 active:scale-95;
     background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(200, 200, 200, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .exercise-card:hover {
     background: rgba(255, 255, 255, 1);
+  }
+  .exercise-card:active {
+    -webkit-transform: translateZ(0) scale(0.95);
+    transform: translateZ(0) scale(0.95);
   }
   .dark .exercise-card {
     background: linear-gradient(135deg, rgba(31, 31, 35, 0.7) 0%, rgba(21, 21, 24, 0.8) 100%);
@@ -238,8 +282,12 @@
   .meal-card {
     @apply rounded-xl p-4 transition-all duration-200;
     background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(200, 200, 200, 0.3);
+    /* GPU acceleration for iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .meal-card:hover {
     border-color: rgba(249, 115, 22, 0.3);

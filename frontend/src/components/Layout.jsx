@@ -23,12 +23,16 @@ export default function Layout() {
 
       {/* Bottom navigation - NEW dark/orange theme */}
       <nav
-        className="fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t z-50"
+        className="fixed bottom-0 left-0 right-0 border-t z-50"
         style={{
           background: isDark
             ? 'linear-gradient(180deg, rgba(12, 12, 16, 0.98) 0%, rgba(9, 9, 11, 0.99) 100%)'
-            : 'rgba(255, 255, 255, 0.9)',
-          borderColor: isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(200, 200, 200, 0.3)'
+            : 'rgba(255, 255, 255, 0.95)',
+          borderColor: isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(200, 200, 200, 0.3)',
+          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(20px)',
+          WebkitTransform: 'translateZ(0)',
+          transform: 'translateZ(0)'
         }}
       >
         <div
