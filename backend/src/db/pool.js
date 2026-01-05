@@ -5,6 +5,11 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Set timezone to Spain for all connections
+pool.on('connect', (client) => {
+  client.query("SET timezone = 'Europe/Madrid'");
+});
+
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
   process.exit(-1);
