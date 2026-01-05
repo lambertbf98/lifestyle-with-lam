@@ -12,15 +12,12 @@ export default defineConfig({
         name: 'Lifestyle with Lam',
         short_name: 'Lifestyle with Lam',
         description: 'Tu entrenador personal con IA',
-        theme_color: '#a8edea',
-        background_color: '#a8edea',
+        theme_color: '#0f172a',
+        background_color: '#0f172a',
         display: 'standalone',
-        display_override: ['standalone', 'fullscreen'],
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
-        id: '/',
-        categories: ['health', 'fitness', 'lifestyle'],
         icons: [
           {
             src: 'pwa-192x192.png',

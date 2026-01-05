@@ -28,11 +28,7 @@ export default function Layout() {
           background: isDark
             ? 'linear-gradient(180deg, rgba(12, 12, 16, 0.98) 0%, rgba(9, 9, 11, 0.99) 100%)'
             : 'rgba(255, 255, 255, 0.95)',
-          borderColor: isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(200, 200, 200, 0.3)',
-          WebkitBackdropFilter: 'blur(20px)',
-          backdropFilter: 'blur(20px)',
-          WebkitTransform: 'translateZ(0)',
-          transform: 'translateZ(0)'
+          borderColor: isDark ? 'rgba(249, 115, 22, 0.15)' : 'rgba(200, 200, 200, 0.3)'
         }}
       >
         <div
