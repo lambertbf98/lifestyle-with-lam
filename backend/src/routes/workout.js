@@ -1,7 +1,7 @@
 const express = require('express');
 const pool = require('../db/pool');
 const { authenticateToken } = require('../middleware/auth');
-const { forceUpdateAllGifs } = require('../db/seed');
+const { forceUpdateAllGifs, seedExercises } = require('../db/seed');
 
 const router = express.Router();
 
@@ -421,6 +421,29 @@ router.post('/update-gifs', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Update GIFs error:', error);
     res.status(500).json({ error: 'Failed to update GIFs' });
+  }
+});
+
+// Seed exercises - add new exercises and update GIFs
+router.post('/seed-exercises', async (req, res) => {
+  try {
+    console.log('Manual seed triggered via API');
+    await seedExercises();
+
+    // Get final count
+    const result = await pool.query('SELECT COUNT(*) as total FROM exercises');
+    const byGroup = await pool.query(
+      'SELECT muscle_group, COUNT(*) as count FROM exercises GROUP BY muscle_group ORDER BY muscle_group'
+    );
+
+    res.json({
+      success: true,
+      total: parseInt(result.rows[0].total),
+      byMuscleGroup: byGroup.rows
+    });
+  } catch (error) {
+    console.error('Seed exercises error:', error);
+    res.status(500).json({ error: 'Failed to seed exercises', details: error.message });
   }
 });
 

@@ -1212,40 +1212,52 @@ const seedExercises = async () => {
   const client = await pool.connect();
 
   try {
-    // Check if exercises table already has data
-    const existingCount = await client.query('SELECT COUNT(*) FROM exercises');
-    const count = parseInt(existingCount.rows[0].count);
+    // Get existing exercises
+    const existingResult = await client.query('SELECT name_es FROM exercises');
+    const existingNames = new Set(existingResult.rows.map(r => r.name_es?.toLowerCase()));
+    const existingCount = existingNames.size;
 
-    if (count > 0) {
-      console.log(`Exercises table already has ${count} exercises, force updating all GIFs...`);
-      // Force update ALL exercises with correct GIFs (not just empty ones)
-      // Note: forceUpdateAllGifs gets its own connection, and finally block will release this client
-      await forceUpdateAllGifs();
-      return;
+    console.log(`Database has ${existingCount} exercises, code has ${exercises.length} exercises`);
+
+    // Find new exercises to insert
+    const newExercises = exercises.filter(ex => !existingNames.has(ex.name_es?.toLowerCase()));
+
+    if (newExercises.length > 0) {
+      console.log(`Inserting ${newExercises.length} new exercises...`);
+
+      await client.query('BEGIN');
+
+      for (const exercise of newExercises) {
+        await client.query(
+          `INSERT INTO exercises (name, name_es, muscle_group, secondary_muscles, equipment, difficulty, instructions, gif_url)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            exercise.name,
+            exercise.name_es,
+            exercise.muscle_group,
+            exercise.secondary_muscles,
+            exercise.equipment,
+            exercise.difficulty,
+            exercise.instructions,
+            exercise.gif_url
+          ]
+        );
+      }
+
+      await client.query('COMMIT');
+      console.log(`Inserted ${newExercises.length} new exercises successfully`);
+    } else {
+      console.log('No new exercises to insert');
     }
 
-    await client.query('BEGIN');
+    // Always update GIFs for all exercises
+    console.log('Updating GIFs for all exercises...');
+    await forceUpdateAllGifs();
 
-    // Insert exercises
-    for (const exercise of exercises) {
-      await client.query(
-        `INSERT INTO exercises (name, name_es, muscle_group, secondary_muscles, equipment, difficulty, instructions, gif_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [
-          exercise.name,
-          exercise.name_es,
-          exercise.muscle_group,
-          exercise.secondary_muscles,
-          exercise.equipment,
-          exercise.difficulty,
-          exercise.instructions,
-          exercise.gif_url
-        ]
-      );
-    }
+    // Log final count
+    const finalCount = await client.query('SELECT COUNT(*) FROM exercises');
+    console.log(`Total exercises in database: ${finalCount.rows[0].count}`);
 
-    await client.query('COMMIT');
-    console.log(`Seeded ${exercises.length} exercises successfully`);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error seeding exercises:', error);
