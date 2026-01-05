@@ -10,25 +10,13 @@
 
   html {
     @apply antialiased;
-    height: 100%;
-  }
-
-  /* Fixed background layer - prevents iOS flickering */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
+    /* iOS PWA hack: prevents white bar at bottom when status bar is translucent */
+    min-height: calc(100% + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
-    /* Disable on iOS to prevent flickering */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
   }
 
-  .dark body::before {
+  .dark html {
     background: linear-gradient(145deg, #1a1209 0%, #1c1012 40%, #15101a 70%, #0d0c14 100%);
   }
 
@@ -36,17 +24,14 @@
   body {
     @apply text-gray-800 min-h-screen;
     font-family: 'Inter', system-ui, sans-serif;
-    /* NO background-attachment: fixed - causes flickering on iOS */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    /* Background inherited from html - no background-attachment: fixed */
     /* Force GPU acceleration to reduce flickering */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Dark mode - Subtle orange to purple gradient like accent colors */
+  /* Dark mode */
   .dark body {
     @apply text-white;
   }

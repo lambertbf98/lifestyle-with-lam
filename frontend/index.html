@@ -3,16 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <!-- Light mode theme color matches pastel gradient -->
+    <!-- iOS PWA: viewport-fit=cover is REQUIRED for fullscreen -->
+    <meta name="viewport" content="initial-scale=1, viewport-fit=cover, width=device-width, maximum-scale=1, user-scalable=no" />
+    <!-- Theme colors for status bar -->
     <meta name="theme-color" content="#a8edea" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d0c14" media="(prefers-color-scheme: dark)" />
+    <!-- iOS PWA configuration -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- default = solid color bar matching theme-color, black-translucent = transparent with white text -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Lifestyle with Lam" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- CRITICAL: Synchronous styles for iOS Safari - must load before JS -->
+    <style>
+      /* iOS PWA: These styles MUST be synchronous for Safari */
+      html {
+        min-height: calc(100% + env(safe-area-inset-top));
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        background: linear-gradient(160deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+      /* Prevent FOUC */
+      #root { min-height: 100vh; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
