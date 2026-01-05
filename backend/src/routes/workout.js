@@ -5,6 +5,48 @@ const { forceUpdateAllGifs } = require('../db/seed');
 
 const router = express.Router();
 
+// Helper: Remove accents from string for accent-insensitive search
+const removeAccents = (str) => {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+};
+
+// Mapping of generic search terms to muscle groups
+const muscleGroupAliases = {
+  'pierna': ['Cuádriceps', 'Isquiotibiales', 'Glúteos', 'Pantorrillas', 'Aductores'],
+  'piernas': ['Cuádriceps', 'Isquiotibiales', 'Glúteos', 'Pantorrillas', 'Aductores'],
+  'brazo': ['Bíceps', 'Tríceps', 'Antebrazos'],
+  'brazos': ['Bíceps', 'Tríceps', 'Antebrazos'],
+  'core': ['Abdominales', 'Oblicuos', 'Core'],
+  'abdomen': ['Abdominales', 'Oblicuos', 'Core'],
+  'abs': ['Abdominales', 'Oblicuos', 'Core'],
+  'tren superior': ['Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps'],
+  'tren inferior': ['Cuádriceps', 'Isquiotibiales', 'Glúteos', 'Pantorrillas'],
+  'pecho': ['Pecho'],
+  'espalda': ['Espalda'],
+  'hombro': ['Hombros'],
+  'hombros': ['Hombros'],
+  'biceps': ['Bíceps'],
+  'bicep': ['Bíceps'],
+  'triceps': ['Tríceps'],
+  'tricep': ['Tríceps'],
+  'cuadriceps': ['Cuádriceps'],
+  'cuadricep': ['Cuádriceps'],
+  'cuads': ['Cuádriceps'],
+  'isquios': ['Isquiotibiales'],
+  'isquiotibiales': ['Isquiotibiales'],
+  'femoral': ['Isquiotibiales'],
+  'gluteo': ['Glúteos'],
+  'gluteos': ['Glúteos'],
+  'pantorrilla': ['Pantorrillas'],
+  'pantorrillas': ['Pantorrillas'],
+  'gemelo': ['Pantorrillas'],
+  'gemelos': ['Pantorrillas'],
+  'abdominal': ['Abdominales'],
+  'abdominales': ['Abdominales'],
+  'trapecio': ['Trapecios'],
+  'trapecios': ['Trapecios']
+};
+
 // Get all exercises
 router.get('/exercises', authenticateToken, async (req, res) => {
   const { muscle_group, search, equipment } = req.query;
@@ -27,12 +69,33 @@ router.get('/exercises', authenticateToken, async (req, res) => {
     }
 
     if (search) {
-      paramCount++;
-      query += ` AND (name ILIKE $${paramCount} OR name_es ILIKE $${paramCount} OR muscle_group ILIKE $${paramCount})`;
-      params.push(`%${search}%`);
+      const searchLower = removeAccents(search.trim());
+
+      // Check if search matches a muscle group alias
+      const matchedGroups = muscleGroupAliases[searchLower];
+
+      if (matchedGroups && matchedGroups.length > 0) {
+        // Search by muscle groups
+        const placeholders = matchedGroups.map((_, i) => `$${paramCount + i + 1}`).join(', ');
+        query += ` AND muscle_group IN (${placeholders})`;
+        params.push(...matchedGroups);
+        paramCount += matchedGroups.length;
+      } else {
+        // Search by name (with accent-insensitive matching)
+        paramCount++;
+        query += ` AND (
+          name ILIKE $${paramCount} OR
+          name_es ILIKE $${paramCount} OR
+          muscle_group ILIKE $${paramCount} OR
+          LOWER(TRANSLATE(name, 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN')) LIKE LOWER($${paramCount}) OR
+          LOWER(TRANSLATE(name_es, 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN')) LIKE LOWER($${paramCount}) OR
+          LOWER(TRANSLATE(muscle_group, 'áéíóúÁÉÍÓÚñÑ', 'aeiouAEIOUnN')) LIKE LOWER($${paramCount})
+        )`;
+        params.push(`%${search}%`);
+      }
     }
 
-    query += ' ORDER BY name';
+    query += ' ORDER BY muscle_group, name_es';
 
     const result = await pool.query(query, params);
     res.json(result.rows);

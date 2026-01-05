@@ -477,8 +477,9 @@ export default function Workouts() {
                 <div className="text-center py-12">
                   <Search size={48} className="mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-500">Escribe al menos 2 letras para buscar</p>
-                  <p className="text-xs text-gray-400 mt-1">Por nombre: "press", "curl", "sentadilla"</p>
-                  <p className="text-xs text-accent-primary mt-1">Por músculo: "pecho", "espalda", "pierna", "bíceps"</p>
+                  <p className="text-xs text-gray-400 mt-2">Por nombre: "press", "curl", "sentadilla"</p>
+                  <p className="text-xs text-accent-primary mt-1">Por músculo: "pecho", "espalda", "biceps", "triceps"</p>
+                  <p className="text-xs text-neon-purple mt-1">Por zona: "pierna", "brazo", "core", "abdomen"</p>
                 </div>
               ) : exerciseResults.length === 0 ? (
                 <div className="text-center py-12">
