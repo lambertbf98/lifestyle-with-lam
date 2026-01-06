@@ -24,6 +24,11 @@ export default function Workouts() {
 
   useEffect(() => {
     loadData();
+
+    // Cleanup: restore body scroll on unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   const loadData = async () => {
@@ -103,14 +108,24 @@ export default function Workouts() {
   };
 
   // Open exercise selector modal
-  const openExerciseSelector = (exercise, dayIndex) => {
+  const openExerciseSelector = async (exercise, dayIndex) => {
     setSelectedExerciseToReplace(exercise);
     setSelectedDayIndex(dayIndex);
     setSearchQuery('');
-    setExerciseResults([]);
     setShowExerciseSelector(true);
     // Block body scroll
     document.body.style.overflow = 'hidden';
+
+    // Load all exercises as preview
+    setSearchLoading(true);
+    try {
+      const response = await workoutsApi.getExercises({ limit: 100 });
+      setExerciseResults(response.data);
+    } catch (error) {
+      console.error('Error loading exercises:', error);
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   // Close exercise selector modal
@@ -125,14 +140,12 @@ export default function Workouts() {
   // Search exercises
   const searchExercises = async (query) => {
     setSearchQuery(query);
-    if (query.length < 2) {
-      setExerciseResults([]);
-      return;
-    }
 
     setSearchLoading(true);
     try {
-      const response = await workoutsApi.getExercises({ search: query });
+      // If query is empty or too short, load all exercises
+      const params = query.length >= 2 ? { search: query } : { limit: 100 };
+      const response = await workoutsApi.getExercises(params);
       setExerciseResults(response.data);
     } catch (error) {
       console.error('Error searching exercises:', error);
@@ -425,11 +438,14 @@ export default function Workouts() {
 
       {/* Exercise Selector Modal - Full Screen */}
       {showExerciseSelector && (
-        <div className="fixed inset-0 z-50 flex flex-col">
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          style={{ touchAction: 'none' }}
+        >
           {/* Full screen modal */}
-          <div className={`flex-1 flex flex-col ${isDark ? 'bg-dark-900' : 'bg-gray-50'}`}>
+          <div className={`flex-1 flex flex-col h-full ${isDark ? 'bg-dark-900' : 'bg-gray-50'}`}>
             {/* Header */}
-            <div className={`sticky top-0 z-10 p-4 border-b ${isDark ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'}`}>
+            <div className={`flex-shrink-0 p-4 border-b ${isDark ? 'bg-dark-800 border-dark-600' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center gap-3 mb-3">
                 <button
                   onClick={closeExerciseSelector}
@@ -438,7 +454,7 @@ export default function Workouts() {
                   <X size={20} />
                 </button>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold">Buscar Ejercicio</h3>
+                  <h3 className="text-lg font-bold">Seleccionar Ejercicio</h3>
                   {selectedExerciseToReplace && (
                     <p className="text-xs text-gray-500">
                       Reemplazando: <span className="text-accent-primary font-medium">{selectedExerciseToReplace.exercise?.name_es || selectedExerciseToReplace.exercise?.name}</span>
@@ -452,7 +468,7 @@ export default function Workouts() {
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar por nombre o músculo..."
+                  placeholder="Filtrar por nombre o músculo..."
                   value={searchQuery}
                   onChange={(e) => searchExercises(e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl ${
@@ -460,24 +476,22 @@ export default function Workouts() {
                       ? 'bg-dark-700 text-white placeholder-gray-500 border-dark-600'
                       : 'bg-gray-100 text-gray-800 placeholder-gray-400 border-gray-200'
                   } border focus:border-accent-primary focus:outline-none`}
-                  autoFocus
                 />
               </div>
             </div>
 
-            {/* Results - Full height scroll */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 pb-20">
+            {/* Results - Scrollable container */}
+            <div
+              className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-2"
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                touchAction: 'pan-y',
+                minHeight: 0
+              }}
+            >
               {searchLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 size={32} className="animate-spin text-accent-primary" />
-                </div>
-              ) : searchQuery.length < 2 ? (
-                <div className="text-center py-12">
-                  <Search size={48} className="mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-500">Escribe al menos 2 letras para buscar</p>
-                  <p className="text-xs text-gray-400 mt-2">Por nombre: "press", "curl", "sentadilla"</p>
-                  <p className="text-xs text-accent-primary mt-1">Por músculo: "pecho", "espalda", "biceps", "triceps"</p>
-                  <p className="text-xs text-neon-purple mt-1">Por zona: "pierna", "brazo", "abdomen"</p>
                 </div>
               ) : exerciseResults.length === 0 ? (
                 <div className="text-center py-12">
@@ -487,7 +501,7 @@ export default function Workouts() {
                 </div>
               ) : (
                 <>
-                  <p className="text-xs text-gray-500 mb-2">{exerciseResults.length} resultados</p>
+                  <p className="text-xs text-gray-500 mb-2">{exerciseResults.length} ejercicios disponibles</p>
                   {exerciseResults.map((ex) => (
                     <button
                       key={ex.id}
@@ -529,6 +543,8 @@ export default function Workouts() {
                       )}
                     </button>
                   ))}
+                  {/* Bottom padding for safe area */}
+                  <div className="h-20"></div>
                 </>
               )}
             </div>
