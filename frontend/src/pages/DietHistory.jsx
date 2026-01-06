@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { diet as dietApi } from '../api';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronLeft, ChevronRight, Flame, Calendar, ArrowLeft, UtensilsCrossed } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Flame, Calendar, ArrowLeft, UtensilsCrossed } from 'lucide-react';
 
 const mealTypeLabels = {
   breakfast: 'Desayuno',
@@ -29,6 +29,7 @@ export default function DietHistory() {
   const [dayData, setDayData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingDay, setLoadingDay] = useState(false);
+  const [expandedMeal, setExpandedMeal] = useState(null);
 
   // Get calendar data for current month and select today on first load
   useEffect(() => {
@@ -112,12 +113,46 @@ export default function DietHistory() {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
     setSelectedDate(null);
     setDayData(null);
+    setExpandedMeal(null);
   };
 
   const nextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
     setSelectedDate(null);
     setDayData(null);
+    setExpandedMeal(null);
+  };
+
+  // Parse ingredients from the JSON structure
+  const parseIngredients = (ingredientsData) => {
+    if (!ingredientsData) return { main: [], alternatives: [] };
+
+    // If it's already an object with main/alternatives
+    if (ingredientsData.main) {
+      return ingredientsData;
+    }
+
+    // If it's an array (old format)
+    if (Array.isArray(ingredientsData)) {
+      return { main: ingredientsData, alternatives: [] };
+    }
+
+    // If it's a string, try to parse
+    if (typeof ingredientsData === 'string') {
+      try {
+        const parsed = JSON.parse(ingredientsData);
+        if (parsed.main) return parsed;
+        if (Array.isArray(parsed)) return { main: parsed, alternatives: [] };
+      } catch (e) {
+        return { main: [], alternatives: [] };
+      }
+    }
+
+    return { main: [], alternatives: [] };
+  };
+
+  const toggleMealExpand = (mealIndex) => {
+    setExpandedMeal(expandedMeal === mealIndex ? null : mealIndex);
   };
 
   const { daysInMonth, startingDay } = getDaysInMonth(currentDate);
@@ -271,26 +306,85 @@ export default function DietHistory() {
 
               {/* Meals List */}
               <div className="space-y-3">
-                {dayData.meals.map((meal, index) => (
-                  <div
-                    key={index}
-                    className={`rounded-xl p-4 ${isDark ? 'bg-dark-800 border border-dark-600' : 'bg-white border border-gray-200'}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {mealTypeIcons[meal.meal_type] || '🍽️'}
-                      </span>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {meal.meal_name || meal.custom_meal_name || mealTypeLabels[meal.meal_type] || 'Comida'}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {meal.calories} kcal • P: {meal.protein_grams}g • C: {meal.carbs_grams}g • G: {meal.fat_grams}g
-                        </p>
-                      </div>
+                {dayData.meals.map((meal, index) => {
+                  const isExpanded = expandedMeal === index;
+                  const ingredients = parseIngredients(meal.ingredients);
+                  const hasIngredients = ingredients.main && ingredients.main.length > 0;
+                  const hasRecipe = !!meal.recipe;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`rounded-xl overflow-hidden ${isDark ? 'bg-dark-800 border border-dark-600' : 'bg-white border border-gray-200'}`}
+                    >
+                      {/* Meal Header - Clickable */}
+                      <button
+                        onClick={() => toggleMealExpand(index)}
+                        className="w-full p-4 text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">
+                            {mealTypeIcons[meal.meal_type] || '🍽️'}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate">
+                              {meal.meal_name || meal.custom_meal_name || mealTypeLabels[meal.meal_type] || 'Comida'}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {meal.calories} kcal • P: {meal.protein_grams}g • C: {meal.carbs_grams}g • G: {meal.fat_grams}g
+                            </p>
+                          </div>
+                          {(hasIngredients || hasRecipe) && (
+                            isExpanded ? (
+                              <ChevronUp size={20} className="text-gray-400 flex-shrink-0" />
+                            ) : (
+                              <ChevronDown size={20} className="text-gray-400 flex-shrink-0" />
+                            )
+                          )}
+                        </div>
+                        {(hasIngredients || hasRecipe) && !isExpanded && (
+                          <p className="text-xs text-accent-primary mt-2">Toca para ver ingredientes</p>
+                        )}
+                      </button>
+
+                      {/* Expanded Content */}
+                      {isExpanded && (hasIngredients || hasRecipe) && (
+                        <div className={`px-4 pb-4 space-y-4 animate-fade-in border-t ${isDark ? 'border-dark-600' : 'border-gray-200'}`}>
+                          {/* Ingredients */}
+                          {hasIngredients && (
+                            <div className="pt-4">
+                              <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Ingredientes:
+                              </h4>
+                              <div className={`rounded-xl p-3 space-y-2 ${isDark ? 'bg-dark-700/50' : 'bg-gray-100/80'}`}>
+                                {ingredients.main.map((ing, i) => (
+                                  <div key={i} className="flex items-center justify-between text-sm">
+                                    <span className={isDark ? 'text-white' : 'text-gray-800'}>{ing.name}</span>
+                                    <span className="text-accent-primary font-medium">{ing.amount}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recipe */}
+                          {hasRecipe && (
+                            <div>
+                              <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Preparación:
+                              </h4>
+                              <div className={`rounded-xl p-3 ${isDark ? 'bg-dark-700/50' : 'bg-gray-100/80'}`}>
+                                <p className={`text-sm whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                  {meal.recipe}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           ) : (
