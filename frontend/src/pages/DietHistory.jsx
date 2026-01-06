@@ -30,10 +30,16 @@ export default function DietHistory() {
   const [loading, setLoading] = useState(true);
   const [loadingDay, setLoadingDay] = useState(false);
 
-  // Get calendar data for current month
+  // Get calendar data for current month and select today on first load
   useEffect(() => {
     loadHistoryDates();
   }, [currentDate]);
+
+  // Select today by default on first load
+  useEffect(() => {
+    const today = new Date();
+    loadDayData(today);
+  }, []);
 
   const loadHistoryDates = async () => {
     setLoading(true);
@@ -52,7 +58,12 @@ export default function DietHistory() {
   const loadDayData = async (date) => {
     setLoadingDay(true);
     try {
-      const dateStr = date.toISOString().split('T')[0];
+      // Use local date formatting to avoid timezone conversion issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
       const response = await dietApi.getHistory(dateStr);
       setDayData(response.data);
       setSelectedDate(date);
@@ -88,6 +99,13 @@ export default function DietHistory() {
     return day === today.getDate() &&
            currentDate.getMonth() === today.getMonth() &&
            currentDate.getFullYear() === today.getFullYear();
+  };
+
+  const isFutureDate = (day) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return checkDate > today;
   };
 
   const prevMonth = () => {
@@ -172,14 +190,15 @@ export default function DietHistory() {
             const dateInfo = getDateInfo(day);
             const hasData = !!dateInfo;
             const today = isToday(day);
+            const future = isFutureDate(day);
             const isSelected = selectedDate?.getDate() === day &&
                               selectedDate?.getMonth() === currentDate.getMonth();
 
             return (
               <button
                 key={day}
-                onClick={() => hasData && loadDayData(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}
-                disabled={!hasData}
+                onClick={() => !future && loadDayData(new Date(currentDate.getFullYear(), currentDate.getMonth(), day))}
+                disabled={future}
                 className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm transition-all ${
                   isSelected
                     ? 'bg-accent-primary text-dark-900 font-bold'
@@ -187,13 +206,17 @@ export default function DietHistory() {
                       ? isDark
                         ? 'bg-dark-600 ring-2 ring-accent-primary'
                         : 'bg-gray-200 ring-2 ring-accent-primary'
-                      : hasData
+                      : future
                         ? isDark
-                          ? 'bg-dark-700 hover:bg-dark-600'
-                          : 'bg-gray-100 hover:bg-gray-200'
-                        : isDark
-                          ? 'text-gray-600'
-                          : 'text-gray-400'
+                          ? 'text-gray-700 cursor-not-allowed'
+                          : 'text-gray-300 cursor-not-allowed'
+                        : hasData
+                          ? isDark
+                            ? 'bg-dark-700 hover:bg-dark-600'
+                            : 'bg-gray-100 hover:bg-gray-200'
+                          : isDark
+                            ? 'text-gray-400 hover:bg-dark-700/50'
+                            : 'text-gray-500 hover:bg-gray-100'
                 }`}
               >
                 <span>{day}</span>
@@ -283,7 +306,7 @@ export default function DietHistory() {
       {!selectedDate && !loading && (
         <div className={`rounded-2xl p-8 text-center ${isDark ? 'bg-dark-800/50' : 'bg-white/50'}`}>
           <Calendar size={40} className="mx-auto mb-3 text-gray-400" />
-          <p className="text-gray-500">Selecciona un día con datos para ver el historial</p>
+          <p className="text-gray-500">Selecciona un día para ver el historial</p>
           <p className="text-xs text-gray-400 mt-1">Los días con punto verde tienen comidas registradas</p>
         </div>
       )}
