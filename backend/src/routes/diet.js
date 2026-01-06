@@ -184,10 +184,32 @@ router.post('/log', authenticateToken, async (req, res) => {
   const { meal_id, meal_type, custom_meal_name, calories, protein_grams, carbs_grams, fat_grams, notes } = req.body;
 
   try {
+    // Check if this meal was already logged today (prevent duplicates from rapid clicks)
+    if (meal_id) {
+      const clientTimezone = req.headers['x-timezone'] || 'UTC';
+      const clientDate = new Date(new Date().toLocaleString('en-US', { timeZone: clientTimezone }));
+      const clientDateStr = clientDate.toISOString().split('T')[0];
+
+      const existing = await pool.query(
+        `SELECT id FROM meal_logs
+         WHERE user_id = $1 AND meal_id = $2
+         AND DATE(logged_at AT TIME ZONE 'UTC' AT TIME ZONE $3) = $4::date`,
+        [req.user.id, meal_id, clientTimezone, clientDateStr]
+      );
+
+      if (existing.rows.length > 0) {
+        return res.status(409).json({
+          error: 'Meal already logged today',
+          existing_id: existing.rows[0].id
+        });
+      }
+    }
+
+    // Use NOW() to respect session timezone
     const result = await pool.query(
       `INSERT INTO meal_logs
-       (user_id, meal_id, meal_type, custom_meal_name, calories, protein_grams, carbs_grams, fat_grams, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+       (user_id, meal_id, meal_type, custom_meal_name, calories, protein_grams, carbs_grams, fat_grams, notes, logged_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW()) RETURNING *`,
       [req.user.id, meal_id, meal_type, custom_meal_name, calories, protein_grams, carbs_grams, fat_grams, notes]
     );
 

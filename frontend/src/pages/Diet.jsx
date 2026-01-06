@@ -30,6 +30,7 @@ export default function Diet() {
   const [expandedMeal, setExpandedMeal] = useState(null);
   const [selectedMealDetail, setSelectedMealDetail] = useState(null);
   const [nutritionInfo, setNutritionInfo] = useState(null);
+  const [loggingMealId, setLoggingMealId] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -81,6 +82,10 @@ export default function Diet() {
   };
 
   const logMeal = async (meal) => {
+    // Prevent double-clicks
+    if (loggingMealId) return;
+
+    setLoggingMealId(meal.id);
     try {
       await dietApi.logMeal({
         meal_id: meal.id,
@@ -92,7 +97,12 @@ export default function Diet() {
       });
       await loadData();
     } catch (error) {
-      console.error('Error logging meal:', error);
+      // Ignore 409 conflict (already logged)
+      if (error.response?.status !== 409) {
+        console.error('Error logging meal:', error);
+      }
+    } finally {
+      setLoggingMealId(null);
     }
   };
 
@@ -474,9 +484,14 @@ export default function Diet() {
                         ) : (
                           <button
                             onClick={() => logMeal(meal)}
-                            className="w-10 h-10 bg-accent-primary rounded-full flex items-center justify-center hover:scale-105 transition-transform"
+                            disabled={loggingMealId === meal.id}
+                            className="w-10 h-10 bg-accent-primary rounded-full flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
                           >
-                            <Plus size={20} className="text-dark-900" />
+                            {loggingMealId === meal.id ? (
+                              <Loader2 size={20} className="animate-spin text-dark-900" />
+                            ) : (
+                              <Plus size={20} className="text-dark-900" />
+                            )}
                           </button>
                         )}
                       </div>
